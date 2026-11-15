@@ -135,6 +135,26 @@ export function tone(freqs, {dur = 0.5, gain = 0.06, type = 'sine', attack = 0.0
     o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + dur + 0.05);
   }
 }
+/** exertion breathing: a continuous inhale/exhale cycle whose rate and loudness follow getEx() (0..1) */
+export function startExertionBreathing(getEx) {
+  const puff = (dur, freq, gain) => {
+    const t = ctx.currentTime; const s = ctx.createBufferSource(); s.buffer = noises.white;
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 0.9;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + dur * 0.35); g.gain.linearRampToValueAtTime(0, t + dur);
+    s.connect(f); f.connect(g); g.connect(voiceBus); s.start(t, Math.random() * 2, dur + 0.05);
+  };
+  const cycle = () => {
+    const ex = Math.max(0, Math.min(1, getEx()));
+    const period = 3.6 - 2.85 * ex;                  // 3.6 s calm → 0.75 s panting
+    if (ex > 0.12) {
+      const v = 0.006 + 0.05 * ex * ex;
+      puff(period * 0.38, 1350 + 300 * ex, v);                                       // inhale
+      setTimeout(() => puff(period * 0.48, 780 + 200 * ex, v * 1.15), period * 420);   // exhale (a little louder)
+    }
+    setTimeout(cycle, period * 1000);
+  };
+  cycle();
+}
 /** soft audible inhale before a line (filtered noise swell) */
 export function breath(vol = 1) {
   const t = ctx.currentTime; const s = ctx.createBufferSource(); s.buffer = noises.white;

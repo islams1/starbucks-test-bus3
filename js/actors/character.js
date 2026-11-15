@@ -345,9 +345,11 @@ export class Character {
     rotBoneWorld(b.head, up, this.look.yaw * 0.4 * wgt); rotBoneWorld(b.head, right, this.look.pitch * 0.5 * wgt);
     const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(this.holder.quaternion); rotBoneWorld(b.head, fwd, this._roll);
     // breathing: slow chest rise (deeper on the inhale before a line)
-    this._br = (this._br || 0) + dt * (this.emotion === 'tense' || this.emotion === 'worried' ? 1.6 : 1.0);
+    const ex = this.exertion || 0;
+    this._br = (this._br || 0) + dt * ((this.emotion === 'tense' || this.emotion === 'worried' ? 1.6 : 1.0) + 3.4 * ex);
     this._inhale = Math.max(0, (this._inhale || 0) - dt);
-    if (b.spine2) rotBoneWorld(b.spine2, right, -(Math.sin(this._br * 1.6) * 0.012 + (this._inhale > 0 ? Math.sin(Math.min(1, (0.42 - this._inhale) / 0.42) * Math.PI) * 0.03 : 0)));
+    if (b.spine2) rotBoneWorld(b.spine2, right, -(Math.sin(this._br * 1.6) * (0.012 + 0.05 * ex) + (this._inhale > 0 ? Math.sin(Math.min(1, (0.42 - this._inhale) / 0.42) * Math.PI) * 0.03 : 0)));
+    if (ex > 0.05 && b.neck) rotBoneWorld(b.neck, right, Math.sin(this._br * 1.6 + 0.6) * 0.02 * ex);   // head lifts slightly with each breath
     // eyes: remaining angle + micro saccades
     if (b.le && b.re) {
       if (!this._sac || this._sac.t <= 0) this._sac = {t: 0.4 + Math.random() * 1.6, y: (Math.random() - 0.5) * 0.06, p: (Math.random() - 0.5) * 0.04};
@@ -371,9 +373,10 @@ export class Character {
     set('AK_44_MouthSmileLeft', m.smile * 0.7); set('AK_45_MouthSmileRight', m.smile * 0.7);
     set('AK_30_MouthFrownLeft', m.frown * 0.6); set('AK_31_MouthFrownRight', m.frown * 0.6);
     this._browKick = Math.max(0, (this._browKick || 0) - dt * 3);
-    set('AK_03_BrowInnerUp', Math.min(1, m.worry * 0.8 + m.brow * 0.5 + this._browKick * 0.35));
+    const exF = this.exertion || 0;
+    set('AK_03_BrowInnerUp', Math.min(1, m.worry * 0.8 + m.brow * 0.5 + this._browKick * 0.35 + 0.35 * exF));
     set('AK_01_BrowDownLeft', m.frown * 0.55); set('AK_02_BrowDownRight', m.frown * 0.55);
-    set('AK_19_EyeSquintLeft', m.smile * 0.35 + m.squint * 0.4); set('AK_20_EyeSquintRight', m.smile * 0.35 + m.squint * 0.4);
+    set('AK_19_EyeSquintLeft', m.smile * 0.35 + m.squint * 0.4 + 0.25 * exF); set('AK_20_EyeSquintRight', m.smile * 0.35 + m.squint * 0.4 + 0.25 * exF);
     set('AK_21_EyeWideLeft', m.brow * 0.3); set('AK_22_EyeWideRight', m.brow * 0.3);
     // ---- visemes ----
     const target = new Float32Array(15);
@@ -395,6 +398,7 @@ export class Character {
     const names = KEEP_MORPHS;
     for (let i = 0; i < 15; i++) set(names[i], this.vis[i] * (i === 0 ? 0 : 0.95));
     if (!this.voice && this._inhale > 0) jaw = Math.max(jaw, 0.08);
+    if (!this.voice && exF > 0.15) jaw = Math.max(jaw, (0.05 + 0.2 * exF) * (0.55 + 0.45 * Math.sin((this._br || 0) * 1.6)));   // breathing through the mouth
     this._jaw = damp(this._jaw || 0, jaw, 18, dt);
     set('AK_25_JawOpen', this._jaw);
   }

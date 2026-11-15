@@ -3,13 +3,13 @@ import * as THREE from 'three';
 import {camera, onUpdate, damp, angleDamp, clamp} from '../core/engine.js';
 import {keys, consumeMouse, input} from '../core/input.js';
 import {colliders, B} from '../world/building.js';
-import {footstep} from '../core/audio.js';
+import {footstep, startExertionBreathing} from '../core/audio.js';
 import {gait} from '../core/assets.js';
 import {characters, Character} from './character.js';
 
 export const player = {
   ch: null, mode: 'cine',            // 'free' | 'cine' | 'desk'
-  yaw: Math.PI, pitch: 0.12, camDist: 2.5, speed: 0, radius: 0.32,
+  yaw: Math.PI, pitch: 0.12, camDist: 2.5, speed: 0, radius: 0.32, exert: 0, bob: 0,
   onMove: null,
 };
 const R = 0.32;
@@ -58,7 +58,12 @@ export function initPlayer(ch) {
   ch.o.talkAnims = ['m_gestic_talk_neutral_01', 'm_gestic_talk_relaxed_01'];
   ch.o.presentAnims = ['m_gestic_presentation_right_01', 'm_gestic_presentation_left_01'];
   ch.setBase('m_idle_neutral_02');
+  startExertionBreathing(() => player.ch && player.ch.holder.visible ? player.exert : 0);
   onUpdate((dt) => {
+    // exertion: ~7 s of running to be out of breath; recovers in ~10 s walking, faster standing still
+    if (player.speed > 2.2) player.exert = Math.min(1, player.exert + dt / 7);
+    else player.exert = Math.max(0, player.exert - dt / (player.speed > 0.3 ? 10 : 6));
+    ch.exertion = player.exert;
     if (player.mode !== 'free') { player.speed = 0; return; }
     const h = ch.holder;
     const m = consumeMouse();
@@ -72,7 +77,8 @@ export function initPlayer(ch) {
     }
     const run = keys.has('ShiftLeft') || keys.has('ShiftRight');
     const len = Math.hypot(fx, fz);
-    const want = len > 0 ? (run ? 3.3 : 1.25) : 0;
+    const tired = Math.max(0, (player.exert - 0.7) / 0.3);          // out of breath: can't keep sprinting
+    const want = len > 0 ? (run ? 3.3 * (1 - 0.25 * tired) : 1.25) : 0;
     player.speed = damp(player.speed, want, len > 0 ? 6 : 9, dt);
     if (len > 0) {
       const ang = player.yaw + Math.atan2(fx, fz);
@@ -85,12 +91,13 @@ export function initPlayer(ch) {
       collidePeople(h.position); collide(h.position);
     }
     // animation blend
-    const anim = sp > 2.1 ? 'm_run_neutral_01' : sp > 0.2 ? 'm_walk_neutral_01' : ch.baseName;
-    if (ch.curName !== anim && !ch.voice) ch.play(anim, {fade: anim === ch.baseName ? 0.35 : 0.25});
+    const restAnim = player.exert > 0.45 ? 'm_idle_breathe_01' : ch.baseName;   // catching breath after a run
+    const anim = sp > 2.1 ? 'm_run_neutral_01' : sp > 0.2 ? 'm_walk_neutral_01' : restAnim;
+    if (ch.curName !== anim && !ch.voice) ch.play(anim, {fade: anim === ch.baseName || anim === restAnim ? 0.5 : 0.25});
     const hs = ch.o.height / 1.75;   // stride scales with body height; cadence follows ground speed (no foot sliding)
     if (anim === 'm_walk_neutral_01') ch.cur.timeScale = clamp(sp / ((gait.m_walk_neutral_01 || 1.01) * hs), 0.5, 1.6);
     if (anim === 'm_run_neutral_01') ch.cur.timeScale = clamp(sp / ((gait.m_run_neutral_01 || 2.88) * hs), 0.6, 1.5);
-    if (anim !== ch.baseName && ch.cur) {
+    if (anim !== ch.baseName && anim !== restAnim && ch.cur) {
       const ph = (ch.cur.time / ch.cur.getClip().duration) * 2 % 1;
       if (ph < stepPh) footstep(!run || true, run ? 1.2 : 0.9);
       stepPh = ph;
@@ -108,8 +115,11 @@ export function initPlayer(ch) {
     _c.set(_t.x + bx * player.camDist, _t.y + Math.sin(player.pitch) * dist * player.camDist, _t.z + bz * player.camDist);
     if (inside) _c.y = Math.min(_c.y, B.H - 0.25);
     _c.y = Math.max(0.4, _c.y);
+    player.bob += dt * (sp > 2.1 ? 11 : sp > 0.2 ? 6.5 : 1.6 + 2.5 * player.exert);
+    const bobAmp = sp > 2.1 ? 0.04 : sp > 0.2 ? 0.012 : 0.01 * player.exert;
+    _c.y += Math.abs(Math.sin(player.bob)) * bobAmp; _c.x += Math.cos(player.bob) * bobAmp * 0.4 * Math.cos(player.yaw); _c.z -= Math.cos(player.bob) * bobAmp * 0.4 * Math.sin(player.yaw);
     camera.position.copy(_c);
-    camera.rotation.set(-player.pitch * 0.85, player.yaw + Math.PI, 0, 'YXZ');
+    camera.rotation.set(-player.pitch * 0.85, player.yaw + Math.PI, Math.sin(player.bob) * bobAmp * 0.35, 'YXZ');
     // character fades when camera is very close (avoid clipping into the head)
     ch.fbx.visible = player.camDist > 0.3;
     if (player.onMove) player.onMove(h.position);
