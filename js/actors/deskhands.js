@@ -55,6 +55,7 @@ export function initDeskHands(ch) {
   bones(ch);
   ch.postIK = () => {
     if (!state.active) return;
+    if (!ch.seated) { deskBody(false); return; }      // the desk hands only exist at the desk: never on a standing body
     ch.fbx.updateMatrixWorld(true);
     for (const s of ['L', 'R']) solve(ch, s, state[s].t, state[s].w);
   };

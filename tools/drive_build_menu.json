@@ -1,0 +1,1 @@
+[["waitfor", ".mode", 240000], ["wait", 1], ["eval", "JSON.stringify({title: document.title, mode: document.querySelector(\".mode\").dataset.mode, full: document.querySelector(\"#menufoot a\").href, tag: document.querySelector(\"#menu .tag\").textContent})"], ["shot", "b0_menu.png"]]

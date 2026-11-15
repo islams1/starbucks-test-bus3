@@ -1,0 +1,4 @@
+[["waitfor", ".mode", 240000], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"], ["waitfor", "#hud:not(.hidden)", 90000],
+ ["eval", "fetch('/tools/pose_monitor.js').then(r => r.text()).then(t => (0, eval)(t))"], ["wait", 1],
+ ["eval", "(()=>{ __C.player.mixer.stopAllAction(); return 1 })()"], ["wait", 0.5], ["shot", "self_broken.png"], ["wait", 2.5], ["shot", "self_repaired.png"],
+ ["eval", "(()=>{ const s = JSON.parse(__poseSummary()); return JSON.stringify(s.map(e => ({k: e.k, n: e.n, first: e.first, last: e.last}))) })()"]]

@@ -1,0 +1,1 @@
+[["waitfor", "#menu .mode", 240000], ["wait", 1], ["click", "[data-mode=practice]"], ["wait", 0.5], ["click", "#startbtn"], ["wait", 5], ["shot", "f1_air.png"], ["wait", 7], ["shot", "f2_low.png"], ["wait", 8], ["shot", "f3_plaza.png"], ["eval", "JSON.stringify({lvl: __quality().quality.level, scale: __quality().dyn.scale, fps: __stats.fps.toFixed(1)})"]]

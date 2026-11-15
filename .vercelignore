@@ -5,3 +5,11 @@ test.html
 .env*
 .vercel/
 README.md
+# full-detail originals kept only to regenerate the lighter copies (tools/tree_lod.py, tools/decimate.py)
+assets/models/island_tree_02/island_tree_02.gltf
+assets/models/island_tree_02/island_tree_02.bin
+assets/models/shrub_02/shrub_02.gltf
+assets/models/shrub_02/shrub_02.bin
+assets/models/hanging_picture_frame_03/hanging_picture_frame_03.gltf
+assets/models/hanging_picture_frame_03/hanging_picture_frame_03.bin
+_build/

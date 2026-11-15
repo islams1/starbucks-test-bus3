@@ -1,10 +1,11 @@
 // Hands-on interactions: the one-page campaign brief (doc node N07) built by dragging evidence cards,
 // and the sticky-note ideas board sorted by hand.
 import {openDoc} from './docs.js';
-import {S, EVIDENCE, CAT, log} from '../story/state.js';
+import {S, EVIDENCE, CAT, log, MINI} from '../story/state.js';
 import {sfx} from '../core/audio.js';
+import {coach} from './coach.js';
 
-const SEGTXT = {A: 'الشريحة أ — مهنيون 18–40 (46% من الزيارات)', B: 'الشريحة ب — الباحثون عن الجودة 40–60', C: 'الشريحة ج — الباحثون عن السهولة (موبايل/درايف ثرو)', D: 'الشريحة د — العائلات', everyone: 'للجميع', none: '— لم تُحدَّد بعد —'};
+export const SEGTXT = {A: 'الشريحة أ — مهنيون 18–40 (46% من الزيارات)', B: 'الشريحة ب — الباحثون عن الجودة 40–60', C: 'الشريحة ج — الباحثون عن السهولة (موبايل/درايف ثرو)', D: 'الشريحة د — العائلات', everyone: 'للجميع', none: '— لم تُحدَّد بعد —'};
 export const FIELDS = [
   {k: 'insight', t: 'الرؤية عن العميل', opts: () => [
     S.segment === 'A' ? ['strong', 'في أيام العمل يريدوننا سريعين؛ وفي عطلة الأسبوع يريدون مكانًا يقابلون فيه أصدقاءهم.'] :
@@ -17,7 +18,7 @@ export const FIELDS = [
   {k: 'risk', t: 'الخطر الرئيسي وكيف نتعامل معه', opts: () => [['plan', 'المسابقة قد تُظهر الازدحام: إطلاق في 8 فروع مدعومة، موافقة مكتوبة، قواعد إشراف، متابعة أسبوعية'], ['none', 'لا خطر كبير']], cards: ['M7', 'M8', 'M5']},
 ];
 // pairs that cannot both be true "on a Tuesday at 8 a.m." (doc: coherence interaction)
-function conflicts(b) {
+export function conflicts(b = S.brief || {}) {
   const out = [];
   if ((b.idea === 'contest' || b.idea === 'third') && b.ops !== 'sound') out.push(['idea', 'ops']);
   if (S.segment === 'C' && b.idea === 'contest') out.push(['insight', 'idea']);
@@ -27,19 +28,42 @@ function conflicts(b) {
   return out;
 }
 
+/** first-time walkthrough of the brief: drag a card, pick a wording, read the field state, then approve */
+function briefTour(el, b) {
+  const filled = () => FIELDS.find(f => (b.cards[f.k] || []).length)?.k;
+  const fk = () => filled() || FIELDS[0].k;
+  const card0 = () => el.querySelector('.card');
+  const dropFor = () => { const id = card0()?.dataset.id; const f = FIELDS.find(x => x.cards.includes(id)) || FIELDS[0]; return el.querySelector(`.drop[data-k="${f.k}"]`); };
+  return coach([
+    // bubble above/below the card, not over the fields: the ghost card glides there
+    {skip: () => !card0(), target: card0, side: ['above', 'below', 'left'], ghost: () => [card0(), dropFor()], done: () => !!filled(),
+      text: '<b>هذه أدلتك</b> — كل ما جمعته من مكتبك.<br>اسحب بطاقة إلى الحقل الذي تدعمه.<small>على شاشة اللمس: اضغط البطاقة، ثم اضغط الحقل.</small>'},
+    {target: () => el.querySelector(`select[data-k="${fk()}"]`), side: ['above', 'below', 'left', 'right'], done: () => !!b[fk()],
+      text: '<b>اختر الصياغة</b> التي يقولها هذا الدليل فعلًا.<small>كل حقل له صياغة قوية وصياغات ضعيفة.</small>'},
+    {target: () => el.querySelector(`.bf-f[data-k="${fk()}"]`), side: ['above', 'below', 'left', 'right'], next: 'التالي',
+      text: 'الحقل <b style="color:#7fc79a">الأخضر ✓</b> = اخترت صياغة وربطتها بدليل.<br>وإذا ظهر <b style="color:#e0705f">⚠</b> فهناك حقلان لا يمكن أن يكونا صحيحين معًا — عدّل أحدهما.' + (MINI ? '<small>كل تعارض يخصم 3 نقاط.</small>' : '')},
+    {target: () => el.querySelector('#bfsave'), side: ['above', 'right', 'left'], next: 'ابدأ',
+      text: 'أكمل <b>الحقول الخمسة</b> بالطريقة نفسها، ثم اضغط «اعتمد الموجز».' + (MINI ? '<small>بعد الاعتماد لا يمكن التعديل — هذا ما ستعرضه على نادية.</small>' : '')},
+  ]);
+}
+
 export function briefDoc() {
   S.brief = S.brief || {cards: {}};
   const b = S.brief;
   const have = Object.keys(EVIDENCE).filter(id => S.ev[id]);
-  const html = `<div class="paper brief" style="width:min(1150px,95vw)"><div class="hdr"><b>موجز الحملة — صفحة واحدة</b><span>BRIEF · N07</span></div>
+  let tour = null;
+  const html = `<div class="paper brief" style="width:min(1150px,95vw)"><div class="hdr"><b>موجز الحملة — صفحة واحدة</b><button class="bf-help" id="bfhelp">؟ كيف أبني الموجز</button><span>BRIEF · N07</span></div>
     <p style="margin:0 0 10px">اسحب <b>بطاقات الأدلة</b> إلى الحقول التي تدعمها، واختر الصياغة المناسبة لكل حقل. هذا ما ستعرضه على الشاشة في الاجتماع.</p>
     <div class="bf-wrap"><div class="bf-tray"><h4>أدلتك (${have.length}/10)</h4>${have.map(id => `<div class="card" draggable="true" data-id="${id}"><span class="cat ${EVIDENCE[id].cat}">${CAT[EVIDENCE[id].cat]}</span> <b>${id}</b> ${EVIDENCE[id].t}</div>`).join('') || '<p>لم تجمع أدلة بعد — افتح الوثائق على مكتبك.</p>'}</div>
     <div class="bf-fields"><div class="bf-f fixed"><div class="bf-t">الشريحة المستهدفة</div><div class="bf-v">${SEGTXT[S.segment] || '—'}</div></div>
     ${FIELDS.map(f => `<div class="bf-f" data-k="${f.k}"><div class="bf-t">${f.t}<span class="bf-ok"></span></div>
       <select data-k="${f.k}"><option value="">— اختر —</option>${f.opts().map(([v, t]) => `<option value="${v}" ${b[f.k] === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <div class="drop" data-k="${f.k}">${(b.cards[f.k] || []).map(id => `<span class="chip" data-id="${id}">${id} ✕</span>`).join('') || '<i>اسحب دليلًا هنا</i>'}</div><div class="bf-warn"></div></div>`).join('')}
-    </div></div><div class="bf-foot"><span id="bfstat"></span><button class="primary" id="bfsave">اعتمد الموجز</button></div></div>`;
-  return openDoc(html, (el, close) => {
+    </div></div><div class="bf-foot"><span id="bfstat"></span>${MINI ? '<span class="bf-final">بعد الاعتماد لا يمكن التعديل — هذا ما ستعرضه على نادية</span>' : ''}<button class="primary" id="bfsave">اعتمد الموجز</button></div></div>`;
+  const shown = openDoc(html, (el, close) => {
+    const startTour = () => { if (tour) tour.stop(); tour = briefTour(el, b); };
+    el.querySelector('#bfhelp').onclick = startTour;
+    if (!S.tutBrief) { S.tutBrief = true; setTimeout(() => el.isConnected && startTour(), 400); }   // first time only
     const refresh = () => {
       const cf = conflicts(b);
       el.querySelectorAll('.bf-f[data-k]').forEach(f => {
@@ -72,6 +96,8 @@ export function briefDoc() {
     };
     refresh();
   });
+  shown.then(() => tour && tour.stop());      // closing the brief ends the guide
+  return shown;
 }
 
 // ---------- sticky-note ideas board: sort the four ideas by hand ----------

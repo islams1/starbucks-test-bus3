@@ -21,12 +21,24 @@ const aniso = SOFTWARE ? 1 : renderer.capabilities.getMaxAnisotropy();
 
 const modelCache = new Map();
 /** Poly Haven glTF model (cached; returns a clone each call). */
-export async function model(name) {
-  if (!modelCache.has(name)) modelCache.set(name, track(gltf.loadAsync(`assets/models/${name}/${name}.gltf`), name).then(g => g.scene));
-  const s = await modelCache.get(name);
+/** Poly Haven model (cloned). `file` picks another glTF in the same folder (e.g. a lighter level of detail). */
+export async function model(name, file = name) {
+  if (!modelCache.has(file)) modelCache.set(file, track(gltf.loadAsync(`assets/models/${name}/${file}.gltf`), file).then(g => g.scene));
+  const s = await modelCache.get(file);
   const c = s.clone(true);
   c.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   return c;
+}
+/** One named part of a model file, moved to the origin. Poly Haven plant/shrub files hold several variants side by
+ *  side (a, b, c… a metre or more apart); loading the whole file put extra plants around every pot. */
+export async function modelPart(name, part, file = name) {
+  const s = await model(name, file);
+  const o = s.getObjectByName(part); if (!o) return s;
+  o.removeFromParent(); o.position.x = 0; o.position.z = 0;
+  const g = new THREE.Group(); g.name = part; g.add(o); g.updateMatrixWorld(true);
+  const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());   // centre its footprint on the origin
+  o.position.x -= c.x; o.position.z -= c.z;
+  return g;
 }
 export const loadFBX = (url) => track(fbx.loadAsync(url), url.split('/').slice(-2).join('/'));
 export const loadHDR = (url) => track(rgbe.loadAsync(url), 'sky');

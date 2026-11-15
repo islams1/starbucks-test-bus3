@@ -14,4 +14,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         os.makedirs(os.path.dirname(dst),exist_ok=True); open(dst,'wb').write(data)
         s.send_response(200); s.end_headers(); s.wfile.write(b'ok')
     def log_message(s,*a): pass
-http.server.ThreadingHTTPServer(('127.0.0.1',int(sys.argv[1]) if len(sys.argv)>1 else 8777),H).serve_forever()
+class Srv(http.server.ThreadingHTTPServer):
+    request_queue_size=256      # the game fetches ~150 files at once: the default backlog (5) refuses connections on Windows
+    daemon_threads=True
+Srv(('127.0.0.1',int(sys.argv[1]) if len(sys.argv)>1 else 8777),H).serve_forever()

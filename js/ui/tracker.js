@@ -4,7 +4,7 @@ import {hotspots} from './hotspots.js';
 import {toast} from './ui.js';
 import {sfx} from '../core/audio.js';
 
-const STEPS = [
+let STEPS = [
   {id: 'lobby', t: 'ادخل المبنى وتحدث مع عمر صالح في الاستقبال', done: () => !!S.nodes.LOBBY},
   {id: 'office', t: 'اذهب إلى مكتبك واستمع لتكليف نادية', done: () => !!S.briefed},
   {id: 'research', t: 'افتح «ملف الأبحاث» وأكمل مهمة القيمة', done: () => !!S.tasks.research, hs: 'desk_folder'},
@@ -30,6 +30,10 @@ const list = el.querySelector('#trlist');
 const seen = new Set();
 let first = true;
 
+let optLabel = 'اختياري';
+/** replace the checklist (quick version); opt steps show `label` instead of «اختياري» */
+export function setSteps(steps, {label = 'اختياري'} = {}) { STEPS = steps; optLabel = label; seen.clear(); first = true; render(); }
+export const getSteps = () => STEPS;
 export function currentStep() { return STEPS.find(s => !s.opt && !s.done()); }
 
 function render() {
@@ -43,7 +47,7 @@ function render() {
   const visible = STEPS.filter(s => !s.done()).slice(0, 7);
   list.innerHTML = (doneN ? `<li class="done"><span class="ck">✓</span>${doneN} خطوات مكتملة</li>` : '') + visible.map(s => {
     const d = s.done(), c = s === cur;
-    return `<li class="${d ? 'done' : ''} ${c ? 'cur' : ''} ${s.opt ? 'optl' : ''}"><span class="ck">${d ? '✓' : ''}</span>${s.t}${s.opt ? ' <small>(اختياري)</small>' : ''}</li>`;
+    return `<li class="${d ? 'done' : ''} ${c ? 'cur' : ''} ${s.opt ? 'optl' : ''}"><span class="ck">${d ? '✓' : ''}</span>${s.t}${s.opt ? ` <small>(${optLabel})</small>` : ''}</li>`;
   }).join('');
   // completion toasts
   for (const s of STEPS) if (s.done() && !seen.has(s.id)) { seen.add(s.id); if (!first) { toast(`<b>✓ تم</b> — ${s.t}`); sfx.ping(); } }

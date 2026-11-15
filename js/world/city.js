@@ -1,14 +1,14 @@
 // Plaza in front of the HQ + surrounding city blocks.
 import * as THREE from 'three';
-import {scene} from '../core/engine.js';
-import {model} from '../core/assets.js';
+import {scene, camera, onUpdate} from '../core/engine.js';
+import {model, modelPart} from '../core/assets.js';
 import {M, canvasTex, addWind} from './materials.js';
 import * as P from './props.js';
 import {col} from './building.js';
 import {onQuality} from '../core/quality.js';
 export const trees = [];
 import {mergeStatic} from './merge.js';
-onQuality((L) => { for (const t of trees) t.traverse(o => { if (o.isMesh) o.castShadow = L.treeShadow; }); });
+onQuality((L) => { for (const t of trees) t.traverse(o => { if (o.isMesh) o.castShadow = L.treeShadow && !o.userData.impostor; }); });
 
 const root = new THREE.Group(); root.name = 'city';
 
@@ -39,20 +39,27 @@ export async function buildCity() {
   // kerbs
   // planters with trees (wind)
   const treeSpots = [[-14, 16], [-7, 18], [7, 18], [14, 16], [-24, 22], [24, 22], [-20, 33], [-8, 33], [8, 33], [20, 33], [-30, 37.4], [30, 37.4]];
-  const kinds = ['island_tree_02'];
+  // levels of detail: full crown up close, a light crown at mid range, a flat cut-out far away (baked after boot)
   let i = 0;
   for (const [x, z] of treeSpots) {
     P.box(root, 2.6, 0.45, 2.6, M.concrete, x, 0, z);
     const soil = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.02, 2.3), M.soil); soil.position.set(x, 0.45, z); root.add(soil);
     col(x - 1.3, x + 1.3, z - 1.3, z + 1.3);
-    const t = await model(kinds[i++ % kinds.length]);
-    const bb = new THREE.Box3().setFromObject(t); const h = bb.max.y - bb.min.y;
-    const s = (6.5 + (i % 3)) / h; t.scale.setScalar(s); t.position.set(x, 0.45, z); t.rotation.y = i * 1.7;
-    addWind(t, 0.55 / s);
+    const near = await model('island_tree_02', 'island_tree_02_lod0'), mid = await model('island_tree_02', 'island_tree_02_lod1'); i++;
+    const bb = new THREE.Box3().setFromObject(near); const h = bb.max.y - bb.min.y;
+    const s = (6.5 + (i % 3)) / h;
+    // the LOD origin sits in the crown (≈4.2 m up), so detail follows the distance to the leaves, not to the trunk base
+    const lift = 4.2 / s;
+    const t = new THREE.LOD(); t.scale.setScalar(s); t.position.set(x, 0.45 + 4.2, z); t.rotation.y = i * 1.7; t.userData.lift = lift;
+    near.position.y = -lift; mid.position.y = -lift;
+    addWind(near, 0.55 / s); addWind(mid, 0.55 / s);
+    t.addLevel(near, 0, 0.1); t.addLevel(mid, 10, 0.1);
     root.add(t); trees.push(t);
   }
   // shrubs along the facade
-  for (let x = -16; x <= 16; x += 4) { if (Math.abs(x) < 10) continue; const s = await model('shrub_02'); s.position.set(x, 0, 11.2); s.scale.setScalar(1.2); addWind(s, 1.2); root.add(s); }
+  // (the model file holds four shrubs side by side, ~5 m in all: take one per spot, and give it a body)
+  let sh = 0;
+  for (let x = -16; x <= 16; x += 4) { if (Math.abs(x) < 10) continue; const s = await modelPart('shrub_02', 'shrub_02_' + 'bdbd'[sh++ % 4], 'shrub_02_lod'); s.position.set(x, 0, 11.2); s.scale.setScalar(1.2); addWind(s, 1.2); root.add(s); col(x - 0.6, x + 0.6, 10.65, 11.75); }
   // benches + lamps
   for (const [x, z] of [[-10.5, 21], [10.5, 21], [-3.5, 27], [3.5, 27]]) {   // concrete + timber benches
     const g = P.group(root, x, 0, z);
@@ -68,7 +75,7 @@ export async function buildCity() {
     const head = P.box(g, 0.28, 0.06, 0.5, new THREE.MeshStandardMaterial({color: 0xffffff, emissive: 0xfff2d8, emissiveIntensity: 0.15}), 0, 6.02, -1.15);
     col(x - 0.15, x + 0.15, 39.15, 39.45);
   }
-  const ub = await model('utility_box_01'); ub.position.set(19, 0, 11.5); root.add(ub);
+  const ub = await model('utility_box_01'); ub.position.set(19, 0, 11.5); root.add(ub); { const b = new THREE.Box3().setFromObject(ub); col(b.min.x, b.max.x, b.min.z, b.max.z); }
   // flag poles (wind)
   for (const x of [-5.5, 5.5]) {
     P.cyl(root, 0.05, 0.06, 9, M.steel, x, 0, 13);
@@ -101,4 +108,36 @@ export async function buildCity() {
   // world bounds for the player
   col(-36, -35, -30, 41); col(35, 36, -30, 41); col(-36, 36, 39.75, 40.1); col(-36, 36, -30, -29);
   return root;
+}
+
+/** Far trees: render the mid-detail tree once into a texture and show it as a camera-facing cut-out (4 triangles). */
+export function bakeTreeImpostors(renderer) {
+  if (!trees.length) return;
+  const src = trees[0].levels[1].object.clone(true);
+  src.position.set(0, 0, 0); src.rotation.set(0, 0, 0); src.scale.setScalar(1); src.updateMatrixWorld(true);   // (the level's crown offset is reset here: baked at model origin)
+  const box = new THREE.Box3().setFromObject(src), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const W = Math.max(size.x, size.z) * 1.04, H = size.y * 1.04;
+  const rh = 512, rw = Math.round(rh * W / H);
+  const rt = new THREE.WebGLRenderTarget(rw, rh, {type: THREE.HalfFloatType, samples: 4});
+  rt.texture.generateMipmaps = true; rt.texture.minFilter = THREE.LinearMipmapLinearFilter;
+  const sc = new THREE.Scene(); sc.environment = scene.environment; sc.add(src);
+  sc.add(new THREE.HemisphereLight(0xe8d6bd, 0x6a5440, 0.9));
+  const key = new THREE.DirectionalLight(0xfff0dc, 2.6); key.position.set(0.5, 0.9, 0.7); sc.add(key);
+  const cam = new THREE.OrthographicCamera(-W / 2, W / 2, H / 2, -H / 2, 0.1, size.z * 4 + 10);
+  cam.position.set(c.x, c.y, c.z + size.z * 2 + 2); cam.lookAt(c);
+  const prevCol = renderer.getClearColor(new THREE.Color()), prevA = renderer.getClearAlpha(), prevRT = renderer.getRenderTarget(), prevSh = renderer.shadowMap.enabled;
+  renderer.shadowMap.enabled = false;
+  renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(sc, cam);
+  renderer.setRenderTarget(prevRT); renderer.setClearColor(prevCol, prevA); renderer.shadowMap.enabled = prevSh;
+  const geo = new THREE.PlaneGeometry(W, H); geo.translate(0, c.y, 0);
+  const mat = new THREE.MeshBasicMaterial({map: rt.texture, alphaTest: 0.35, side: THREE.DoubleSide});
+  for (const t of trees) {
+    const m = new THREE.Mesh(geo, mat); m.userData.impostor = true; m.castShadow = false; m.receiveShadow = false; m.position.y = -t.userData.lift;
+    t.addLevel(m, 50, 0.08);
+  }
+  // keep each cut-out turned towards the camera (only while it is the level in use)
+  // seen from the air (opening flight) a vertical cut-out would show edge-on: keep the 3D crown up there
+  let aerial = null;
+  onUpdate(() => { const air = camera.position.y > 14; if (air !== aerial) { aerial = air; for (const t of trees) t.levels[2].distance = air ? 1e9 : 50; } });
+  onUpdate(() => { for (const t of trees) if (t.getCurrentLevel() === 2) { const im = t.levels[2].object; im.rotation.y = Math.atan2(camera.position.x - t.position.x, camera.position.z - t.position.z) - t.rotation.y; } });
 }

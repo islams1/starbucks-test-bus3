@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import {camera, onUpdate, damp, angleDamp, clamp} from '../core/engine.js';
 import {keys, consumeMouse, input} from '../core/input.js';
+import {touch} from '../ui/touch.js';
 import {colliders, B} from '../world/building.js';
 import {footstep, startExertionBreathing} from '../core/audio.js';
 import {gait} from '../core/assets.js';
@@ -74,11 +75,13 @@ export function initPlayer(ch) {
       if (keys.has('KeyS') || keys.has('ArrowDown')) fz -= 1;
       if (keys.has('KeyA') || keys.has('ArrowLeft')) fx += 1;
       if (keys.has('KeyD') || keys.has('ArrowRight')) fx -= 1;
+      if (touch.x || touch.y) { fx -= touch.x; fz -= touch.y; }      // touch stick (analog)
     }
-    const run = keys.has('ShiftLeft') || keys.has('ShiftRight');
+    const run = keys.has('ShiftLeft') || keys.has('ShiftRight') || touch.run;
     const len = Math.hypot(fx, fz);
     const tired = Math.max(0, (player.exert - 0.7) / 0.3);          // out of breath: can't keep sprinting
-    const want = len > 0 ? (run ? 3.3 * (1 - 0.25 * tired) : 1.25) : 0;
+    const analog = touch.x || touch.y ? Math.max(0.3, Math.min(1, len)) : 1;     // light push on the stick = slow walk
+    const want = len > 0 ? (run ? 3.3 * (1 - 0.25 * tired) : 1.25) * analog : 0;
     player.speed = damp(player.speed, want, len > 0 ? 6 : 9, dt);
     if (len > 0) {
       const ang = player.yaw + Math.atan2(fx, fz);

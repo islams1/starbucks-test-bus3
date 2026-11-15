@@ -763,6 +763,54 @@
    "t": "هل لديك دقيقة؟",
    "src": "adapted",
    "e": "persuasive"
+  },
+  "nadia_mini_brief": {
+   "s": "nadia",
+   "t": "صباح الخير. الاجتماع بعد قليل، وأريد منك حملة الأعياد في صفحة واحدة: لمن هي، ولماذا سيهتمون، وهل تستطيع فروعنا تقديمها. كل ما تحتاجه على مكتبك. سأنتظرك في قاعة الاجتماعات.",
+   "src": "adapted",
+   "e": "warm"
+  },
+  "nadia_mini_early": {
+   "s": "nadia",
+   "t": "ليس بعد. أكمل الموجز على التابلت أولًا، ثم تعال.",
+   "src": "adapted",
+   "e": "firm"
+  },
+  "nadia_mini_open": {
+   "s": "nadia",
+   "t": "تفضل. اعرض موجزك.",
+   "src": "adapted",
+   "e": "firm"
+  },
+  "nadia_r_good1": {
+   "s": "nadia",
+   "t": "جيد. هذا مدعوم بالأرقام.",
+   "src": "adapted",
+   "e": "pleased"
+  },
+  "nadia_r_good2": {
+   "s": "nadia",
+   "t": "مقنع. أكمل.",
+   "src": "adapted",
+   "e": "pleased"
+  },
+  "nadia_r_weak1": {
+   "s": "nadia",
+   "t": "هذا رأي، لا دليل.",
+   "src": "adapted",
+   "e": "skeptical"
+  },
+  "nadia_r_weak2": {
+   "s": "nadia",
+   "t": "هذا لا يكفي.",
+   "src": "adapted",
+   "e": "disappointed"
+  },
+  "nadia_r_conflict": {
+   "s": "nadia",
+   "t": "لحظة. بعض ما في موجزك لا يمكن أن يكون صحيحًا في الوقت نفسه.",
+   "src": "adapted",
+   "e": "skeptical"
   }
  }
 }

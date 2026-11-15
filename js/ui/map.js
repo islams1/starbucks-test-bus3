@@ -5,6 +5,7 @@ import {ROOMS, B} from '../world/building.js';
 import {player} from '../actors/player.js';
 import {hotspots} from './hotspots.js';
 import {characters} from '../actors/character.js';
+import {distanceField, routeFrom} from '../world/nav.js';
 import {$, show} from './ui.js';
 
 const EXT = {x0: -30, x1: 52, z0: -18, z1: 60};   // mapped area
@@ -49,7 +50,37 @@ export function bakeMap(hide = []) {
 }
 
 const toMap = (x, z, W, H) => [(x - EXT.x0) / (EXT.x1 - EXT.x0) * W, (z - EXT.z0) / (EXT.z1 - EXT.z0) * H];
+
+// walking route from the player to the objective, through doors and around furniture. One distance field per objective,
+// built a few ms per frame; after that each update is only a walk downhill from the player (no path search while moving).
+const route = {pts: null, field: null, tx: 1e9, tz: 1e9, at: 0, px: 1e9, pz: 1e9};
+function updateRoute() {
+  const t = mapState.target, ch = player.ch;
+  if (!t || !ch || !ch.holder.visible) { route.pts = null; route.field = null; route.tx = 1e9; return; }
+  if (t.x !== route.tx || t.z !== route.tz) { route.tx = t.x; route.tz = t.z; route.field = distanceField(t.x, t.z); route.pts = null; route.px = 1e9; }
+  const f = route.field; if (!f || f.failed) { route.pts = null; return; }
+  if (!f.done) { f.step(3); if (!f.done) return; }
+  const p = ch.holder.position, now = performance.now();
+  if (Math.hypot(p.x - t.x, p.z - t.z) < 1.3) { route.pts = null; return; }             // arrived
+  if (now - route.at < 150 && Math.hypot(p.x - route.px, p.z - route.pz) < 0.15) return;
+  route.at = now; route.px = p.x; route.pz = p.z;
+  route.pts = routeFrom(f, p.x, p.z);
+}
+function drawRoute(g, W, H, scale) {
+  const pts = route.pts; if (!pts || pts.length < 2) return;
+  const ch = player.ch, p = ch && ch.holder.position;
+  const xy = pts.map(([x, z], i) => i === 0 && p ? toMap(p.x, p.z, W, H) : toMap(x, z, W, H));   // starts exactly under the player arrow
+  const line = () => { g.beginPath(); g.moveTo(xy[0][0], xy[0][1]); for (let i = 1; i < xy.length; i++) g.lineTo(xy[i][0], xy[i][1]); };
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  line(); g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 9 * scale; g.stroke();
+  line(); g.strokeStyle = 'rgba(255,212,121,.35)'; g.lineWidth = 6 * scale; g.stroke();
+  g.setLineDash([9 * scale, 9 * scale]); g.lineDashOffset = -(performance.now() / 28) * scale;   // dashes flow toward the objective
+  line(); g.strokeStyle = '#ffd479'; g.lineWidth = 4 * scale; g.stroke();
+  g.restore();
+}
+
 function markers(g, W, H, scale = 1) {
+  updateRoute(); drawRoute(g, W, H, scale);
   // hotspots (items) + talkable people
   for (const h of hotspots.values()) {
     if (!h.when() || h.desk && h.deskOnly) continue;

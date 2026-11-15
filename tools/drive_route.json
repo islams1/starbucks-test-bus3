@@ -1,0 +1,3 @@
+[["waitfor", ".mode", 240000], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"], ["waitfor", "#hud:not(.hidden)", 90000], ["wait", 2],
+ ["eval", "(async()=>{ __teleport(-4, 22, 0); const m = await import('/js/ui/map.js'); m.mapState.target = {x: 15, z: 4.5}; return 1 })()"],
+ ["wait", 1.5], ["shot", "x1_minimap_outside.png"], ["key", "KeyM"], ["wait", 1.2], ["shot", "x2_map_outside.png"], ["key", "KeyM"]]

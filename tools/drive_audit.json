@@ -1,0 +1,4 @@
+[["waitfor", ".mode", 240000], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"], ["waitfor", "#hud:not(.hidden)", 90000], ["wait", 3],
+ ["eval", "fetch('/tools/audit_obstacles.js').then(r => r.text()).then(t => (0, eval)(t))"],
+ ["shot", "a0_all.png"],
+ ["eval", "__auditView(-19, 19, -15, 11)"], ["shot", "a1_building.png"]]

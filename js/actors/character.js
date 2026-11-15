@@ -278,7 +278,17 @@ export class Character {
       let yieldK = 1;
       const pl = Character.player;
       if (pl && pl !== this && pl.holder.visible) { const ox = pl.holder.position.x - p.x, oz = pl.holder.position.z - p.z, od = Math.hypot(ox, oz);
-        if (od < 0.95 && (ox * dx + oz * dz) / (od * L + 1e-6) > 0.3) yieldK = 0; }
+        if (!tgt.detour && od < 0.95 && (ox * dx + oz * dz) / (od * L + 1e-6) > 0.3) yieldK = 0;
+        // the player keeps standing in the way: after a short pause, step around them (side without an obstacle)
+        this._yieldT = yieldK ? 0 : (this._yieldT || 0) + dt;
+        if (this._yieldT > 1.2 && od > 1e-3) {
+          this._yieldT = 0;
+          const px = -oz / od, pz = ox / od, P = pl.holder.position;
+          for (const s of [1, -1]) {
+            const wx = P.x + px * s * 0.95, wz = P.z + pz * s * 0.95;
+            if (!segmentBlocked(p.x, p.z, wx, wz) && !segmentBlocked(wx, wz, tgt.x, tgt.y)) { const v = new THREE.Vector2(wx, wz); v.detour = true; w.pts.splice(w.i, 0, v); break; }
+          }
+        } }
       this.speed = damp(this.speed, yieldK * w.speed * (1 - Math.min(0.7, diff * 0.6)), yieldK ? 4 : 10, dt);
       if (this.curName !== w.anim) this.play(w.anim, {fade: 0.35});
       this.cur.timeScale = this.speed / ((gait[w.anim] || 1.25) * this.o.height / 1.75);
@@ -303,10 +313,33 @@ export class Character {
       this.holder.rotation.y = angleDamp(this.holder.rotation.y, this._turnTo, 5, dt);
       if (Math.abs(((this._turnTo - this.holder.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI) < 0.02) this._turnTo = null;
     }
+    // Gaze, breathing and the desk IK turn some bones a little on top of the animation every frame. Put those bones
+    // back to last frame's pure animation pose first: if no clip happens to write them this frame, the offsets would
+    // otherwise pile up frame after frame (upper body bending and twisting further and further).
+    const post = this._post || (this._post = this._postBones().map(b => [b, b.quaternion.clone()]));
+    for (const [b, q] of post) b.quaternion.copy(q);
     this.mixer.update(dt);
+    for (const [b, q] of post) q.copy(b.quaternion);
+    this._guardPose(dt);
     this.updateFace(dt, t);
     this.updateGaze(dt);
     if (this.postIK) this.postIK(dt);
+  }
+  _postBones() {
+    const sk = this.mesh.skeleton, b = this.bones;
+    return [b.spine2, b.neck, b.head, b.le, b.re, ...['L', 'R'].flatMap(s => [sk.getBoneByName(`Bip01_${s}_UpperArm`), sk.getBoneByName(`Bip01_${s}_Forearm`)])].filter(Boolean);
+  }
+  /** safety net: the body must always be driven by a full-weight animation; anything less shows the bind (T) pose */
+  _guardPose(dt) {
+    let w = 0;
+    for (const k in this.actions) { const a = this.actions[k]; if (a.enabled && a.isScheduled()) w += a.getEffectiveWeight(); }
+    if (w >= 0.9 || !this.cur) { this._lowW = 0; return; }
+    this._lowW = (this._lowW || 0) + dt;
+    if (this._lowW < 0.9) return;                        // normal cross-fades are over well before this
+    this._lowW = 0;
+    const name = this.curName || this.baseName;
+    console.warn('[pose] no full animation on', this.id, {cur: this.curName, base: this.baseName, weight: +w.toFixed(2)});
+    this.cur = null; this.play(name, {fade: 0});
   }
 
   updateGaze(dt) {

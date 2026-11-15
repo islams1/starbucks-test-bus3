@@ -27,8 +27,7 @@ export const CAST = {
   p4: {avatar: 'Female_Adult_07', gender: 'f', height: 1.66, talks: false, normals: false},
 };
 
-export async function loadCast(onEach) {
-  const ids = Object.keys(CAST);
+export async function loadCast(onEach, ids = Object.keys(CAST)) {
   // sequential-ish (2 at a time) to keep peak memory low while FBX morph data is pruned
   for (let i = 0; i < ids.length; i += 2) {
     await Promise.all(ids.slice(i, i + 2).map(async id => {
@@ -54,14 +53,15 @@ export function stand(ch, x, z, ry, anim = null) {
 /** background life: seated workers, walkers. */
 export function startBackground() {
   const C = characters, seats = anchors.workSeats;
-  sit(C.w1, seats[1], {anim: 'm_sit_table_idle_neutral_01'});
-  sit(C.w2, seats[6], {anim: 'f_sit_table_breathe_01'});
+  if (C.w1) sit(C.w1, seats[1], {anim: 'm_sit_table_idle_neutral_01'});
+  if (C.w2) sit(C.w2, seats[6], {anim: 'f_sit_table_breathe_01'});
+  if (!C.w3) return;          // quick version: only the two seated colleagues
   stand(C.w3, anchors.breakNpc.x, anchors.breakNpc.z, anchors.breakNpc.ry, 'm_idle_neutral_03');
   // two walkers: one outdoor loop (plaza), one indoor loop (lobby ↔ corridor ↔ open office)
   loop(C.w4, [[-12, 30], [12, 30], [14, 22], [-14, 22]], 1.3);
   loop(C.w5, [[-3, 7.5], [-3.5, 0.5], [-9, -3.5], [-12, 2], [-6.2, 4.2], [-3, 7.5]], 1.15, 'f_walk_stroll_01');
   // street: two walkers on the sidewalks, two people who cross at the zebra when the walk light is green
-  loop(C.p1, [[-34, 38.2], [34, 38.2]], 1.3, 'f_walk_neutral_01', false);
+  loop(C.p1, [[-34, 38.2], [34, 38.2]], 1.3, 'f_walk_neutral_01');      // grid: goes around the corner planters and the bus stop
   loop(C.p2, [[30, 54.2], [-32, 54.2]], 1.15, 'm_walk_cool_01', false);
   crosser(C.p3, -1, 'm_walk_neutral_01', [-22, 38.4], [18, 54.0]);
   crosser(C.p4, 1, 'f_walk_fast_01', [24, 54.0], [-26, 38.6]);
@@ -71,11 +71,12 @@ async function crosser(ch, side, anim, a, b) {
   ch.seated = false; ch.place(a[0], a[1], 0); ch.setBase(ch.g === 'm' ? 'm_idle_neutral_01' : 'f_idle_neutral_02');
   const zNear = ROAD.z0 - 1.0, zFar = ROAD.z1 + 1.0, x = side * 0.9;
   for (;;) {
-    await ch.walkTo([[x, a[1] < ROAD.zc ? zNear : zFar]], {speed: 1.2, anim, nav: false});
+    // sidewalk legs use the walk grid (around planters, lamp posts and the bus-stop bench); only the zebra is a fixed line
+    await ch.walkTo([[x, a[1] < ROAD.zc ? zNear : zFar]], {speed: 1.2, anim});
     ch.faceTo(x, a[1] < ROAD.zc ? zFar : zNear);
     await until(() => !signal.walk); await until(() => signal.walk);       // wait for the next green man
     await ch.walkTo([[x, a[1] < ROAD.zc ? zFar : zNear]], {speed: 1.45, anim, nav: false});
-    await ch.walkTo([b], {speed: 1.2, anim, nav: false});
+    await ch.walkTo([b], {speed: 1.2, anim});
     [a, b] = [b, a];
   }
 }

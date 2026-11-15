@@ -12,6 +12,7 @@ def run(pg, steps):
         elif k=='shot': pg.screenshot(path=os.path.join(out, st[1])); print('shot', st[1], flush=True)
         elif k=='click': pg.click(st[1], timeout=st[2] if len(st)>2 else 30000, force=True)
         elif k=='key': pg.keyboard.press(st[1])
+        elif k=='tap': pg.tap(st[1], timeout=st[2] if len(st)>2 else 30000, force=True)
         elif k=='select': pg.select_option(st[1], st[2])
         elif k=='down': pg.keyboard.down(st[1])
         elif k=='up': pg.keyboard.up(st[1])
@@ -19,7 +20,7 @@ def run(pg, steps):
         elif k=='waitfor': pg.wait_for_selector(st[1], timeout=st[2] if len(st)>2 else 120000, state=st[3] if len(st)>3 else 'visible')
 with sync_playwright() as p:
     b=p.chromium.launch(channel='msedge', headless=True, args=(['--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-gpu'] if os.environ.get('CPU') else ['--use-angle=d3d11'])+['--enable-gpu','--ignore-gpu-blocklist','--autoplay-policy=no-user-gesture-required']+(['--disable-gpu-vsync','--disable-frame-rate-limit'] if os.environ.get('UNCAP') else []))
-    pg=b.new_page(viewport={'width':1280,'height':720})
+    pg=b.new_page(viewport={'width':844,'height':390}, is_mobile=True, has_touch=True, device_scale_factor=3, user_agent='Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36') if os.environ.get('MOBILE') else b.new_page(viewport={'width':1280,'height':720})
     pg.on('console', lambda m: ((m.type in ('error','warning') or '[boot]' in m.text or 'rafFPS' in m.text) and 'TGA' not in m.text and 'PropertyBinding' not in m.text) and print('[console]', m.type, m.text[:400], flush=True))
     pg.on('response', lambda r: r.status>=400 and print('[http]', r.status, r.url, flush=True))
     pg.on('pageerror', lambda e: print('[pageerror]', str(e)[:600], (e.stack or '')[:900], flush=True))

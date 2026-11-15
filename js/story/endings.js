@@ -52,7 +52,7 @@ const SERIES = {
 };
 const WEEKS = ['نوفمبر', '', '', '', 'ديسمبر', '', '', '', 'يناير', '', '', '', ''];
 
-export function showResult(ending, {extra = '', practice = false, plan = 0} = {}) {
+export function showResult(ending, {extra = '', practice = false, plan = 0, next = 'المراجعة الختامية'} = {}) {
   const c = CARDS[ending];
   const el = $('result');
   const up = ending === 'E1' || ending === 'E2';
@@ -61,7 +61,7 @@ export function showResult(ending, {extra = '', practice = false, plan = 0} = {}
       <div class="mkt-val ${up ? 'up' : 'down'}" id="mval">100.0</div><canvas id="mchart" width="900" height="420"></canvas>
       <div class="ticker"><span>${tickerText(ending)}</span></div></div>
     <div class="jan"><span class="ending" style="background:${c.color}">BUS3-${ending}</span><div class="jl">بطاقة «يناير»</div><h2>${c.name}</h2><p>${c.text}</p>${extraLines}
-      <div class="actions">${practice && ending !== 'E1' ? '<button id="rmeet">أعد من بداية الاجتماع</button>' : ''}<button id="todeb">المراجعة الختامية</button></div></div>`;
+      <div class="actions">${practice && ending !== 'E1' ? '<button id="rmeet">أعد من بداية الاجتماع</button>' : ''}<button id="todeb">${next}</button></div></div>`;
   show('result', true);
   animateChart(SERIES[ending]);
   return new Promise(res => {

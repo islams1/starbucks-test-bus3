@@ -2,6 +2,12 @@
 import {toast} from '../ui/ui.js';
 import {sfx} from '../core/audio.js';
 
+/** quick version (?mini=1): fewer people, less talk, straight to the tasks, scored out of 100.
+ *  A deploy of the quick version alone sets <meta name="bus3-mode" content="mini"> and <meta name="bus3-full" content="<full version url>">. */
+const meta = (n) => document.querySelector(`meta[name="${n}"]`)?.content || null;
+export const MINI = new URLSearchParams(location.search).has('mini') || meta('bus3-mode') === 'mini';
+export const FULL_URL = meta('bus3-full');
+
 export const S = {
   mode: 'practice',
   clock: 8 * 60 + 45,
@@ -23,6 +29,7 @@ export const S = {
   plansTried: [],
   ending: null,
   tasks: {},
+  revealed: {},                  // quick mode: score parts revealed in the meeting
 };
 
 export const EVIDENCE = {

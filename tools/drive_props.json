@@ -1,0 +1,4 @@
+[["waitfor", ".mode", 240000], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"], ["waitfor", "#hud:not(.hidden)", 90000], ["wait", 2],
+ ["eval", "(()=>{ __teleport(0.5, 6.5, 0); __player.yaw = Math.atan2(4.4 - 0.5, 0 - 6.5) + Math.PI; return 1 })()"], ["wait", 2], ["shot", "p1_lobby.png"],
+ ["eval", "(()=>{ __teleport(0, 7.5, 0); __player.yaw = Math.PI; return 1 })()"], ["wait", 2], ["shot", "p2_reception.png"],
+ ["eval", "(()=>{ __teleport(14.5, 7.2, 0); __player.yaw = Math.atan2(17.4 - 14.5, 9.4 - 7.2) + Math.PI; return 1 })()"], ["wait", 2], ["shot", "p3_office_plant.png"]]

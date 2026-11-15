@@ -1,7 +1,7 @@
 // 2D document screens (paper / laptop / booklet / board). Content = fictional training data from the situation file.
 import {$, show} from './ui.js';
 import {sfx} from '../core/audio.js';
-import {S, gain, log, EVIDENCE, CAT} from '../story/state.js';
+import {S, gain, log, setNode, EVIDENCE, CAT, MINI} from '../story/state.js';
 
 let closeCb = null;
 export function openDoc(html, mount = null) {
@@ -28,7 +28,7 @@ const SEG = [
 const revTotal = SEG.reduce((s, x) => s + x.share * x.spend, 0);
 export const segRevShare = (k) => { const x = SEG.find(s => s.k === k); return x.share * x.spend / revTotal * 100; };
 
-function quiz(el, sel, correct, onAnswer, fbRight, fbWrong) {
+function quiz(el, sel, correct, onAnswer, fbRight, fbWrong, prev = null) {
   el.querySelectorAll(sel).forEach(b => b.onclick = () => {
     if (b.parentElement.dataset.done) return;
     b.parentElement.dataset.done = 1;
@@ -38,6 +38,7 @@ function quiz(el, sel, correct, onAnswer, fbRight, fbWrong) {
     b.parentElement.nextElementSibling.innerHTML = ok ? fbRight : fbWrong;
     onAnswer(ok, b.dataset.v);
   });
+  if (prev != null) { const b = el.querySelector(`${sel}[data-v="${prev}"]`); if (b) b.click(); }
 }
 
 // ---------- 1. segment research (blue folder) ----------
@@ -53,25 +54,36 @@ export function researchDoc() {
         <div class="opts q1"><button class="opt" data-v="A">الشريحة أ</button><button class="opt" data-v="B">الشريحة ب</button><button class="opt" data-v="C">الشريحة ج</button><button class="opt" data-v="D">الشريحة د</button></div><div class="fb"></div></div>
       <div id="q2" class="hidden" style="margin-top:14px">وأي شريحة أعلى قيمة <u>للعميل الواحد</u> شهريًا (الزيارات × الإنفاق)؟
         <div class="opts q2"><button class="opt" data-v="A">أ: ${num('9 × 6.10')}</button><button class="opt" data-v="B">ب: ${num('6 × 5.40')}</button><button class="opt" data-v="C">ج: ${num('11 × 5.80')}</button><button class="opt" data-v="D">د: ${num('3 × 9.20')}</button></div><div class="fb"></div></div>
+      ${MINI ? `<div id="qseg" class="hidden" style="margin-top:16px"><b>③ قرارك: لمن ستكون حملة الأعياد؟</b> <small>(قرار واحد — لا يمكن تغييره)</small>
+        <div class="opts qs"><button class="opt" data-v="A">الشريحة أ</button><button class="opt" data-v="B">الشريحة ب</button><button class="opt" data-v="C">الشريحة ج</button><button class="opt" data-v="D">الشريحة د</button><button class="opt" data-v="everyone">للجميع</button></div><div class="fb"></div></div>` : ''}
     </div></div>`;
   return openDoc(html, (el) => {
-    el.querySelector('#calcrev').onclick = (e) => {
-      e.target.disabled = true; e.target.textContent = 'تم الحساب ✓';
+    const T = S.tasks;
+    const calc = () => {
+      const btn = el.querySelector('#calcrev'); btn.disabled = true; btn.textContent = 'تم الحساب ✓';
       el.querySelectorAll('tr[data-k]').forEach(tr => { const k = tr.dataset.k; tr.querySelector('.rev').innerHTML = num(segRevShare(k).toFixed(1) + '%'); });
       // sort rows by revenue share
       const tb = el.querySelector('table'); [...el.querySelectorAll('tr[data-k]')].sort((a, b) => segRevShare(b.dataset.k) - segRevShare(a.dataset.k)).forEach(r => tb.appendChild(r));
       el.querySelector('#q1').classList.remove('hidden');
-      log('task', 'segments_sorted');
     };
-    quiz(el, '.q1 .opt', 'A', (ok, v) => { S.tasks.revenue = {ok, v}; log('task', 'revenue_q', v); el.querySelector('#q2').classList.remove('hidden'); el.querySelector(`tr[data-k="A"]`).classList.add('sel'); },
-      'صحيح: الشريحة أ وحدها نحو <b>46%</b> من الإيراد.', 'ليس تمامًا: الشريحة أ وحدها نحو <b>46%</b> من الإيراد.');
-    quiz(el, '.q2 .opt', 'C', (ok, v) => { S.tasks.value = {ok, v}; S.tasks.research = true; log('task', 'value_q', v); },
-      'صحيح: العميل في الشريحة ج يساوي نحو <b>63.8 دولار</b> شهريًا، لكن الفروع أبطأ ما تكون معه.', 'العميل في الشريحة ج يساوي نحو <b>63.8 دولار</b> شهريًا (11 × 5.80).');
+    el.querySelector('#calcrev').onclick = () => { calc(); log('task', 'segments_sorted'); };
+    if (T.revenue) calc();
+    quiz(el, '.q1 .opt', 'A', (ok, v) => { if (!T.revenue) { T.revenue = {ok, v}; log('task', 'revenue_q', v); } el.querySelector('#q2').classList.remove('hidden'); el.querySelector(`tr[data-k="A"]`).classList.add('sel'); },
+      'صحيح: الشريحة أ وحدها نحو <b>46%</b> من الإيراد.', 'ليس تمامًا: الشريحة أ وحدها نحو <b>46%</b> من الإيراد.', T.revenue && T.revenue.v);
+    quiz(el, '.q2 .opt', 'C', (ok, v) => { if (!T.value) { T.value = {ok, v}; log('task', 'value_q', v); } T.research = true; const qs = el.querySelector('#qseg'); if (qs) qs.classList.remove('hidden'); },
+      'صحيح: العميل في الشريحة ج يساوي نحو <b>63.8 دولار</b> شهريًا، لكن الفروع أبطأ ما تكون معه.', 'العميل في الشريحة ج يساوي نحو <b>63.8 دولار</b> شهريًا (11 × 5.80).', T.value && T.value.v);
+    // quick version: the target segment is decided here (no conversation with Nadia)
+    const qs = el.querySelector('#qseg');
+    if (qs) {
+      const mark = (v) => { qs.querySelector('.opts').dataset.done = 1; qs.querySelectorAll('.opt').forEach(b => b.classList.toggle('sel', b.dataset.v === v)); qs.querySelector('.fb').innerHTML = `سُجّل قرارك: <b>${v === 'everyone' ? 'للجميع' : 'الشريحة ' + {A: 'أ', B: 'ب', C: 'ج', D: 'د'}[v]}</b>. ستعرضه على نادية في الاجتماع.`; };
+      qs.querySelectorAll('.opt').forEach(b => b.onclick = () => { if (S.segment !== 'none') return; S.segment = b.dataset.v; S.segmentTries = 1; setNode('N01', b.dataset.v); sfx.ui(); mark(b.dataset.v); });
+      if (S.segment !== 'none') mark(S.segment);
+    }
   });
 }
 
 // ---------- 2. store dashboard (laptop) ----------
-export function dashboardDoc({onCall}) {
+export function dashboardDoc({onCall, callLabel = '📹 مكالمة فيديو مع الفرع (هنا — مشرفة وردية)', extra = []}) {
   gain('M3'); gain('M4');
   const months = ['يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   const html = `<div class="laptop"><div class="screen-in">
@@ -83,7 +95,7 @@ export function dashboardDoc({onCall}) {
       <div class="kpi"><div class="l">مبيعات ديسمبر</div><div class="v">+4%</div><div class="s bad">الهدف على مستوى البلاد <span class="num">+6%</span></div></div>
     </div>
     <div class="chartbox"><canvas id="dch" width="900" height="230" style="width:100%"></canvas></div>
-    <div class="dash-actions"><button id="vcbtn">📹 مكالمة فيديو مع الفرع (هنا — مشرفة وردية)</button><button class="alt" id="dclose">إغلاق</button></div>
+    <div class="dash-actions"><button id="vcbtn">${callLabel}</button>${extra.map((x, i) => `<button data-x="${i}">${x.label}</button>`).join('')}<button class="alt" id="dclose">إغلاق</button></div>
   </div></div>`;
   return openDoc(html, (el, close) => {
     const c = el.querySelector('#dch').getContext('2d');
@@ -99,6 +111,7 @@ export function dashboardDoc({onCall}) {
     data.forEach((v, i) => { const x = 80 + i * ((W - 140) / 5), y = H - 30 - v * 17; c.fillStyle = '#c0392b'; c.beginPath(); c.arc(x, y, 4, 0, 7); c.fill(); c.fillStyle = '#5f6b77'; c.fillText(months[i], x - 18, H - 8); });
     el.querySelector('#dclose').onclick = close;
     el.querySelector('#vcbtn').onclick = () => { close(); onCall(); };
+    el.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { close(); extra[+b.dataset.x].fn(); });
   });
 }
 
@@ -137,9 +150,10 @@ export function budgetDoc() {
       <div class="sliders">${lines.map(([k, n, v]) => `<div class="sl"><span>${n}</span><input type="range" min="0" max="120000" step="5000" value="${v}" data-k="${k}"><span class="num" id="v_${k}">${v.toLocaleString('en')}</span></div>`).join('')}</div>
       <div class="total" id="btotal"></div><button class="opt" id="bsave" style="margin-top:8px">اعتمد المسودة</button><div class="fb" id="bfb"></div></div></div>`;
   return openDoc(html, (el) => {
-    quiz(el, '.q3 .opt', '79', (ok, v) => { S.tasks.discountShare = {ok, v}; log('task', 'discount_share', v); },
-      'صحيح: 95,000 ÷ 120,000 ≈ <b>79%</b> — معظم الميزانية في بند واحد.', 'الحساب: 95,000 ÷ 120,000 ≈ <b>79%</b> — معظم الميزانية في بند واحد.');
+    quiz(el, '.q3 .opt', '79', (ok, v) => { if (!S.tasks.discountShare) { S.tasks.discountShare = {ok, v}; log('task', 'discount_share', v); } },
+      'صحيح: 95,000 ÷ 120,000 ≈ <b>79%</b> — معظم الميزانية في بند واحد.', 'الحساب: 95,000 ÷ 120,000 ≈ <b>79%</b> — معظم الميزانية في بند واحد.', S.tasks.discountShare && S.tasks.discountShare.v);
     const sl = [...el.querySelectorAll('input[type=range]')];
+    if (S.tasks.budget) sl.forEach(s => { s.value = S.tasks.budget[s.dataset.k] || 0; });
     const upd = () => { let t = 0; sl.forEach(s => { t += +s.value; el.querySelector('#v_' + s.dataset.k).textContent = (+s.value).toLocaleString('en'); });
       const tot = el.querySelector('#btotal'); tot.textContent = `المجموع: ${t.toLocaleString('en')} $`; tot.classList.toggle('over', t !== 120000); return t; };
     sl.forEach(s => s.oninput = upd); upd();

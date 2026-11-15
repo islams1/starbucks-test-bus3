@@ -7,7 +7,7 @@ import * as cine from '../core/cine.js';
 import {characters} from '../actors/character.js';
 import {player, setPlayerMode, teleport, insideBuilding} from '../actors/player.js';
 import {anchors, roomAt, screens} from '../world/building.js';
-import {sunFollow, interior} from '../world/lighting.js';
+import {sunFollow, setInteriorDim} from '../world/lighting.js';
 import {callOn} from '../world/cafe.js';
 import {subtitle, hideSubtitle, choose, toast, objective, setClock, fade, letterbox, hud, $, show, prompt} from '../ui/ui.js';
 import {addHotspot, markDone, setDeskMode, setHotspotsBusy, hotspots} from '../ui/hotspots.js';
@@ -39,7 +39,7 @@ function listenersReact(speaker, emo) {
 }
 // one voice at a time: every line waits for the previous one to finish (no two people talking over each other)
 let lineChain = Promise.resolve(); let lineActive = 0;
-function line(id, opt = {}) {
+export function line(id, opt = {}) {
   const run = lineChain.then(() => { lineActive++; return lineImpl(id, opt); }).finally(() => { lineActive--; });
   lineChain = run.catch(() => {});
   return run;
@@ -64,33 +64,33 @@ async function lineImpl(id, {cam = null, gesture = true} = {}) {
     await p;
   } else {
     const radio = L.s === 'hana' || L.s === 'ruth';
-    if (who === C.hana) { const perfH = buildPerformance(L.t, words, {speakerId: 'hana', emotion: L.e, seated: false, pointTarget: null}); const p = who.say(url, {getPos: () => null, radio: true, emotion: L.e, perf: perfH}); await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); }); subtitle(sp.name, sp.role, L.t, words, () => timeFn()); await p; }
+    if (who && who === C.hana) { const perfH = buildPerformance(L.t, words, {speakerId: 'hana', emotion: L.e, seated: false, pointTarget: null}); const p = who.say(url, {getPos: () => null, radio: true, emotion: L.e, perf: perfH}); await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); }); subtitle(sp.name, sp.role, L.t, words, () => timeFn()); await p; }
     else { const v = await playVoice(url + '.mp3', null, {radio}); subtitle(sp.name, sp.role, L.t, words, v.time); await v.done; }
   }
   await wait(0.25);
   hideSubtitle();
 }
 /** choice where each option is a player voice line. opts: [{id(line), key, disabled?, need?}] */
-async function ask(opts, {q = '', hint = null} = {}) {
+export async function ask(opts, {q = '', hint = null} = {}) {
   const o = await choose(q, opts.map(x => ({...x, text: x.text || LINES[x.id].t})), {hint: practice() ? hint : null});
   if (!o.silent) await line(o.id, {cam: o.cam});
   return o.key || o.id;
 }
 // framing presets
-const camOTS = (other) => (who) => who === player.ch ? cine.ots(player.ch, other, {side: -1, dur: 0.6}) : cine.ots(who, player.ch, {side: 1, dur: 0.6});
+export const camOTS = (other) => (who) => who === player.ch ? cine.ots(player.ch, other, {side: -1, dur: 0.6}) : cine.ots(who, player.ch, {side: 1, dur: 0.6});
 const camClose = (who) => cine.closeup(who, {dist: 1.35, yawOff: (Math.random() - 0.5) * 0.7, fov: 30, dur: 0.7});
 // meeting: speakers are framed over the player's shoulder so they face the lens; the player is framed from across the table
 let otsSide = 1;
-const camMeet = (who) => {
+export const camMeet = (who) => {
   if (who === player.ch) return cine.closeup(player.ch, {dist: 1.45, yawOff: 0.22, fov: 30, dur: 0.7});
   otsSide = -otsSide;
   const far = who.holder.position.distanceTo(player.ch.holder.position);
   return cine.ots(who, player.ch, {side: otsSide, dist: 0.5, height: 0.05, fov: far > 3.5 ? 24 : 30, dur: 0.7});
 };
 
-function waitUntil(fn) { return new Promise(res => { const off = onUpdate(() => { if (fn()) { off(); res(); } }); }); }
-function lockControls() { setInput(false); setPlayerMode('cine'); hud(true); }
-function freeControls() { setPlayerMode('free'); setInput(true, true); cine.stop(); }
+export function waitUntil(fn) { return new Promise(res => { const off = onUpdate(() => { if (fn()) { off(); res(); } }); }); }
+export function lockControls() { setInput(false); setPlayerMode('cine'); hud(true); }
+export function freeControls() { setPlayerMode('free'); setInput(true, true); cine.stop(); }
 
 // ---------------------------------------------------------------- checkpoints (restart from node)
 function checkpoint(scene) { try { sessionStorage.setItem('bus3_cp', JSON.stringify({scene, S})); } catch (e) {} }
@@ -192,10 +192,14 @@ function deskCam() {
   return () => {};
 }
 let offDeskCam = null;
-async function sitAtDesk() {
+export const isSeated = () => seated;
+// free spot beside the office chair, on the door side: desk box x 14.83–15.77 / z 3.5–5.5, chair x 16.15–16.8 / z 4.2–4.8
+const DESK_STAND = {x: 16.45, z: 3.55};
+export async function sitAtDesk() {
   lockControls();
   const st = anchors.officeSeat;
-  await player.ch.walkTo([[st.x - 0.75, st.z - 0.55], [st.x - 0.2, st.z]], {speed: 1.2});
+  // approach from the door side of the chair (the old points were inside the desk's footprint)
+  await player.ch.walkTo([[DESK_STAND.x, DESK_STAND.z], [st.x + 0.03, st.z - 0.62]], {speed: 1.2});
   sit(player.ch, st, {anim: 'm_sit_table_idle_neutral_01'});
   await cine.shot(V3(16.2, 1.32, 4.5), V3(14.9, 0.66, 4.5), 1.1, {fov: 58});
   deskBody(true);
@@ -203,12 +207,14 @@ async function sitAtDesk() {
   seated = true; setDeskMode(true); setInput(true, false);
   objective(officeObjective());
 }
-async function standFromDesk() {
+export async function standFromDesk() {
   if (offDeskCam) offDeskCam(); offDeskCam = null;
   seated = false; setDeskMode(false); deskBody(false);
   player.ch.fbx.visible = true; player.ch.seated = false;
-  stand(player.ch, anchors.officeSeat.x - 0.55, anchors.officeSeat.z - 0.6, -Math.PI / 2, 'm_idle_neutral_02');
-  player.yaw = -Math.PI / 2;
+  // get up beside the chair, clear of the desk (the old spot overlapped the desk top by ~25 cm), facing the door
+  const ry = Math.atan2(12 - DESK_STAND.x, 1.8 - DESK_STAND.z);
+  stand(player.ch, DESK_STAND.x, DESK_STAND.z, ry, 'm_idle_neutral_02');
+  player.yaw = ry;
   freeControls();
 }
 function officeObjective() {
@@ -260,11 +266,13 @@ async function nadiaVisit(lines) {
   await n.walkTo([[12.4, 2.4], [13.75, 4.2]], {speed: 1.15});
   n.faceTo(16.4, 4.5); n.lookAt(player.ch); n.lockLook = true;
   const look = () => n.headPos();
+  // the camera sits at the seated player's eyes: his own shoulder would fill the frame when it turns to the door
+  if (seated) player.ch.fbx.visible = false;
   cine.shot(V3(16.4, 1.24, 4.6), look, 0.9, {fov: 33});
   await wait(0.6);
   await lines();
   await n.walkTo([[12.3, 2.3], [10.0, 1.8]], {speed: 1.2}); n.hide(); n.lockLook = false;
-  if (seated) { offDeskCam && offDeskCam(); offDeskCam = deskCam(); }
+  if (seated) { player.ch.fbx.visible = true; offDeskCam && offDeskCam(); offDeskCam = deskCam(); }
   setHotspotsBusy(false);
 }
 
@@ -303,6 +311,7 @@ async function nodeN02() {
   sfx.knock();
   await r.walkTo([[12.4, 2.4], [13.6, 3.7]], {speed: 1.3});
   r.faceTo(16.4, 4.5); r.lookAt(player.ch); r.lockLook = true;
+  if (seated) player.ch.fbx.visible = false;          // (own shoulder out of the shot, see nadiaVisit)
   cine.shot(V3(16.4, 1.24, 4.6), () => r.headPos(), 0.9, {fov: 33});
   await line('ryan_n02');
   const ready = S.ev.M5 && S.ev.M10;
@@ -317,7 +326,7 @@ async function nodeN02() {
   if (k !== 'later') { setNode('N02', k); advance(30); }
   await r.walkTo([[12.3, 2.3], [10.0, 1.8]], {speed: 1.3}); r.lockLook = false;
   stagedRyan();
-  if (seated) { offDeskCam && offDeskCam(); offDeskCam = deskCam(); }
+  if (seated) { player.ch.fbx.visible = true; offDeskCam && offDeskCam(); offDeskCam = deskCam(); }
   setHotspotsBusy(false);
 }
 function stagedRyan() { const r = C.ryan, a = anchors.ryanPhone; r.mood.smile = 0; r.mood.frown = 0; stand(r, a.x, a.z, a.ry, 'm_cell_phone_talk_01'); }
@@ -325,7 +334,7 @@ function stagedRyan() { const r = C.ryan, a = anchors.ryanPhone; r.mood.smile = 
 
 // ---------------------------------------------------------------- physical actions (the player does things, not only talks)
 /** turn toward a target and play a short hands/eyes action before opening something */
-async function look(target, anim = 'm_documents_check') {
+export async function look(target, anim = 'm_documents_check') {
   if (seated || player.mode !== 'free') return;
   lockControls();
   const ch = player.ch; ch.faceTo(target.x, target.z); ch.lookAt(target);
@@ -376,7 +385,7 @@ async function makeCoffee() {
 }
 // ---------------------------------------------------------------- meeting presentation (clicker + slides)
 function wrapRTL(g, text, x, y, maxW, lh) { const words = text.split(' '); let lineTxt = ''; for (const w of words) { const t = lineTxt ? lineTxt + ' ' + w : w; if (g.measureText(t).width > maxW && lineTxt) { g.fillText(lineTxt, x, y); y += lh; lineTxt = w; } else lineTxt = t; } if (lineTxt) g.fillText(lineTxt, x, y); }
-function drawSlide(n, title, body, evid) {
+export function drawSlide(n, title, body, evid) {
   screens.meeting.draw((g, W, H) => {
     g.fillStyle = '#f4efe6'; g.fillRect(0, 0, W, H); g.fillStyle = '#1f5e47'; g.fillRect(0, 0, W, 120);
     g.fillStyle = '#fff'; g.font = '700 56px "IBM Plex Sans Arabic"'; g.textAlign = 'right'; g.direction = 'rtl'; g.fillText(title, W - 60, 80);
@@ -385,19 +394,19 @@ function drawSlide(n, title, body, evid) {
     if (evid && evid.length) { g.font = '600 30px "IBM Plex Sans Arabic"'; g.fillStyle = '#8a6d2e'; g.fillText('الأدلة: ' + evid.join(' · '), W - 70, H - 60); }
   });
 }
-function briefText(k) { const f = {insight: 0, idea: 1, ops: 2, measure: 3, risk: 4}[k]; const b = S.brief || {}; const opts = BRIEF_FIELDS[f].opts(); const o = opts.find(x => x[0] === b[k]); return o ? o[1] : 'لم تُكتب في الموجز'; }
-async function clicker(label) {
+export function briefText(k) { const f = {insight: 0, idea: 1, ops: 2, measure: 3, risk: 4}[k]; const b = S.brief || {}; const opts = BRIEF_FIELDS[f].opts(); const o = opts.find(x => x[0] === b[k]); return o ? o[1] : 'لم تُكتب في الموجز'; }
+export async function clicker(label) {
   const el = document.createElement('div'); el.id = 'clicker'; el.innerHTML = `<kbd>E</kbd> اعرض الشريحة: ${label}`; document.body.appendChild(el);
   await new Promise(res => { const go = () => { removeEventListener('keydown', kd); el.remove(); res(); }; const kd = (e) => { if (e.code === 'KeyE' || e.code === 'Space') go(); }; addEventListener('keydown', kd); el.onclick = go; });
   sfx.ui();
 }
 /** frame the presenter beside the screen so the new slide is readable */
-async function slideShot() { player.ch.gesture('m_gestic_presentation_right_01', {fade: 0.3}); await cine.shot(V3(-0.6, 1.55, -8.2), V3(4.5, 1.55, -9.35), 0.9, {fov: 44}); await wait(2.2); }
-const presCam = () => cine.closeup(player.ch, {dist: 2.2, yawOff: 0.35, height: -0.1, fov: 34, dur: 0.8});
+export async function slideShot() { player.ch.gesture('m_gestic_presentation_right_01', {fade: 0.3}); await cine.shot(V3(-0.6, 1.55, -8.2), V3(4.5, 1.55, -9.35), 0.9, {fov: 44}); await wait(2.2); }
+export const presCam = () => cine.closeup(player.ch, {dist: 2.2, yawOff: 0.35, height: -0.1, fov: 34, dur: 0.8});
 async function presentStart() {
   const ch = player.ch, N = C.nadia, seat = anchors.meetSeats[SEAT.player];
   cine.shot(V3(-3.2, 2.0, -6.4), V3(1.5, 1.0, -9.2), 1.2, {fov: 48});
-  ch.seated = false; stand(ch, seat.x, seat.z + 0.55, Math.PI, 'm_idle_neutral_01');
+  ch.seated = false; stand(ch, seat.x, seat.z + 0.78, Math.PI, 'm_idle_neutral_01');   // clear of the chair back (0.55 overlapped it)
   N.walkTo([[3.9, -12.1]], {speed: 1.0}).then(() => N.faceTo(0, -9.5));
   await ch.walkTo([[seat.x + 0.2, -7.55], [2.9, -7.6], [3.35, -8.9]], {speed: 1.15});
   ch.faceTo(-2, -9.3); ch.presenting = true;
@@ -408,7 +417,7 @@ async function presentEnd() {
   const ch = player.ch, N = C.nadia, seat = anchors.meetSeats[SEAT.player];
   ch.presenting = false;
   cine.shot(V3(-3.2, 2.0, -6.4), V3(1.5, 1.0, -9.2), 1.0, {fov: 48});
-  await ch.walkTo([[2.9, -7.6], [seat.x + 0.2, -7.55], [seat.x, seat.z + 0.5]], {speed: 1.15});
+  await ch.walkTo([[2.9, -7.6], [seat.x + 0.2, -7.55], [seat.x, seat.z + 0.78]], {speed: 1.15});
   sit(ch, seat);
   await N.walkTo([[anchors.nadiaMeet.x, anchors.nadiaMeet.z]], {speed: 1.0}); N.holder.rotation.y = anchors.nadiaMeet.ry;
 }
@@ -498,7 +507,7 @@ async function secretaryScene() {
   stand(s, 9.8, 1.9, Math.PI / 2, 'f_idle_neutral_02');
   sfx.knock(); await wait(0.6);
   await s.walkTo([[12.2, 2.3]], {speed: 1.2}); s.faceTo(16.4, 4.5); s.lookAt(player.ch);
-  if (seated) cine.shot(V3(16.4, 1.24, 4.6), () => s.headPos(), 0.9, {fov: 33}); else { lockControls(); await camOTS(s)(s); }
+  if (seated) { player.ch.fbx.visible = false; cine.shot(V3(16.4, 1.24, 4.6), () => s.headPos(), 0.9, {fov: 33}); } else { lockControls(); await camOTS(s)(s); }
   S.clock = 13 * 60 + 50; setClock(S.clock);
   await line('secretary_call');
   await line('p_secretary', {gesture: false});
@@ -519,7 +528,7 @@ function stageMeeting() {
   const n = C.nadia; n.seated = false; n.place(anchors.nadiaMeet.x, anchors.nadiaMeet.z, anchors.nadiaMeet.ry); n.setBase('f_idle_neutral_01');
   drawScreen('sales');
 }
-function drawScreen(kind) {
+export function drawScreen(kind) {
   screens.meeting.draw((g, W, H) => {
     g.fillStyle = '#0f1417'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#e8e2d6'; g.font = '600 56px "IBM Plex Sans Arabic"'; g.textAlign = 'right';
@@ -662,11 +671,11 @@ async function decision(struck) {
   return result(ending, plan);
 }
 let tensionOn = false;
-function setTension(on) {
+export function setTension(on) {
   tensionOn = on; sfx.heartbeat(on);
   document.querySelector('.vignette')?.classList.toggle('on', on);
   for (const id of ['ryan', 'mei', 'omar', 'grace']) {
-    const c = C[id];
+    const c = C[id]; if (!c) continue;
     if (on) { c.mood.worry = 0.7; c.mood.smile = 0; c.setBase(c.g === 'm' ? 'm_sit_table_idle_nervous_01' : 'f_sit_table_breathe_01', {fade: 0.8}); if (id === 'omar') c.lookAt(V3(0, 0.75, -9.5)); }
     else { c.mood.worry = 0; c.setBase(c.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_idle_neutral_01', {fade: 0.8}); c.lookAt(C.nadia); }
   }
@@ -674,7 +683,7 @@ function setTension(on) {
 }
 onUpdate((dt) => {
   grade.uniforms.mood.value = damp(grade.uniforms.mood.value, tensionOn ? 1 : 0, 1.5, dt);
-  for (const l of interior.children) { l.userData.base ??= l.intensity; l.intensity = damp(l.intensity, l.userData.base * (tensionOn ? 0.55 : 1), 1.5, dt); }
+  setInteriorDim(tensionOn ? 0.55 : 1);
 });
 
 async function result(ending, plan) {
@@ -699,6 +708,8 @@ async function result(ending, plan) {
 }
 
 // ================================================================= entry
+/** dialogue data for line()/ask() (the quick version calls this instead of run()) */
+export function initLines(lines, speakers) { LINES = lines; SPK = speakers; }
 export async function run(lines, speakers, resumeScene = null) {
   window.__S = S; window.__C = C; window.__player = player; window.__teleport = teleport;
   initDeskHands(player.ch);

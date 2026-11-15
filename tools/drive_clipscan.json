@@ -1,0 +1,2 @@
+[["waitfor", ".mode", 240000], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"], ["waitfor", "#hud:not(.hidden)", 90000], ["wait", 1],
+ ["eval", "fetch('/tools/clip_scan.js').then(r => r.text()).then(t => (0, eval)(t))"]]

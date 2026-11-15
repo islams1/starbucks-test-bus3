@@ -6,3 +6,6 @@ _src/
 *.log
 *.part
 node_modules/
+
+# stand-alone quick-version build (tools/build_mini.py)
+_build/

@@ -1,7 +1,7 @@
 // Regional HQ — ground floor interior + exterior shell.  +x = east, +z = south (front/entrance), y up.
 import * as THREE from 'three';
 import {scene} from '../core/engine.js';
-import {model} from '../core/assets.js';
+import {model, modelPart} from '../core/assets.js';
 import {M, canvasTex, addWind, pbr} from './materials.js';
 import * as P from './props.js';
 
@@ -21,6 +21,9 @@ export const colliders = [];   // {x0,x1,z0,z1}
 export const col = (x0, x1, z0, z1) => colliders.push({x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1)});
 export const occluders = [];   // meshes that block hotspot line-of-sight
 export const anchors = {};     // named positions used by the story
+// one potted plant (the model file holds five variants side by side: take one; b and c are the pot-sized ones)
+let plantN = 0;
+const plant = () => modelPart('calathea_orbifolia_01', 'calathea_orbifolia_01_' + 'bc'[plantN++ % 2]);
 export const screens = {};
 
 const root = new THREE.Group(); root.name = 'building';
@@ -172,7 +175,13 @@ async function lobby() {
   const g = P.group(root, 0, 0, 5.0);
   const front = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 1.05, 48, 1, true, -0.62, 1.24), M.walnut);
   front.position.set(0, 0.525, -2.0); front.castShadow = front.receiveShadow = true; front.material.side = THREE.DoubleSide; g.add(front);
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(2.72, 2.72, 0.04, 48, 1, false, -0.64, 1.28), M.whiteTop); top.position.set(0, 1.07, -2.0); top.castShadow = true; g.add(top);
+  // counter top: a ring sector over the curved front (a closed cylinder slice was a pie wedge whose tip reached the
+  // receptionist's spot, so they stood inside the desk)
+  const ts = new THREE.Shape(), A0 = -0.64, A1 = 0.64, RO = 2.72, RI = 1.95;
+  for (let k = 0; k <= 32; k++) { const a = A0 + (A1 - A0) * k / 32; ts[k ? 'lineTo' : 'moveTo'](RO * Math.sin(a), RO * Math.cos(a)); }
+  for (let k = 32; k >= 0; k--) { const a = A0 + (A1 - A0) * k / 32; ts.lineTo(RI * Math.sin(a), RI * Math.cos(a)); }
+  const tg = new THREE.ExtrudeGeometry(ts, {depth: 0.04, bevelEnabled: false}); tg.rotateX(Math.PI / 2);
+  const top = new THREE.Mesh(tg, M.whiteTop); top.position.set(0, 1.09, -2.0); top.castShadow = true; g.add(top);
   P.box(g, 2.8, 0.75, 0.6, M.whiteTop, 0, 0, -0.45);
   P.monitor(g, 0.5, 0.75, -0.5, Math.PI, P.spreadsheetTex(3));
   col(-1.6, 1.6, 4.2, 5.7);
@@ -193,7 +202,7 @@ async function lobby() {
   const chairs = [[3.2, 7.4, -Math.PI / 2], [3.2, 8.8, -Math.PI / 2], [1.6, 8.1, Math.PI / 2]];
   for (const [x, z, r] of chairs) { const c = await model('modern_arm_chair_01'); c.position.set(x, 0, z); c.rotation.y = r; root.add(c); }
   col(1.2, 3.8, 7.0, 9.4);
-  for (const [x, z] of [[4.4, 0.0], [-4.4, 0.0]]) { P.planter(root, x, z, 0.55, 0.3); const p = await model('calathea_orbifolia_01'); p.position.set(x, 0.53, z); p.scale.setScalar(2.4); root.add(p); col(x - 0.3, x + 0.3, z - 0.3, z + 0.3); }
+  for (const [x, z] of [[4.4, 0.0], [-4.4, 0.0]]) { P.planter(root, x, z, 0.55, 0.3); const p = await plant(); p.position.set(x, 0.53, z); p.scale.setScalar(2.4); root.add(p); col(x - 0.3, x + 0.3, z - 0.3, z + 0.3); }
   anchors.lobbyOmar = {x: -3.0, z: 6.6};
   anchors.lobbyEnter = {x: 0, z: 9.0};
 }
@@ -226,7 +235,7 @@ async function openOffice() {
   P.box(root, 0.04, 1.3, 2.5, M.oak, -17.86, 0.9, -2.6);
   // storage + plants along north wall
   for (let x = -17; x < -6; x += 2.2) { P.box(root, 2.0, 1.1, 0.45, M.whiteTop, x + 1.0, 0, -13.6); col(x, x + 2, -13.9, -13.3); }
-  for (const [x, z] of [[-17.3, 9.2], [-6, 9.3], [-17.3, -13.2], [-6.1, -13.4]]) { P.planter(root, x, z, 0.5, 0.28); const p = await model('calathea_orbifolia_01'); p.position.set(x, 0.48, z); p.scale.setScalar(2.2); root.add(p); col(x - 0.3, x + 0.3, z - 0.3, z + 0.3); }
+  for (const [x, z] of [[-17.3, 9.2], [-6, 9.3], [-17.3, -13.2], [-6.1, -13.4]]) { P.planter(root, x, z, 0.5, 0.28); const p = await plant(); p.position.set(x, 0.48, z); p.scale.setScalar(2.2); root.add(p); col(x - 0.3, x + 0.3, z - 0.3, z + 0.3); }
   anchors.ryanPhone = {x: -16.9, z: 1.2, ry: -Math.PI / 2};
   anchors.graceStand = {x: -7.2, z: 3.6, ry: -Math.PI / 2};
   // values card copy (as in many offices) on open office west wall? keep the real one in meeting room
@@ -300,7 +309,7 @@ async function meetingRoom() {
   P.envelope(root, 1.55, 0.745, tz + 0.25, 0.4);
   anchors.redCups = {x: 0.6, y: 0.95, z: tz};
   // plants
-  for (const [x, z] of [[4.4, -13.4], [-4.4, -5.7]]) { const p = await model('calathea_orbifolia_01'); p.position.set(x, 0, z); p.scale.setScalar(2.2); root.add(p); }
+  for (const [x, z] of [[4.4, -13.4], [-4.4, -5.7]]) { const p = await plant(); p.position.set(x, 0, z); p.scale.setScalar(2.2); root.add(p); col(x - 0.35, x + 0.35, z - 0.35, z + 0.35); }
 }
 
 async function breakRoom() {
@@ -321,7 +330,7 @@ async function breakRoom() {
     for (let i = 0; i < 3; i++) { const a = i * 2.1; P.taskChair(root, x + Math.sin(a) * 0.85, z + Math.cos(a) * 0.85, a + Math.PI, M.fabricSand); }
     col(x - 1.15, x + 1.15, z - 1.15, z + 1.15);    // table + chairs around it
   }
-  P.planter(root, 17.2, -5.8, 0.5, 0.28); const sofaPl = await model('calathea_orbifolia_01'); sofaPl.position.set(17.2, 0.48, -5.8); sofaPl.scale.setScalar(2.2); root.add(sofaPl);
+  P.planter(root, 17.2, -5.8, 0.5, 0.28); const sofaPl = await plant(); sofaPl.position.set(17.2, 0.48, -5.8); sofaPl.scale.setScalar(2.2); root.add(sofaPl); col(16.85, 17.55, -6.15, -5.45);
   anchors.breakNpc = {x: 11.5, z: -12.6, ry: Math.PI};
 }
 
@@ -334,7 +343,7 @@ async function secretary() {
   col(7.0, 9.0, 1.15, 2.6);
   anchors.secretarySeat = {x: 8.2, z: 2.2, ry: Math.PI};
   for (const z of [6.5, 7.6, 8.7]) { const c = await model('modern_arm_chair_01'); c.position.set(10.3, 0, z); c.rotation.y = -Math.PI / 2; root.add(c); col(9.8, 10.8, z - 0.45, z + 0.45); }
-  P.planter(root, 5.6, 9.3, 0.5, 0.28); const pl = await model('calathea_orbifolia_01'); pl.position.set(5.6, 0.48, 9.3); pl.scale.setScalar(2.2); root.add(pl);
+  P.planter(root, 5.6, 9.3, 0.5, 0.28); const pl = await plant(); pl.position.set(5.6, 0.48, 9.3); pl.scale.setScalar(2.2); root.add(pl); col(5.25, 5.95, 8.95, 9.65);
   const cab = await model('drawer_cabinet'); cab.position.set(5.5, 0, 3.5); cab.rotation.y = Math.PI / 2; root.add(cab); col(5.1, 5.9, 3.0, 4.0);
 }
 
@@ -389,27 +398,29 @@ async function office() {
   // framed photo prints (city skyline, coffee farm) on the office south-west wall
   const art = (t, x, z, ry, w, h) => { const g = P.group(root, x, 1.45, z, ry); P.box(g, w + 0.06, h + 0.06, 0.03, M.trim, 0, 0, 0); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({map: t, roughness: 0.5})); m.position.set(0, (h + 0.06) / 2, 0.017); g.add(m); };
   art(canvasTex(600, 400, (g, W, H) => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#9fb8c9'); gr.addColorStop(0.6, '#e8d2b0'); gr.addColorStop(1, '#5a4636'); g.fillStyle = gr; g.fillRect(0, 0, W, H); g.fillStyle = '#2f3b33'; for (let i = 0; i < 12; i++) { g.beginPath(); g.ellipse(50 * i, H * 0.75, 60, 40, 0, 0, 7); g.fill(); } g.fillStyle = '#b3171d'; for (let i = 0; i < 40; i++) { g.beginPath(); g.arc(Math.random() * W, H * 0.68 + Math.random() * 60, 4, 0, 7); g.fill(); } }), 11.1, 3.7, Math.PI / 2, 1.1, 0.75);
-  P.planter(root, 17.4, 9.4, 0.55, 0.3); const pl = await model('calathea_orbifolia_01'); pl.position.set(17.4, 0.53, 9.4); pl.scale.setScalar(2.4); root.add(pl);
+  P.planter(root, 17.4, 9.4, 0.55, 0.3); const pl = await plant(); pl.position.set(17.4, 0.53, 9.4); pl.scale.setScalar(2.4); root.add(pl); col(17.05, 17.75, 9.05, 9.75);
   for (const z of [7.6, 9.0]) { const c = await model('modern_arm_chair_01'); c.position.set(12.0, 0, z); c.rotation.y = Math.PI / 2; root.add(c); col(11.5, 12.5, z - 0.45, z + 0.45); }
   const clock = await model('wall_clock'); clock.position.set(11.1, 2.3, 5.5); clock.rotation.y = Math.PI / 2; root.add(clock);
   P.box(root, 0.02, 1.0, 1.6, M.whiteTop, 11.1, 1.0, 7.5);   // whiteboard
 }
 
 import {mergeStatic} from './merge.js';
+import {addLightSpec} from './lighting.js';
 async function decor() {
   // red neon glow strip on the lobby brick wall (as in the demo cafe) + its light
   const neon = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.05, 0.05), new THREE.MeshStandardMaterial({color: 0x330000, emissive: 0xff2414, emissiveIntensity: 4}));
   neon.position.set(0, 2.72, -0.86); neon.userData.noMerge = true; root.add(neon);
-  const red = new THREE.PointLight(0xff3020, 2.2, 4.5, 1.8); red.position.set(0, 2.55, -0.55); root.add(red);
+  addLightSpec({x: 0, y: 2.55, z: -0.55, i: 2.2, d: 4.5, c: 0xff3020});   // red neon glow (through the nearest-lights pool)
   // green exit signs
   const exitTex = canvasTex(256, 96, (g, W, H) => { g.fillStyle = '#0d3b1c'; g.fillRect(0, 0, W, H); g.fillStyle = '#c8ffd8'; g.font = '700 46px "IBM Plex Sans Arabic"'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('\u0645\u062e\u0631\u062c', W / 2, H / 2 + 2); });
   const exitMat = new THREE.MeshStandardMaterial({map: exitTex, emissive: 0x40ff80, emissiveMap: exitTex, emissiveIntensity: 2.2});
   for (const [x, y, z, ry] of [[0, 2.85, B.z1 - 0.12, Math.PI], [2.0, 2.55, -5.08, Math.PI], [-17.85, 2.6, -8, Math.PI / 2]]) {
     const e = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.04), exitMat); e.position.set(x, y, z); e.rotation.y = ry; e.userData.noMerge = true; root.add(e);
-    const gl = new THREE.PointLight(0x30ff70, 0.5, 2.2, 2); gl.position.set(x + (ry === Math.PI / 2 ? 0.25 : 0), y - 0.1, z + (ry === Math.PI ? -0.2 : 0)); root.add(gl);
+    // (no point light: each extra light costs on every pixel of the scene; the emissive sign + bloom carry the glow)
   }
   // framed pictures on the warm walls + extinguishers + cabinet (Poly Haven, from the demo set)
-  const put = async (name, x, y, z, ry, s = 1) => { const o = await model(name); o.position.set(x, y, z); o.rotation.y = ry; o.scale.setScalar(s); root.add(o); return o; };
+  const LOD = {hanging_picture_frame_03: 'hanging_picture_frame_03_lod'};
+  const put = async (name, x, y, z, ry, s = 1) => { const o = await model(name, LOD[name] || name); o.position.set(x, y, z); o.rotation.y = ry; o.scale.setScalar(s); root.add(o); return o; };
   await Promise.all([
     put('hanging_picture_frame_01', -4.9, 1.45, 2.0, Math.PI / 2),
     put('hanging_picture_frame_02', 4.9, 1.5, 3.2, -Math.PI / 2),
@@ -422,7 +433,7 @@ async function decor() {
     put('modern_wooden_cabinet', 12.0, 0, 4.3, Math.PI / 2),
     put('coffee_table_round_01', 2.4, 0, 8.1, 0),
   ]);
-  col(11.6, 12.4, 3.5, 5.1);
+  col(11.6, 12.4, 3.1, 5.5);                                // modern_wooden_cabinet (full length)
   col(4.2, 4.6, -5.6, -5.2); col(-17.8, -17.4, 8.8, 9.2);   // extinguishers
 }
 export async function buildBuilding() {
@@ -431,6 +442,18 @@ export async function buildBuilding() {
   await Promise.all([lobby(), openOffice(), meetingRoom(), breakRoom(), secretary(), office(), decor()]);
   root.traverse(o => { if (o.isMesh && o.material && o.material.transparent) o.castShadow = false; });
   root.updateMatrixWorld(true);
+  // Sun shadows only matter where sunlight gets in: the morning sun (31° high, south-east) reaches ~4 m inside the
+  // south and east glass. Furniture deeper inside sits under the roof's shadow anyway, so it stops casting sun
+  // shadows (the shadow pass no longer redraws ~half the interior). Walls, ceilings and tall pieces keep casting.
+  const _b = new THREE.Box3();
+  root.traverse(o => {
+    if (!o.isMesh || !o.castShadow || o.isSkinnedMesh) return;
+    _b.setFromObject(o);
+    const inside = _b.min.x > -18 && _b.max.x < 18 && _b.min.z > -14 && _b.max.z < 10;
+    const small = _b.max.y < 2.7 && Math.max(_b.max.x - _b.min.x, _b.max.z - _b.min.z) < 4;
+    const sunlit = _b.max.z > 5.2 || _b.max.x > 13.2;
+    if (inside && small && !sunlit) o.castShadow = false;
+  });
   const a = mergeStatic(root, {exclude: [roofGroup]}), b = mergeStatic(roofGroup);
   console.info('building merge', a, b);
   return root;

@@ -1,0 +1,6 @@
+[["waitfor", ".mode", 240000], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"], ["waitfor", "#hud:not(.hidden)", 90000], ["wait", 1],
+ ["eval", "__hs.get('sit').use(), 1"],
+ ["waitfor", "#hotspots .hs:has-text('ورقة الميزانية')", 60000], ["wait", 1],
+ ["eval", "(()=>{ const ch = __C.player, R = ch.mesh.skeleton.getBoneByName('Bip01_R_Hand'); window.__hl = []; const t0 = performance.now(); const id = setInterval(() => { const r = R.getWorldPosition(new __THREE.Vector3()); __hl.push(((performance.now()-t0)/1000).toFixed(1) + ' R ' + r.toArray().map(v=>v.toFixed(2)).join(',')); if (__hl.length > 14) clearInterval(id); }, 100); return 1 })()"],
+ ["click", "#hotspots .hs:has-text('ورقة الميزانية')"], ["wait", 0.3], ["shot", "h1.png"], ["wait", 0.3], ["shot", "h2.png"], ["wait", 0.3], ["shot", "h3.png"], ["wait", 0.6],
+ ["eval", "__hl.join(' | ')"]]

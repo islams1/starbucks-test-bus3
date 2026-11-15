@@ -1,67 +1,75 @@
-# اختبار ستاربكس — SYRA-EDU-BUS-03
+# Starbucks Test — SYRA-EDU-BUS-03
 
-لعبة تعليمية ثلاثية الأبعاد (ويب) لطلاب MBA/MPA مبنية على `Situation5_Starbucks_MarketingStrategy_AR.docx`.
+A 3D educational web game for MBA/MPA students, based on `Situation5_Starbucks_MarketingStrategy_AR.docx`.
 
-## التشغيل محليًا
+## Run locally
+From the project folder:
 ```
-cd game
-python tools/devserver.py 8777      # أو أي خادم ملفات ثابتة
+python tools/devserver.py 8777      # or any static file server
 ```
-ثم افتح `http://127.0.0.1:8777/` (Chrome / Edge، يُفضّل كارت شاشة منفصل وسماعات).
+Then open `http://127.0.0.1:8777/` (Chrome / Edge; a dedicated graphics card and headphones are recommended).
 
-روابط الاختبار السريع (للمطوّر فقط):
-- `?dev=lobby` · `?dev=office` · `?dev=meeting` — القفز لمشهد.
-- `?dev=meeting&preset=good` — الاجتماع بحالة لاعب أنجز المكتب بشكل سليم (مسار E1).
+Quick test links (developer only):
+- `?dev=lobby` · `?dev=office` · `?dev=meeting` — jump to a scene.
+- `?dev=meeting&preset=good` — the meeting, with the state of a player who did the office work correctly (E1 path).
 
-## النشر (Vercel)
-المجلد `game/` موقع ثابت بالكامل. `.vercelignore` يستبعد `_src/` (ملفات المصدر الخام ~1GB) و`tools/`.
-حجم الأصول المنشورة ≈ 130MB.
+## Graphics on any device
+- The game picks a profile from the graphics card: dedicated GPU → high; laptop integrated graphics and recent phones → medium; older phones → low; no GPU → the lightest mode.
+- Dynamic resolution keeps the frame rate by rendering slightly fewer pixels (sharpened) before any effect is switched off.
+- Only the nearest interior lamps are real lights (a fixed pool); far trees are flat cut-outs; ambient occlusion runs at half resolution.
+- Players can fine-tune everything in **⚙ تخصيص** (main menu or pause): resolution, target FPS, lamps, shadows, AO, anti-aliasing, bloom. Saved per browser.
+- Phones/tablets get touch controls (stick, drag to look, run / E / map / tasks / pause).
+- Force a level for testing: `?q=high|medium|low|cpu`. Phone test in headless Edge: `MOBILE=1 python -I tools/drive.py <out> phone "?mini=1"`.
 
-## البنية
-| المسار | المحتوى |
+## Deploy (Vercel)
+The project folder is a fully static site. `.vercelignore` excludes `_src/` (raw source files, ~1 GB) and `tools/`.
+Deployed assets ≈ 130 MB.
+
+## Structure
+| Path | Contents |
 |---|---|
-| `data/lines.ar.json` | كل الحوار العربي (`src: doc` حرفي من الملف، `src: adapted` يحتاج مراجعة لغوية) + صوت كل شخصية |
-| `assets/vo/ar/` | التسجيلات الصوتية (Microsoft neural TTS) + توقيت كل كلمة للشفاه والترجمة |
-| `js/story/flow.js` | تسلسل المشاهد S1→S8 |
-| `js/story/state.js` | متغيرات الحالة والأدلة M1–M10 ومنطق النهايات E1–E4 |
-| `js/story/endings.js` | الخطط الأربع، التوتر، بطاقة يناير ومؤشر السوق، المراجعة الختامية |
-| `js/ui/docs.js` | الوثائق والمهام المالية |
-| `js/actors/character.js` | الشخصيات: أنيميشن mocap، visemes، رمش، نظر |
-| `js/world/*` | المبنى، المدينة، الإضاءة، مشهد مكالمة الفيديو |
-| `tools/` | تنزيل الأصول، خبز الأنيميشن، توليد الصوت، اختبارات آلية (Playwright) |
+| `data/lines.ar.json` | All the Arabic dialogue (`src: doc` = word for word from the document, `src: adapted` = needs a language review) + each character's voice |
+| `assets/vo/ar/` | Voice recordings (Microsoft neural TTS) + the timing of each word for the lips and subtitles |
+| `js/story/flow.js` | The scene sequence S1→S8 |
+| `js/story/state.js` | State variables, evidence M1–M10 and the ending logic E1–E4 |
+| `js/story/endings.js` | The four plans, the tension, the January card and market index, the final review |
+| `js/ui/docs.js` | Documents and finance tasks |
+| `js/actors/character.js` | Characters: mocap animation, visemes, blinking, gaze |
+| `js/world/*` | The building, the city, the lighting, the video-call scene |
+| `tools/` | Asset download, animation baking, voice generation, automated tests (Playwright) |
 
-## إعادة توليد الأصوات بعد تعديل النص
+## Regenerate the voices after editing the text
 ```
 pip install edge-tts
-python -I tools/gen_voice.py ar        # يولّد فقط السطور التي تغيّر نصها
+python -I tools/gen_voice.py ar        # only regenerates lines whose text changed
 ```
 
-## ماذا استخدمنا في كل جزء
+## What we used for each part
 
-| الجزء | الأداة / المصدر | الترخيص | ملاحظات |
+| Part | Tool / source | Licence | Notes |
 |---|---|---|---|
-| المحرك ثلاثي الأبعاد | [three.js](https://threejs.org) r160 (WebGL2) | MIT | بدون build؛ ES modules + importmap |
-| المبنى والمكاتب والقاعات | مبني بالكود (`js/world/building.js`) | — | جدران/أسقف/عروق/زجاج بالكود، وخامات PBR حقيقية |
-| الخامات (طوب، خشب، رخام، أسفلت، بلاط) | [Poly Haven](https://polyhaven.com) + خامة الطوب والخشب من ديمو `demo/` | CC0 | brick_wall_005، wood_floor_deck، walnut_veneer، concrete_pavers… |
-| الأثاث والإكسسوارات | Poly Haven (مكتب، كراسي لوبي، لمبات صناعية، براويز، طفاية، نباتات، كيك…) + كراسي الاجتماعات والترابيزات بالكود | CC0 | |
-| الأشجار والشجيرات | Poly Haven (island_tree_02، shrub_02) — مخففة بسكربت `tools/thin_tree.py` | CC0 | حركة الهواء بشيدر (vertex shader) |
-| السماء والإضاءة | HDRI من Poly Haven (kloofendal_38d_partly_cloudy_puresky) + شمس بزاوية صباح نوفمبر | CC0 | تكيّف العين داخل/خارج، GTAO، Bloom، Color grading |
-| المدينة والطريق والعربيات والمحلات | بالكود (`js/world/city.js`، `traffic.js`) | — | عربيات إجرائية بطلاء clear-coat، إشارات مرور، مشاة |
-| ورق الشجر المتطاير | بالكود (`js/world/leaves.js`) — InstancedMesh | — | |
-| الشخصيات (14 + 4 للشارع) | [Microsoft Rocketbox](https://github.com/microsoft/Microsoft-Rocketbox) — النسخ facial | MIT | 175 blendshape (15 viseme + ARKit) — نستخدم 31 |
-| الحركة (المشي، الجري، الجلوس، الكلام، المشاعر، التليفون، القهوة، العرض…) | مكتبة Rocketbox Animations (Motion Capture) | MIT | 99 حركة مخبوزة إلى ملف ثنائي مضغوط (`tools/bake_anims.html`) |
-| الأيدي على المكتب | IK بالكود (`js/actors/deskhands.js`) | — | الكتف والكوع يتحسبوا عشان الإيد توصل للحاجة |
-| تعبيرات الوش والرمش والنظر والنَفَس | بالكود (`js/actors/character.js`) | — | مشاعر لكل جملة + حركة راس/حواجب من الصوت |
-| الكلام (الأصوات) | [edge-tts](https://github.com/rany2/edge-tts) — أصوات Microsoft العربية العصبية | أداة MIT؛ الخدمة غير رسمية | للعرض الداخلي؛ للنشر الرسمي يُفضّل Azure Speech أو ممثلين |
-| مزامنة الشفايف | توقيت الكلمات من edge-tts + تحويل الحروف العربية لـ visemes + قوة الصوت | — | |
-| الأصوات المحيطة والمؤثرات | Web Audio بالكود (نويز مفلتر: مدينة، تكييف، كيبورد، خطوات، مكينة قهوة، نفس، كلاكس) | — | |
-| مسارات الشخصيات | A* على شبكة 25 سم (`js/world/nav.js`) | — | يلفوا حوالين الأثاث ويعدّوا من الأبواب |
-| الخطوط | IBM Plex Sans Arabic، Noto Naskh Arabic، Inter (Google Fonts) | OFL | |
-| الاختبار الآلي | Playwright + Microsoft Edge (`tools/drive.py`) | Apache-2.0 | |
-| الاستضافة | Vercel | — | https://third-place-bus3.vercel.app |
+| 3D engine | [three.js](https://threejs.org) r160 (WebGL2) | MIT | No build step; ES modules + importmap |
+| Building, offices and halls | Built in code (`js/world/building.js`) | — | Walls, ceilings, beams and glass in code, with real PBR materials |
+| Materials (brick, wood, marble, asphalt, tiles) | [Poly Haven](https://polyhaven.com) + the brick and wood materials from the `demo/` demo | CC0 | brick_wall_005, wood_floor_deck, walnut_veneer, concrete_pavers… |
+| Furniture and props | Poly Haven (desk, lobby chairs, industrial lamps, picture frames, fire extinguisher, plants, cake…) + meeting chairs and tables in code | CC0 | |
+| Trees and shrubs | Poly Haven (island_tree_02, shrub_02), thinned with `tools/thin_tree.py` | CC0 | Wind motion in a vertex shader |
+| Sky and lighting | Poly Haven HDRI (kloofendal_38d_partly_cloudy_puresky) + a sun at a November-morning angle | CC0 | Eye adaptation indoors/outdoors, GTAO, Bloom, colour grading |
+| City, road, cars and shops | In code (`js/world/city.js`, `traffic.js`) | — | Procedural cars with clear-coat paint, traffic lights, pedestrians |
+| Blowing leaves | In code (`js/world/leaves.js`), InstancedMesh | — | |
+| Characters (14 + 4 on the street) | [Microsoft Rocketbox](https://github.com/microsoft/Microsoft-Rocketbox), facial versions | MIT | 175 blendshapes (15 visemes + ARKit); we use 31 |
+| Motion (walking, running, sitting, talking, emotions, phone, coffee, presenting…) | Rocketbox Animations library (motion capture) | MIT | 99 clips baked into a compressed binary file (`tools/bake_anims.html`) |
+| Hands on the desk | IK in code (`js/actors/deskhands.js`) | — | The shoulder and elbow are calculated so the hand reaches the object |
+| Facial expressions, blinking, gaze and breathing | In code (`js/actors/character.js`) | — | An emotion for each line + head/eyebrow movement driven by the voice |
+| Speech (voices) | [edge-tts](https://github.com/rany2/edge-tts), Microsoft neural Arabic voices | Tool: MIT; the service is unofficial | For internal demos; for an official release, Azure Speech or voice actors are recommended |
+| Lip-sync | Word timings from edge-tts + Arabic letters mapped to visemes + voice loudness | — | |
+| Ambient sound and effects | Web Audio in code (filtered noise: city, air conditioning, keyboard, footsteps, coffee machine, breathing, car horns) | — | |
+| Character paths | A* on a 25 cm grid (`js/world/nav.js`) | — | They walk around furniture and go through doors |
+| Fonts | IBM Plex Sans Arabic, Noto Naskh Arabic, Inter (Google Fonts) | OFL | |
+| Automated testing | Playwright + Microsoft Edge (`tools/drive.py`) | Apache-2.0 | |
+| Hosting | Vercel | — | https://third-place-bus3.vercel.app |
 
-## المصادر والتراخيص
-- الشخصيات والأنيميشن: Microsoft Rocketbox (MIT) — https://github.com/microsoft/Microsoft-Rocketbox
-- الأثاث والأشجار والخامات والسماء: Poly Haven (CC0)
-- مكتبة 3D: three.js r160 (MIT)
-- الشعار في اللعبة رمز فنجان عام؛ لا يُستخدم شعار العلامة الحقيقي. مؤشر السوق "محاكاة تعليمية" ببيانات خيالية.
+## Sources and licences
+- Characters and animation: Microsoft Rocketbox (MIT) — https://github.com/microsoft/Microsoft-Rocketbox
+- Furniture, trees, materials and sky: Poly Haven (CC0)
+- 3D library: three.js r160 (MIT)
+- The logo in the game is a generic cup symbol; the real brand logo is not used. The market index is an "educational simulation" with fictional data.

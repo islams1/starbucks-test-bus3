@@ -36,9 +36,9 @@
       <button class="mode" data-mode="practice"><b>وضع التدريب</b><span>تلميحات على شكل أسئلة، وزر «أعد من هنا»، بلا درجات</span></button>
       <button class="mode" data-mode="assess"><b>وضع التقييم</b><span>بلا تلميحات، ويُسجَّل المسار للمحاضر</span></button>
     </div>
-    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>لاب توب عادي / كارت مدمج</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div>
     <div class="gpuinfo" id="gpuinfo"></div>
-    <div class="menu-foot">مدة اللعب 25–30 دقيقة · يُفضَّل استخدام سماعات · <a href="?lang=en" id="langlink">English</a></div>
+    <div class="menu-foot" id="menufoot">مدة اللعب 25–30 دقيقة · يُفضَّل استخدام سماعات · <a href="?lang=en" id="langlink">English</a></div>
   </div>
 </div>
 
@@ -94,7 +94,7 @@
 </div>
 
 <!-- map -->
-<div id="map" class="hidden"><div class="map-head"><b>خريطة المقر الإقليمي</b><span>الطابق الأرضي</span><kbd>M</kbd></div><canvas id="mapc"></canvas><div class="map-legend"><span><i class="lg you"></i>أنت</span><span><i class="lg obj"></i>الهدف</span><span><i class="lg npc"></i>شخص يمكن محادثته</span><span><i class="lg item"></i>عنصر للفحص</span></div></div>
+<div id="map" class="hidden"><div class="map-head"><b>خريطة المقر الإقليمي</b><span>الطابق الأرضي</span><kbd>M</kbd></div><canvas id="mapc"></canvas><div class="map-legend"><span><i class="lg you"></i>أنت</span><span><i class="lg obj"></i>الهدف</span><span><i class="lg route"></i>طريقك إلى الهدف</span><span><i class="lg npc"></i>شخص يمكن محادثته</span><span><i class="lg item"></i>عنصر للفحص</span></div></div>
 
 <!-- video call frame -->
 <div id="vcall" class="hidden"><div class="vc-top"><span class="vc-dot"></span><b>هنا — مشرفة وردية</b><span>فرع وسط المدينة · مكالمة فيديو</span><span id="vctime">00:00</span></div><div id="vcview"></div><div class="vc-bar"><span>🎙</span><span>📷</span><span class="end">إنهاء</span></div></div>
@@ -106,7 +106,7 @@
 <div id="debrief" class="hidden"></div>
 <div id="fade"></div>
 <div id="letterbox"><i></i><i></i></div>
-<div id="pause" class="screen hidden"><div class="menu-card small"><h2>إيقاف مؤقت</h2><button class="primary" id="resume">متابعة</button><button id="restartnode" class="ghost">أعد من بداية هذا المشهد</button><button id="tohowto" class="ghost">التعليمات</button><div class="qsel small"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>لاب توب عادي / كارت مدمج</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div></div></div>
+<div id="pause" class="screen hidden"><div class="menu-card small"><h2>إيقاف مؤقت</h2><button class="primary" id="resume">متابعة</button><button id="restartnode" class="ghost">أعد من بداية هذا المشهد</button><button id="tohowto" class="ghost">التعليمات</button><div class="qsel small"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div></div></div>
 <button id="standbtn" class="hidden">قم من المكتب <kbd>Space</kbd></button>
 <div id="clicktolock" class="hidden">انقر للتحكم بالكاميرا</div>
 
