@@ -1,0 +1,67 @@
+<!doctype html><html><body><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
+const list = await (await fetch('anim_list.json')).json();
+const L = new FBXLoader();
+
+const FPS=30, EPS_Q=0.0015, EPS_P=0.15;
+function reduce(times, vals, n, eps){ // greedy keyframe reduction on uniformly resampled data
+  const keep=[0]; let a=0;
+  for(let i=2;i<times.length;i++){
+    let ok=true;
+    for(let j=a+1;j<i && ok;j++){ const u=(times[j]-times[a])/(times[i]-times[a]);
+      for(let k=0;k<n;k++){ const v=vals[a*n+k]+(vals[i*n+k]-vals[a*n+k])*u; if(Math.abs(v-vals[j*n+k])>eps){ok=false;break;} } }
+    if(!ok){ keep.push(i-1); a=i-1; }
+  }
+  if(times.length>1) keep.push(times.length-1);
+  return keep;
+}
+const clips={'m':[], 'f':[]}; const gait={};
+for (const n of list) {
+  try {
+    const o = await L.loadAsync('../_src/anims/' + n + '.fbx');
+    const c = o.animations[0];
+    if (/_walk_|_run_/.test(n)) {   // measure ground speed from the planted foot (m/s)
+      const mx = new THREE.AnimationMixer(o); const act = mx.clipAction(c); act.play();
+      const L = o.getObjectByName('Bip01_L_Foot'), R = o.getObjectByName('Bip01_R_Foot');
+      const N = 120, dt = c.duration / N; let prev = null, sum = 0, cnt = 0; const a = new THREE.Vector3(), b = new THREE.Vector3();
+      for (let i = 0; i <= N; i++) { mx.setTime(i * dt); o.updateMatrixWorld(true); L.getWorldPosition(a); R.getWorldPosition(b);
+        const low = a.y < b.y ? a.clone() : b.clone(); const which = a.y < b.y ? 'L' : 'R';
+        if (prev && prev.which === which) { const d = Math.hypot(low.x - prev.p.x, low.z - prev.p.z); sum += d; cnt++; }
+        prev = {p: low, which}; }
+      gait[n] = +(sum / Math.max(1, cnt) / dt / 100).toFixed(3);   // cm → m
+    }
+    const tr = c.tracks.filter(t => t.name.endsWith('.quaternion') || /^(Bip01|Bip01_Pelvis)\.position$/.test(t.name));
+    const nf = Math.max(2, Math.round(c.duration*FPS)+1);
+    const tracks=[];
+    for(const t of tr){
+      const n2 = t.name.endsWith('quaternion')?4:3;
+      const interp = t.createInterpolant(); const times=[], vals=[];
+      for(let f=0;f<nf;f++){ const time=Math.min(c.duration,f/FPS); const r=interp.evaluate(time); times.push(f); for(let k=0;k<n2;k++) vals.push(r[k]); }
+      // keep quaternion hemisphere continuous
+      if(n2===4) for(let f=1;f<nf;f++){ let d=0; for(let k=0;k<4;k++) d+=vals[f*4+k]*vals[(f-1)*4+k]; if(d<0) for(let k=0;k<4;k++) vals[f*4+k]*=-1; }
+      const keep=reduce(times, vals, n2, n2===4?EPS_Q:EPS_P);
+      const kt=keep.map(i=>times[i]); const kv=[]; keep.forEach(i=>{ for(let k=0;k<n2;k++) kv.push(vals[i*n2+k]); });
+      // constant track: values all within eps of the first key -> single key
+      tracks.push({name:t.name, n:n2, t:kt, v:kv});
+    }
+    clips[n[0]].push({name:n, dur:c.duration, nf, tracks});
+    console.log('ok', n, c.duration.toFixed(1), tracks.reduce((s,t)=>s+t.t.length,0)+' keys');
+  } catch (e) { console.log('ERR', n, e.message); }
+}
+for (const g of ['m','f']) {
+  // header json + Uint16 times + Int16 values
+  const header={fps:FPS, clips:[], gait}; let nt=0, nv=0;
+  for(const c of clips[g]){ const hc={name:c.name, dur:c.dur, tracks:[]}; for(const t of c.tracks){ hc.tracks.push([t.name,t.n,t.t.length]); nt+=t.t.length; nv+=t.v.length; } header.clips.push(hc); }
+  const T=new Uint16Array(nt), V=new Int16Array(nv); let it=0, iv=0;
+  for(const c of clips[g]) for(const t of c.tracks){ T.set(t.t,it); it+=t.t.length; const s=t.n===4?32767:10; for(const x of t.v) V[iv++]=Math.max(-32768,Math.min(32767,Math.round(x*s))); }
+  const hj=new TextEncoder().encode(JSON.stringify(header)); const pad=(4-(hj.length+4)%4)%4;
+  const buf=new Uint8Array(4+hj.length+pad+T.byteLength+V.byteLength+ (T.byteLength%4?2:0));
+  const dv=new DataView(buf.buffer); dv.setUint32(0,hj.length+pad,true); buf.set(hj,4); buf.fill(32,4+hj.length,4+hj.length+pad);
+  let off=4+hj.length+pad; buf.set(new Uint8Array(T.buffer),off); off+=T.byteLength; if(off%4) off+=2; buf.set(new Uint8Array(V.buffer),off);
+  await fetch('/save/anims_'+g+'.bin',{method:'POST',body:buf});
+  console.log('saved',g,(buf.length/1e6).toFixed(2)+'MB','pos range check', Math.max(...clips[g].flatMap(c=>c.tracks.filter(t=>t.n===3).flatMap(t=>t.v.map(Math.abs)))).toFixed(1));
+}
+document.title = 'DONE';
+</script></body></html>

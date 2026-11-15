@@ -1,0 +1,1 @@
+[["waitfor","#hud",180000],["wait",22],["shot","seat1.png"],["eval","(()=>{const C=window.__C; return JSON.stringify(['ryan','mei','omar','grace'].map(id=>{const c=C[id]; const p=c.bones.pelvis.getWorldPosition(c.holder.position.clone()); return [id, c.curName, +p.y.toFixed(3)]}))})()"]]

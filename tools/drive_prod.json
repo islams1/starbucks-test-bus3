@@ -1,0 +1,1 @@
+[["waitfor","#menu .mode",240000],["wait",2],["shot","p1_menu.png"],["click","[data-mode=practice]"],["click","#startbtn"],["wait",3],["shot","p0_intro.png"],["key","Space"],["wait",4],["shot","p2_plaza.png"],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1)})"]]

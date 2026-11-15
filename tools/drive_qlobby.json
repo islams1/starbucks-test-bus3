@@ -1,0 +1,1 @@
+[["waitfor","#hud",180000],["wait",4],["shot","q_lobby.png"],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1)})"]]

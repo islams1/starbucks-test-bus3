@@ -1,0 +1,1 @@
+[["waitfor","#hud",180000],["wait",1.5],["down","KeyW"],["wait",1.2],["up","KeyW"],["waitfor","#hotspots .hs-label:has-text('ملف الأبحاث')",120000],["wait",3],["shot","q_desk.png"],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1)})"]]

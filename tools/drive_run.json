@@ -1,0 +1,3 @@
+[["waitfor","#hud",180000],["wait",1],["eval","window.__teleport(-20, 30, Math.PI/2); 1"],["wait",1],["down","ShiftLeft"],["down","KeyW"],["wait",1.5],
+["eval","new Promise(res=>{const p=window.__player.ch; const v=new (p.holder.position.constructor)(); const out=[]; let n=0; const iv=setInterval(()=>{p.bones.pelvis.getWorldPosition(v); out.push(Math.hypot(v.x-p.holder.position.x, v.z-p.holder.position.z).toFixed(2)); if(++n>=25){clearInterval(iv); res(JSON.stringify({anim:p.curName, ts:p.cur.timeScale.toFixed(2), maxOffset:Math.max(...out.map(Number)), samples:out.join(' ')}));}},80);})"],
+["shot","run1.png"],["up","KeyW"],["up","ShiftLeft"]]

@@ -1,0 +1,2 @@
+[["waitfor","#hud",180000],["wait",1.5],["down","KeyW"],["wait",1.2],["up","KeyW"],["waitfor","#hotspots .hs-label:has-text('ملف الأبحاث')",120000],["wait",1.2],["shot","t1_desk.png"],["wait",0.9],["shot","t1b_desk.png"],
+["click","#hotspots .hs:has-text('ملف الأبحاث')"],["wait",1],["click","#calcrev"],["click",".q1 .opt[data-v=A]"],["click",".q2 .opt[data-v=C]"],["click","#docclose"],["wait",1.5],["shot","t2_done.png"]]

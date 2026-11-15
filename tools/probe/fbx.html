@@ -1,0 +1,14 @@
+<!doctype html><html><body><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
+const r=new THREE.WebGLRenderer(); console.log('webgl', r.getContext().getParameter(r.getContext().VERSION), r.getContext().getParameter(r.getContext().getExtension('WEBGL_debug_renderer_info')?.UNMASKED_RENDERER_WEBGL||0x1F01));
+const f=new URLSearchParams(location.search).get('f');
+new FBXLoader().load(f, o=>{
+  const out={anims:o.animations.map(a=>a.name+':'+a.duration.toFixed(2)+':'+a.tracks.length)};
+  o.traverse(m=>{ if(m.isMesh){ out[m.name]={skinned:m.isSkinnedMesh, verts:m.geometry.attributes.position.count, morph:m.morphTargetDictionary?Object.keys(m.morphTargetDictionary).length:0, mats:(Array.isArray(m.material)?m.material:[m.material]).map(x=>x.name)}; } });
+  const bones=[]; o.traverse(b=>{ if(b.isBone) bones.push(b.name); }); out.bones=bones.length; out.boneNames=bones.join(',');
+  if(o.animations[0]) out.trackSample=o.animations[0].tracks.slice(0,6).map(t=>t.name);
+  document.title='DONE'; console.log(JSON.stringify(out));
+}, undefined, e=>{document.title='DONE'; console.log('ERR '+e)});
+</script></body></html>

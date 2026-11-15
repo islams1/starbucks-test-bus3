@@ -1,0 +1,1 @@
+[["waitfor","#menu .mode",600000],["eval","document.getElementById('gpuinfo').textContent"],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1)})"]]

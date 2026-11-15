@@ -1,0 +1,1 @@
+[["waitfor","#hud",180000],["wait",1.5],["down","KeyW"],["wait",1.2],["up","KeyW"],["wait",75],["shot","d1.png"],["eval","JSON.stringify([...document.querySelectorAll('.hs')].map(h=>[h.textContent, h.style.display, h.style.left, h.style.top]))"]]

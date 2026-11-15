@@ -1,0 +1,5 @@
+[["waitfor","#hud",180000],["wait",2],
+["eval","window.__teleport(1.5, 8.6, Math.PI-0.15); 1"],["wait",2.5],["shot","c_lobby.png"],
+["eval","window.__teleport(-6.2, 8.0, Math.PI+0.55); 1"],["wait",2.5],["shot","c_open.png"],
+["eval","window.__teleport(3.0, -2.6, Math.PI-0.35); 1"],["wait",2.5],["shot","c_corr.png"],
+["eval","window.__teleport(16.5, 8.8, Math.PI+0.6); 1"],["wait",2.5],["shot","c_office.png"]]

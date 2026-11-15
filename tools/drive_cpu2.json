@@ -1,0 +1,1 @@
+[["waitfor","#hud",600000],["wait",6],["shot","cpu_lobby.png"],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1), q: document.querySelector('[data-q].on')?.dataset.q})"],["down","KeyW"],["wait",4],["up","KeyW"],["wait",3],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1)})"]]

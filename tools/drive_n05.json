@@ -1,0 +1,6 @@
+[["waitfor","#hud",180000],["wait",1.5],["down","KeyW"],["wait",1.2],["up","KeyW"],["waitfor","#hotspots .hs-label:has-text('سيناريو الفيلم')",120000],["wait",1],
+["click","#hotspots .hs:has-text('سيناريو الفيلم')"],["wait",1.2],["shot","s1_script.png"],["click",".n05 [data-k=call]"],["wait",16],["shot","s2_ruth.png"],["wait",4],
+["waitfor","#hotspots .hs-label:has-text('الظرف الرمادي')",60000],["click","#hotspots .hs:has-text('الظرف الرمادي')"],["wait",1],["click","#docclose"],["wait",1.5],
+["click","#standbtn"],["wait",2],["eval","window.__teleport(-7.2, 5.4, Math.PI); 1"],["wait",2],["shot","s3_grace.png"],["key","KeyE"],
+["waitfor","#choices:not(.hidden)",60000],["shot","s4_n06.png"],["key","Digit1"],["wait",14],["shot","s5_after.png"],
+["eval","JSON.stringify({nodes: window.__S.nodes, consent: window.__S.consent, ev: Object.keys(window.__S.ev), mode: window.__player.mode})"]]

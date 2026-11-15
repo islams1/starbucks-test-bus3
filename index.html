@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Cpath d=%22M14 22h30v14a15 15 0 0 1-15 15a15 15 0 0 1-15-15z%22 fill=%22%23d9b26f%22/%3E%3C/svg%3E">
+<title>اختبار ستاربكس — SYRA-EDU-BUS-03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<!-- loading -->
+<div id="loading" class="screen">
+  <div class="load-inner">
+    <div class="brandmark"><svg viewBox="0 0 64 64"><path d="M14 22h30v14a15 15 0 0 1-15 15h0a15 15 0 0 1-15-15z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M44 26h4a6 6 0 0 1 0 12h-5" fill="none" stroke="currentColor" stroke-width="3"/><path d="M22 8c-2 4 2 6 0 10M30 6c-2 4 2 6 0 10M38 8c-2 4 2 6 0 10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="load-title">اختبار ستاربكس</div>
+    <div class="load-sub">موقف تعليمي — استراتيجية التسويق · MBA / MPA</div>
+    <div class="bar"><i id="loadbar"></i></div>
+    <div id="loadtxt" class="load-txt">جارٍ التحميل…</div>
+    <div id="loadhint" class="load-hint">أول تحميل قد يستغرق دقيقة أو أكثر حسب سرعة الإنترنت (≈130MB)</div>
+    <div id="loaderr" class="load-err hidden"></div>
+  </div>
+</div>
+
+<!-- main menu -->
+<div id="menu" class="screen hidden">
+  <div class="menu-card">
+    <div class="tag">SYRA-EDU-BUS-03</div>
+    <h1>اختبار ستاربكس</h1>
+    <p class="lead">أنت مسؤول تسويق في الفريق الإقليمي لسلسلة قهوة. المبيعات ثابتة، والأعياد أهم ربع في السنة، ومعك 120,000 دولار. اليوم ستقرّر حملة الموسم.</p>
+    <div class="modes">
+      <button class="mode" data-mode="practice"><b>وضع التدريب</b><span>تلميحات على شكل أسئلة، وزر «أعد من هنا»، بلا درجات</span></button>
+      <button class="mode" data-mode="assess"><b>وضع التقييم</b><span>بلا تلميحات، ويُسجَّل المسار للمحاضر</span></button>
+    </div>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>لاب توب عادي / كارت مدمج</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div>
+    <div class="gpuinfo" id="gpuinfo"></div>
+    <div class="menu-foot">مدة اللعب 25–30 دقيقة · يُفضَّل استخدام سماعات · <a href="?lang=en" id="langlink">English</a></div>
+  </div>
+</div>
+
+<!-- instructions -->
+<div id="howto" class="screen hidden">
+  <div class="howto-card">
+    <h2>تعليمات اللعب</h2>
+    <div class="keys">
+      <div class="k"><span class="kbd-grid"><kbd class="w">W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><b>الحركة</b></div>
+      <div class="k"><span class="kbd-mouse"></span><b>تحريك الماوس: النظر</b></div>
+      <div class="k"><kbd class="wide">Shift</kbd><b>مشي أسرع</b></div>
+      <div class="k"><kbd>E</kbd><b>تفاعل / فتح</b><small>أو اضغط على الأيقونة</small></div>
+      <div class="k"><kbd>M</kbd><b>الخريطة</b></div>
+      <div class="k"><kbd class="wide">Tab</kbd><b>المهام والأدلة</b></div>
+      <div class="k"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><b>اختيار الرد</b></div>
+      <div class="k"><kbd class="wide">Esc</kbd><b>إيقاف مؤقت</b></div>
+    </div>
+    <div class="howto-hot">
+      <div class="hs demo"><div class="hs-ring"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9 11h7M9 14h7M9 17h5" stroke="#fff" stroke-width="1.4"/></svg></div><div class="hs-label">ملف الأبحاث</div></div>
+      <p>عندما تقترب من شيء يمكن فحصه أو شخص يمكن محادثته تظهر هذه الأيقونة. اضغط <kbd>E</kbd> أو انقر عليها.</p>
+    </div>
+    <div class="task-card">
+      <b>المهمة:</b> اقتراح حملة الأعياد في اجتماع اليوم.
+      <span class="ok">مسموح:</span> قراءة البيانات، الحديث مع الفريق والفروع، التوصية.
+      <span class="no">غير مسموح:</span> النشر العلني، الوعد بخصومات أو جوائز، استخدام صورة عميل أو اسمه أو قصته دون موافقة مكتوبة، التوقيع مع شريك.
+    </div>
+    <button id="startbtn" class="primary">ابدأ</button>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="calendar"><span class="day">الاثنين</span><span class="sep"></span><span class="time">8:45</span><div class="cal-strip" id="calstrip"></div></div>
+  <div id="objective"><div class="obj-label">الهدف</div><div id="objtext"></div></div>
+  <div id="minimap"><canvas id="minimapc" width="220" height="220"></canvas><div class="mm-n">N</div></div>
+  <div id="prompt"></div>
+  <div id="toasts"></div>
+  <div id="crosshair"></div>
+</div>
+<div id="hotspots"></div>
+
+<!-- dialogue -->
+<div id="subs" class="hidden"><div class="who"><b id="subwho"></b><span id="subrole"></span></div><div id="subtext"></div></div>
+<div id="choices" class="hidden"><div id="choiceq"></div><div id="choicelist"></div></div>
+
+<!-- documents -->
+<div id="doc" class="hidden"><div id="docbody"></div><button id="docclose" aria-label="إغلاق">✕</button></div>
+
+<!-- tab panel -->
+<div id="tabpanel" class="hidden">
+  <div class="tp-col"><h3>المهام</h3><ul id="tasklist"></ul></div>
+  <div class="tp-col"><h3>الأدلة <small id="evcount"></small></h3><div id="evlist"></div></div>
+</div>
+
+<!-- map -->
+<div id="map" class="hidden"><div class="map-head"><b>خريطة المقر الإقليمي</b><span>الطابق الأرضي</span><kbd>M</kbd></div><canvas id="mapc"></canvas><div class="map-legend"><span><i class="lg you"></i>أنت</span><span><i class="lg obj"></i>الهدف</span><span><i class="lg npc"></i>شخص يمكن محادثته</span><span><i class="lg item"></i>عنصر للفحص</span></div></div>
+
+<!-- video call frame -->
+<div id="vcall" class="hidden"><div class="vc-top"><span class="vc-dot"></span><b>هنا — مشرفة وردية</b><span>فرع وسط المدينة · مكالمة فيديو</span><span id="vctime">00:00</span></div><div id="vcview"></div><div class="vc-bar"><span>🎙</span><span>📷</span><span class="end">إنهاء</span></div></div>
+
+<!-- plans / results / debrief -->
+<div id="plans" class="hidden"></div>
+<div id="tension" class="hidden"></div>
+<div id="result" class="hidden"></div>
+<div id="debrief" class="hidden"></div>
+<div id="fade"></div>
+<div id="letterbox"><i></i><i></i></div>
+<div id="pause" class="screen hidden"><div class="menu-card small"><h2>إيقاف مؤقت</h2><button class="primary" id="resume">متابعة</button><button id="restartnode" class="ghost">أعد من بداية هذا المشهد</button><button id="tohowto" class="ghost">التعليمات</button><div class="qsel small"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>لاب توب عادي / كارت مدمج</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div></div></div>
+<button id="standbtn" class="hidden">قم من المكتب <kbd>Space</kbd></button>
+<div id="clicktolock" class="hidden">انقر للتحكم بالكاميرا</div>
+
+<script>
+(function(){
+  function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
+    e.innerHTML='<b>تعذّر تشغيل اللعبة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge (أحدث إصدار) مع تفعيل «تسريع الأجهزة / Hardware acceleration»، ثم أعد تحميل الصفحة.</small>'; }
+  window.__showErr=showErr;
+  addEventListener('error',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||ev.error||'error'); });
+  addEventListener('unhandledrejection',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });
+  try { var c=document.createElement('canvas'); if(!c.getContext('webgl2')) showErr('WebGL2 غير مدعوم أو تسريع الرسوميات معطّل في المتصفح.'); } catch(e){ showErr(e.message); }
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[["waitfor","#hud",180000],["wait",14],["shot","b1_ots.png"],
+["waitfor","#choices:not(.hidden)",180000],["key","Digit2"],["wait",3],
+["waitfor","#choices:not(.hidden)",120000],["shot","b2_ins.png"],["key","Digit1"],["wait",3],
+["waitfor","#choices:not(.hidden)",120000],["shot","b3_ops.png"],["key","Digit2"],["wait",3],
+["waitfor","#choices:not(.hidden)",120000],["key","Digit2"],["wait",3],
+["waitfor","#choices:not(.hidden)",120000],["key","Digit2"],["wait",3],
+["waitfor","#plans:not(.hidden)",120000],["click",".plan[data-n='3']"],
+["waitfor","#tension:not(.hidden)",120000],["wait",1],["click","#tension .cont"],["wait",8],
+["waitfor","#result:not(.hidden)",120000],["wait",8],["shot","b4_result.png"],["wait",25],["click","#todeb"],["wait",1.5],["shot","b5_debrief.png"],
+["eval","JSON.stringify({ending: window.__S.ending, brief: window.__S.brief_q, tried: window.__S.plansTried, seg: window.__S.segment})"]]

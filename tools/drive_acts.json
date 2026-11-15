@@ -1,0 +1,7 @@
+[["waitfor","#hud",180000],["wait",1.5],["down","KeyW"],["wait",1.2],["up","KeyW"],["waitfor","#hotspots .hs-label:has-text('سيناريو الفيلم')",120000],["wait",1],
+["click","#hotspots .hs:has-text('سيناريو الفيلم')"],["wait",1.2],["click",".n05 [data-k=call]"],["wait",9],["shot","a1_phone.png"],["wait",14],["shot","a2_back.png"],
+["waitfor","#standbtn:not(.hidden)",60000],["click","#standbtn"],["wait",2],["eval","window.__teleport(10.4, -11.4, Math.PI); 1"],["wait",1.5],
+["waitfor","#hotspots .hs-label:has-text('آلة القهوة')",30000],["click","#hotspots .hs:has-text('آلة القهوة')"],["wait",6],["shot","a3_coffee.png"],["wait",6],
+["eval","window.__teleport(-2.6, -11.0, -Math.PI/2-0.6); 1"],["wait",1.5],["waitfor","#hotspots .hs-label:has-text('لوحة أفكار')",30000],["click","#hotspots .hs:has-text('لوحة أفكار')"],["wait",2.5],
+["click",".sb-pool .sticky[data-k=discount]"],["click",".sb-col[data-c=drop]"],["click",".sticky[data-k=contest]"],["click",".sb-col[data-c=test]"],["click",".sticky[data-k=film]"],["click",".sb-col[data-c=test]"],["click",".sticky[data-k=partner]"],["click",".sb-col[data-c=separate]"],["wait",0.5],["shot","a4_board.png"],["click","#sbsave"],["wait",1],
+["eval","JSON.stringify({consent: window.__S.consent, coffee: window.__S.coffee, board: window.__S.boardSort, mode: window.__player.mode})"]]

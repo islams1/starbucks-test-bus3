@@ -1,0 +1,1 @@
+[["waitfor","#hud",180000],["wait",3],["down","KeyW"],["wait",4],["up","KeyW"],["wait",2],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1), calls: window.__renderer.info.render.calls, mem: window.__renderer.info.memory, prog: window.__renderer.info.programs.length})"]]

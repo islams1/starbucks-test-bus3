@@ -1,0 +1,1 @@
+[["waitfor","#hud",180000],["wait",2],["down","KeyW"],["wait",3.6],["up","KeyW"],["wait",1.5],["shot","k_lobby.png"],["eval","window.__teleport(-6.5, 4.2, -Math.PI/2+0.5); 1"],["wait",2.5],["shot","k_open.png"],["eval","window.__teleport(-1.5, -4.0, Math.PI-0.3); 1"],["wait",2.5],["shot","k_meet.png"]]

@@ -1,0 +1,4 @@
+<!doctype html><html><body><canvas id=c width=640 height=360></canvas><script>
+const gl=document.getElementById('c').getContext('webgl2'); let n=0; const t0=performance.now();
+function f(){ n++; gl.clearColor(Math.random(),0,0,1); gl.clear(gl.COLOR_BUFFER_BIT); if(performance.now()-t0<3000) requestAnimationFrame(f); else { document.title='DONE'; console.log('rafFPS', (n/3).toFixed(1)); } } requestAnimationFrame(f);
+</script></body></html>

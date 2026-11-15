@@ -1,0 +1,2 @@
+[["waitfor","#hud",600000],["wait",6],["eval","JSON.stringify({fps: window.__stats.fps.toFixed(1), updMs: window.__stats.upd.toFixed(1), renderMs: window.__stats.rend.toFixed(1), frameGapMs: window.__stats.gap.toFixed(1)})"],
+["eval","(()=>{const res={}; const off=[]; return 'ok'})()"]]

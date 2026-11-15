@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="css/game.css"></head><body>
+<canvas id="gl"></canvas><div id="loadbar"></div><div id="loadtxt"></div><div id="clicktolock" class="hidden"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {scene, camera, start, Q, onUpdate, renderer, renderOpts} from './js/core/engine.js';
+import {initMaterials} from './js/world/materials.js';
+import {buildBuilding, anchors} from './js/world/building.js';
+import {buildCity} from './js/world/city.js';
+import {buildTraffic} from './js/world/traffic.js';
+import {buildLeaves} from './js/world/leaves.js';
+import {buildLighting, sunFollow} from './js/world/lighting.js';
+import {Character, loadAnimLib} from './js/actors/character.js';
+const t0=performance.now();
+initMaterials();
+await Promise.all([buildLighting(), buildBuilding(), buildCity(), buildTraffic(), loadAnimLib()]);
+console.log('world', ((performance.now()-t0)/1000).toFixed(1)+'s');
+const c = Q.get('cam')?.split(',').map(Number) || [0,1.6,9];
+camera.position.set(c[0],c[1],c[2]);
+const l = Q.get('look')?.split(',').map(Number) || [0,1.5,0];
+camera.lookAt(l[0],l[1],l[2]);
+if (Q.get('fov')) { camera.fov=+Q.get('fov'); camera.updateProjectionMatrix(); }
+sunFollow(new THREE.Vector3(c[0],0,c[2]));
+if (Q.has('in')) { renderer.toneMappingExposure = 1.0; scene.fog.density = 0.0075; scene.fog.color.set(0x9a8064); }
+if (Q.has('char')) {
+  const [av, g, anim] = Q.get('char').split(':');
+  const ch = await Character.create('t', av, {gender:g, talks:true});
+  const p = Q.get('cp')?.split(',').map(Number) || [0,0,6,Math.PI];
+  ch.place(p[0],p[2],p[3],p[1]); ch.setBase(anim||'m_idle_neutral_01');
+  if (Q.has('look')) ch.lookAt('camera');
+  if (Q.get('say')) setTimeout(()=>ch.say('assets/vo/ar/'+Q.get('say')), 500);
+  window.ch=ch;
+}
+buildLeaves(); renderOpts.skip = false; start();
+let n=0; onUpdate(()=>{ if(++n===Number(Q.get('frames')||90)) { console.log('info', renderer.info.render.calls, 'calls', renderer.info.render.triangles,'tris'); document.title='DONE'; } });
+</script></body></html>
