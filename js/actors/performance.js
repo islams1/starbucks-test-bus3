@@ -1,0 +1,70 @@
+// Meaning-driven performance: read each Arabic line word by word (with the voice's word timings) and derive
+// head/body beats that match what is being said — nods on agreement and sentence ends, shakes on negation,
+// head tilt + raised brows on questions, emphasis on numbers, looking at people who are named, pointing at
+// things referred to ("انظر إلى هذا…"), shrugs on uncertainty, a thoughtful glance when weighing options.
+
+const strip = (w) => w.replace(/[ً-ْٰـ]/g, '').replace(/[«»"'،,.؟?!:؛…\-()]/g, '').trim();
+const base = (w) => { const s = strip(w); return s.length > 2 && /^[وف]/.test(s) ? [s, s.slice(1)] : [s]; };
+const set = (str) => new Set(str.split(' '));
+const NEG = set('لا لم لن ليس ليست لست ليسوا ممنوع');   // (دون/بلا mean "without": not a refusal)
+const AFF = set('نعم جيد تمام صحيح حسنا أكيد بالضبط ماشي عادل رائع ممتاز موافق طبعا فعلا شكرا');
+const QW = set('لماذا لمن هل كيف ماذا متى أين كم أي أيهما');
+const NUM = set('ثلاثة ثلاث أربعة أربع خمسة خمس ستة ست سبعة سبع ثمانية ثماني تسعة تسع عشرة عشر عشرين مئة مائة ألف ألفا بالمئة أضعاف نصف ربع خمسين وتسعين وعشرين مليون الثامنة السابعة التاسعة الخامسة العاشرة الأولى الثانية');
+const POINT = set('انظر هذا هذه الجدار الشاشة اللوحة');
+const THINK = set('أفضل دعني ربما أعتقد أظن لعل');
+const NAMES = {'نادية': 'nadia', 'عمر': 'omar', 'رايان': 'ryan', 'مي': 'mei', 'جريس': 'grace'};
+
+/**
+ * @param text   line text
+ * @param words  [[offset_ms, dur_ms, word], ...] from the voice
+ * @param ctx    {speakerId, emotion, seated, pointTarget: Vector3|null}
+ * @returns {events: [{t, type, who?}], loop: 'auto'|'none'|'present'}
+ */
+export function buildPerformance(text, words, ctx) {
+  const toks = text.split(/\s+/).filter(Boolean);
+  const W = words.length, T = toks.length;
+  const at = (i) => { if (!W) return 0.4 + i * 0.35; const k = Math.min(W - 1, Math.round(i * (W - 1) / Math.max(1, T - 1))); return words[k][0] / 1000; };
+  const endAt = (i) => { if (!W) return 0.7 + i * 0.35; const k = Math.min(W - 1, Math.round(i * (W - 1) / Math.max(1, T - 1))); return (words[k][0] + words[k][1]) / 1000; };
+  const ev = [];
+  // spacing: never two head beats closer than 0.6 s; the same beat type needs more room (nod 0.9 s, tilt 1.8 s, point 2.5 s)
+  const GAP = {nod: 0.9, tilt: 1.8, point: 2.5, shake: 1.2, shrug: 2.5, emph: 0.7, think: 1.5};
+  const push = (t, type, extra = {}) => {
+    if (ev.some(e => e.type !== 'look' && Math.abs(e.t - t) < 0.6)) return;
+    if (ev.some(e => e.type === type && Math.abs(e.t - t) < (GAP[type] || 0.6))) return;
+    ev.push({t, type, ...extra}); };
+  let lastNeg = -9;
+  const isQuestion = /[؟?]\s*[»"]?\s*$/.test(text);
+  let negSeen = false;
+  toks.forEach((tok, i) => {
+    const forms = base(tok), has = (S) => forms.some(f => S.has(f));
+    const t = at(i);
+    // names: glance at the person while saying the name
+    for (const f of forms) if (NAMES[f] && NAMES[f] !== ctx.speakerId) ev.push({t: t - 0.1, type: 'look', who: NAMES[f]});
+    if (has(NEG)) {
+      negSeen = true; lastNeg = i;
+      const next = toks[i + 1] ? strip(toks[i + 1]) : '';
+      if (next === 'أعرف' || next === 'أدري') push(t, 'shrug');
+      else push(t, 'shake');
+    } else if (has(AFF) && i - lastNeg > 2) push(t, 'nod');   // "لا أعرف بالضبط" is not agreement
+    else if (has(QW) && (isQuestion || i < 2)) push(t, 'tilt');
+    else if (has(NUM) || /\d/.test(tok)) push(t, 'emph');
+    else if (has(POINT) && ctx.pointTarget) push(t, 'point');
+    else if (has(THINK)) push(t, 'think');
+    // clause ends: a small nod on statements, a lift + tilt on questions
+    if (/[.!]$/.test(tok) && i < T - 1) push(endAt(i) - 0.05, 'nod');
+    if (/[؟?]$/.test(tok)) push(endAt(i) - 0.15, 'tilt');
+  });
+  // last beat of the line
+  const last = endAt(T - 1);
+  if (isQuestion) push(last - 0.25, 'tilt');
+  else if (!negSeen && !['sad', 'hurt', 'disappointed', 'annoyed'].includes(ctx.emotion)) push(last - 0.2, 'nod');
+  // short disappointed / sceptical remarks: a slow disapproving shake
+  if (['disappointed', 'skeptical'].includes(ctx.emotion) && T <= 7 && !ev.some(e => e.type === 'shake' || e.type === 'tilt')) push(Math.max(0.3, at(0) + 0.2), 'shake');
+  ev.sort((a, b) => a.t - b.t);
+  // body: short reactions get no gesturing loop (a beat is enough); pointing lines use a presentation gesture
+  let loop = 'auto';
+  if (T <= 5) loop = 'none';
+  if (ev.some(e => e.type === 'point') && !ctx.seated) loop = 'present';
+  if (['unsure', 'skeptical', 'annoyed'].includes(ctx.emotion) && T <= 6 && !ev.some(e => e.type === 'shrug')) ev.unshift({t: Math.max(0.2, at(0)), type: 'shrug'});
+  return {events: ev, loop};
+}

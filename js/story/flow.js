@@ -14,6 +14,7 @@ import {addHotspot, markDone, setDeskMode, setHotspotsBusy, hotspots} from '../u
 import * as D from '../ui/docs.js';
 import {briefDoc, boardSortDoc, FIELDS as BRIEF_FIELDS} from '../ui/brief.js';
 import {initDeskHands, deskBody, pick, openLaptop} from '../actors/deskhands.js';
+import {buildPerformance} from '../actors/performance.js';
 import {mapState} from '../ui/map.js';
 import {S, gain, has, log, setNode, advance, onClock, evaluateEnding, computeBrief} from './state.js';
 import {sit, stand, startBackground} from './cast.js';
@@ -52,13 +53,18 @@ async function lineImpl(id, {cam = null, gesture = true} = {}) {
   let timeFn = () => 0;
   if (who && who !== C.hana) {
     listenersReact(who, L.e);
-    const p = who.say(url, {gesture, emotion: L.e});
+    // what is being referred to when someone says "look at this…"
+    const near = (x, z, r) => who.holder.position.distanceTo(new THREE.Vector3(x, 0, z)) < r;
+    const pointTarget = S.scene === 'meeting' ? V3(4.85, 1.6, -9.5) : near(-17.8, -2.6, 6) ? V3(-17.8, 1.5, -2.6) : null;
+    const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: !!who.seated, pointTarget});
+    perf.pointTarget = pointTarget;
+    const p = who.say(url, {gesture, emotion: L.e, perf});
     await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); });
     subtitle(sp.name, sp.role, L.t, words, () => timeFn());
     await p;
   } else {
     const radio = L.s === 'hana' || L.s === 'ruth';
-    if (who === C.hana) { const p = who.say(url, {getPos: () => null, radio: true, emotion: L.e}); await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); }); subtitle(sp.name, sp.role, L.t, words, () => timeFn()); await p; }
+    if (who === C.hana) { const perfH = buildPerformance(L.t, words, {speakerId: 'hana', emotion: L.e, seated: false, pointTarget: null}); const p = who.say(url, {getPos: () => null, radio: true, emotion: L.e, perf: perfH}); await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); }); subtitle(sp.name, sp.role, L.t, words, () => timeFn()); await p; }
     else { const v = await playVoice(url + '.mp3', null, {radio}); subtitle(sp.name, sp.role, L.t, words, v.time); await v.done; }
   }
   await wait(0.25);

@@ -1,0 +1,10 @@
+<!doctype html><html><body><script type="module">
+import {buildPerformance} from '../../js/actors/performance.js';
+const d = await (await fetch('../../data/lines.ar.json')).json();
+const ids = ['nadia_n01','omar_l2','omar_l3','ryan_n02_weak','ryan_n02_sound1','mei_meet','mei_n04_beat','grace_n06_sep','grace_n06_no','p_n01_val_bad','nadia_n01_c','nadia_n01_all','hana_n03','hana_n03_promise','p_n06_no','nadia_q_insight','ruth_n05','p_n02_sound','nadia_e1','omar_n04_beat'];
+const out = [];
+for (const id of ids) { const L = d.lines[id]; const w = await (await fetch('../../assets/vo/ar/' + id + '.json')).json();
+  const p = buildPerformance(L.t, w, {speakerId: L.s, emotion: L.e, seated: false, pointTarget: id.startsWith('mei') ? {} : null});
+  out.push(id + ' [' + p.loop + '] ' + p.events.map(e => e.type + (e.who ? ':' + e.who : '') + '@' + e.t.toFixed(1)).join(' ')); }
+console.log(out.join('\n')); document.title = 'DONE';
+</script></body></html>

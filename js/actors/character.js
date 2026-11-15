@@ -216,6 +216,23 @@ export class Character {
     for (const k of ['smile', 'frown', 'brow', 'worry', 'squint']) this.mood[k] = (f[k] || 0) * intensity;
     this.emotion = e;
   }
+  /** fire the meaning-driven beats whose time has come (called while the voice plays) */
+  _fireEvents() {
+    if (!this.voice || !this._events || !this._events.length) return;
+    const t = this.voice.time();
+    while (this._events.length && this._events[0].t <= t) {
+      const e = this._events.shift();
+      const glance = (target, sec) => { this._lookOv = {target, until: performance.now() + sec * 1000}; };
+      if (e.type === 'nod') this._nod = {t: 0, dur: 0.55, amp: 0.075, axis: 'p'};
+      else if (e.type === 'shake') this._nod = {t: 0, dur: 0.85, amp: 0.1, axis: 'y'};
+      else if (e.type === 'tilt') { this._tiltK = 1.2; this._tiltSide = Math.random() < 0.5 ? -1 : 1; this._browKick = 1; }
+      else if (e.type === 'emph') { this._accent = 1; this._browKick = 0.8; }
+      else if (e.type === 'look') { const c = characters[e.who]; if (c && c.holder.visible) glance(c, 1.4); }
+      else if (e.type === 'point') { if (this._pointTarget) glance(this._pointTarget, 1.8); if (!this.seated && !this.walking) this.gesture(this.o.presentAnims ? this.o.presentAnims[0] : (this.g === 'm' ? 'm_gestic_presentation_right_01' : 'f_gestic_presentation_left_01'), {fade: 0.3}); }
+      else if (e.type === 'shrug') { if (this.walking) continue; const a = this.seated ? (this.g === 'm' ? 'm_sit_table_gestic_shrug_01' : 'f_sit_table_gestic_shrug_01') : (this.g === 'm' ? 'm_gestic_shrug_01' : 'f_gestic_shrug_01'); this.gesture(a, {fade: 0.25}); this._browKick = 1; }
+      else if (e.type === 'think') { const h = this.headPos(), q = this.holder.quaternion; const f = new THREE.Vector3(0, 0, 1).applyQuaternion(q), r = new THREE.Vector3(1, 0, 0).applyQuaternion(q); glance(h.clone().addScaledVector(f, 1.2).addScaledVector(r, 0.45).add(new THREE.Vector3(0, -0.55, 0)), 0.9); }
+    }
+  }
   /** short reactions while listening: 'nod' | 'shake' | 'worry' | 'smile' | 'surprise' | 'skeptical' */
   react(type) {
     if (type === 'nod') this._nod = {t: 0, dur: 0.9, amp: 0.09, axis: 'p'};
@@ -225,20 +242,25 @@ export class Character {
     else if (type === 'surprise') { this.emote('shocked', 0.8); this.blink.next = 0.05; }
     else if (type === 'skeptical') this.emote('skeptical', 0.9);
   }
-  async say(url, {getPos = null, radio = false, gesture = true, emotion = null} = {}) {
+  async say(url, {getPos = null, radio = false, gesture = true, emotion = null, perf = null} = {}) {
     if (emotion) this.emote(emotion);
     // a breath before speaking: chest rises, lips part slightly, audible inhale
     if (!radio) { this._inhale = 0.42; breath(0.6); await new Promise(r => setTimeout(r, 300)); }
     const [voice, words] = await Promise.all([playVoice(url + '.mp3', getPos || (() => this.headPos()), {radio}), fetch(url + '.json').then(r => r.ok ? r.json() : []).catch(() => [])]);
     this.voice = voice;
     this.words = words.map(([o, d, w]) => ({o: o / 1000, d: d / 1000, seq: visemeSeq(w)}));
-    const standingTalk = gesture && this.o.talkAnims && !this.seated && !this.walking;
+    const loop = perf ? perf.loop : 'auto';
+    const standingTalk = gesture && this.o.talkAnims && !this.seated && !this.walking && loop !== 'none';
     let prev = null;
-    const pool = this.presenting ? this.o.presentAnims : (emotion && TALK[this.g][emotion]) || this.o.talkAnims;
-    if (standingTalk) { prev = this.curName; this.play(pool[(Math.random() * pool.length) | 0], {fade: 0.6}); }
+    const presentPool = this.o.presentAnims || [this.g === 'm' ? 'm_gestic_presentation_right_01' : 'f_gestic_presentation_left_01'];
+    const pool = this.presenting || loop === 'present' ? presentPool : (emotion && TALK[this.g][emotion]) || this.o.talkAnims;
+    // the same line always gets the same gesture loop (stable, not random each time)
+    let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) | 0;
+    if (standingTalk) { prev = this.curName; this.play(pool[Math.abs(h) % pool.length], {fade: 0.6}); }
+    this._events = perf ? perf.events.slice() : []; this._pointTarget = perf ? perf.pointTarget : null;
     await voice.done;
-    this.voice = null; this.words = null;
-    if (standingTalk && this.baseName) this.play(this.baseName, {fade: 0.8});
+    this.voice = null; this.words = null; this._events = [];
+    if (standingTalk && this.baseName && !this.walking) this.play(this.baseName, {fade: 0.8});
     // the expression lingers a moment, then relaxes towards a softer version of it
     setTimeout(() => { if (!this.voice) for (const k in this.mood) this.mood[k] *= 0.45; }, 1400);
   }
@@ -290,7 +312,7 @@ export class Character {
   updateGaze(dt) {
     const b = this.bones; if (!b.head) return;
     let yaw = 0, pitch = 0;
-    const tg = this.look.target;
+    const tg = this._lookOv && performance.now() < this._lookOv.until ? this._lookOv.target : this.look.target;
     if (tg) {
       const tp = tg === 'camera' ? camera.position : (tg.isVector3 ? tg : (tg.headPos ? tg.headPos() : tg.getWorldPosition(new THREE.Vector3())));
       const hp = this.headPos();
@@ -304,11 +326,13 @@ export class Character {
     let sp = 0, sy = 0, roll = 0;
     if (this.voice) {
       const a = this.voice.amp(); this._ampAvg = damp(this._ampAvg || 0, a, 3, dt);
-      if (a > this._ampAvg * 1.6 + 0.02 && (this._lastAccent || 0) < this.voice.time() - 0.35) { this._lastAccent = this.voice.time(); this._accent = 1; this._browKick = 1; }
+      if (a > this._ampAvg * 2.0 + 0.04 && (this._lastAccent || 0) < this.voice.time() - 0.6) { this._lastAccent = this.voice.time(); this._accent = 0.5; this._browKick = Math.max(this._browKick || 0, 0.4); }
       this._phase = (this._phase || 0) + dt;
-      sy = Math.sin(this._phase * 0.9) * 0.05 + Math.sin(this._phase * 2.3) * 0.02; roll = Math.sin(this._phase * 0.7) * 0.03;
+      sy = Math.sin(this._phase * 0.9) * 0.025; roll = Math.sin(this._phase * 0.7) * 0.015;
+      this._fireEvents();
     }
     this._accent = Math.max(0, (this._accent || 0) - dt * 4); sp += this._accent * 0.06;
+    this._tiltK = Math.max(0, (this._tiltK || 0) - dt * 1.4); roll += (this._tiltSide || 1) * 0.1 * Math.sin(Math.min(1, this._tiltK) * Math.PI / 2); sp -= 0.05 * this._tiltK;
     if (this._nod) { const n = this._nod; n.t += dt; const k = Math.sin(n.t / n.dur * Math.PI * 4) * n.amp * (1 - n.t / n.dur); if (n.axis === 'p') sp += k; else sy += k; if (n.t >= n.dur) this._nod = null; }
     yaw += sy; pitch += sp;
     this.look.yaw = damp(this.look.yaw, yaw, 4, dt); this.look.pitch = damp(this.look.pitch, pitch, 4, dt);
