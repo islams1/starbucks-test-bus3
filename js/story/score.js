@@ -1,7 +1,8 @@
 // Quick version scoring (out of 100): every point comes from something the player did.
-// Brief / segment points stay hidden until the slide is shown to Nadia in the meeting (S.revealed).
+// The written brief is scored when it is approved; in the meeting Nadia asks four questions and every spoken answer
+// is scored on the spot (S.answers); the segment is revealed with the first answer (S.revealed.s1).
 import {S, EVIDENCE} from './state.js';
-import {FIELDS, conflicts} from '../ui/brief.js';
+import {conflicts} from '../ui/brief.js';
 
 const GOOD = {insight: 'strong', idea: 'third', ops: 'sound', measure: 'business', risk: 'plan'};
 const PART = {insight: {weak: 2}, idea: {contest: 1}, ops: {unknown: 1}, measure: {vanity: 2}, risk: {}};
@@ -14,19 +15,26 @@ const FIELD_TIP = {
   risk: 'تقرير الاختبار قال إن 14% من الصور تُظهر الازدحام: سمِّ الخطر وضع خطته.',
 };
 const SEG_PTS = {A: 10, C: 10, B: 6, D: 4, everyone: 0, none: 0};
-export const SLIDES = [
-  {key: 's1', fields: ['insight', 'idea'], seg: true},
-  {key: 's2', fields: ['ops']},
-  {key: 's3', fields: ['measure']},
-  {key: 's4', fields: ['risk']},
-];
+export const SEG_POINTS = (seg) => SEG_PTS[seg] || 0;
+/** meeting answers: points per option (5 = the answer the evidence supports) */
+export const ANSWER_PTS = {insight: {strong: 5, weak: 2, none: 0}, ops: {sound: 5, unknown: 2, ignore: 0}, measure: {business: 5, vanity: 2, none: 0}, risk: {plan: 5, none: 0}};
+const ANSWER_NAME = {insight: 'لماذا سيهتمون؟', ops: 'هل تستطيع فروعنا تقديمه؟', measure: 'كيف سنعرف أنها نجحت؟', risk: 'ما الخطر الرئيسي؟'};
+const ANSWER_TIP = {
+  insight: 'اربط إجابتك بالأرقام: ماذا تريد شريحتك، وأين نخفق معها اليوم؟ (لوحة بيانات الفروع على اللابتوب)',
+  ops: 'اسأل الفرع قبل الاجتماع (رسالة هنا من اللابتوب): باريستا إضافي 7–9 ورف استلام.',
+  measure: 'قِس ما يثبت الهدف: زيارات الشريحة، وزمن الانتظار، ونسبة الشكاوى — لا الإعجابات.',
+  risk: 'تقرير الاختبار قال إن 14% من الصور تُظهر الازدحام: سمِّ الخطر وضع خطته (التقرير على اللابتوب).',
+};
+export function answerItem(k) {
+  const a = S.answers && S.answers[k];
+  const pts = a == null ? 0 : (ANSWER_PTS[k][a] || 0);
+  return {id: 'a_' + k, t: ANSWER_NAME[k], pts, max: 5, hidden: a == null, tip: pts >= 5 ? null : ANSWER_TIP[k]};
+}
 
 function fieldItem(k) {
   const b = S.brief || {}, v = b[k];
-  const opt = v === GOOD[k] ? 4 : (PART[k][v] || 0);
-  const f = FIELDS.find(x => x.k === k);
-  const sup = opt > 0 && (b.cards && b.cards[k] || []).some(id => f.cards.includes(id)) ? 1 : 0;
-  return {id: 'f_' + k, t: FIELD_NAME[k] + (sup ? ' (مدعوم بدليل)' : ''), pts: opt + sup, max: 5, tip: opt < 4 ? FIELD_TIP[k] : sup ? null : 'اسحب إلى كل حقل الدليل الذي يدعمه.'};
+  const pts = v === GOOD[k] ? 2 : PART[k][v] ? 1 : 0;
+  return {id: 'f_' + k, t: FIELD_NAME[k], pts, max: 2, hidden: !S.briefBuilt, tip: pts < 2 ? FIELD_TIP[k] : null};
 }
 function budgetPts(b) {
   if (!b) return 0;
@@ -44,7 +52,7 @@ export function scoreParts() {
   const nEv = Object.keys(EVIDENCE).filter(k => S.ev[k]).length;
   const nConf = conflicts(S.brief || {}).length;
   const plan = S.miniPlan;
-  const planPts = !plan ? 0 : plan.plan !== 4 ? 0 : plan.ending === 'E1' ? (plan.revised ? 8 : 15) : (plan.revised ? 5 : 10);
+  const planPts = !plan ? 0 : plan.plan !== 4 ? 0 : plan.ending === 'E1' ? (plan.revised ? 5 : 10) : (plan.revised ? 3 : 7);
   const t = elapsed();
   const parts = [
     {k: 'finance', t: 'التحليل المالي', items: [
@@ -59,16 +67,17 @@ export function scoreParts() {
     {k: 'segment', t: 'اختيار الشريحة', items: [
       {id: 'segment', t: 'الشريحة المستهدفة', pts: SEG_PTS[S.segment] || 0, max: 10, hidden: !rv.s1, tip: (SEG_PTS[S.segment] || 0) >= 10 ? null : 'اختر شريحة واحدة تدعمها الأرقام: أ (أكبر إيراد) أو ج (أعلى قيمة للعميل).'},
     ]},
-    {k: 'brief', t: 'جودة الموجز', items: [
-      ...['insight', 'idea', 'ops', 'measure', 'risk'].map(k => ({...fieldItem(k), hidden: !rv[SLIDES.find(s => s.fields.includes(k)).key]})),
-      {id: 'conflicts', t: nConf ? `تعارضات في الموجز (${nConf})` : 'بلا تعارض', pts: -3 * nConf, max: 0, hidden: !rv.conf, tip: nConf ? 'هل يمكن أن يكون الحقلان صحيحين يوم ثلاثاء الساعة 8 صباحًا؟' : null},
+    {k: 'brief', t: 'الموجز المكتوب', items: [
+      ...['insight', 'idea', 'ops', 'measure', 'risk'].map(fieldItem),
+      {id: 'conflicts', t: nConf ? `تعارضات في الموجز (${nConf})` : 'بلا تعارض', pts: -2 * nConf, max: 0, hidden: !S.briefBuilt, tip: nConf ? 'هل يمكن أن يكون الحقلان صحيحين يوم ثلاثاء الساعة 8 صباحًا؟' : null},
     ]},
+    {k: 'meeting', t: 'إجاباتك في الاجتماع', items: ['insight', 'ops', 'measure', 'risk'].map(answerItem)},
     {k: 'ops', t: 'التشغيل والأخلاقيات', items: [
       {id: 'ops', t: 'سألت الفرع قبل أن تعد بشيء', pts: S.ops_checked ? 8 : 0, max: 8, tip: S.ops_checked ? null : 'راسل مشرفة الفرع من اللابتوب واسأل ماذا تحتاج الفروع، لا تعدها فقط.'},
       {id: 'consent', t: 'موافقة السيدة بيل على قصتها', pts: S.nodes.N05 === 'call' ? 7 : S.nodes.N05 === 'drop' ? 4 : 0, max: 7, tip: S.nodes.N05 === 'call' ? null : 'قصة إنسان تحتاج موافقته المكتوبة: اطلبها قبل أن يُصنع الفيلم.'},
     ]},
     {k: 'plan', t: 'القرار النهائي', items: [
-      {id: 'plan', t: plan ? (plan.plan === 4 ? (plan.revised ? 'الخطة الصحيحة بعد المراجعة' : 'الخطة الصحيحة من أول مرة') : 'أكملت بخطة خاطئة') : 'الخطة', pts: planPts, max: 15, hidden: !plan, tip: planPts >= 15 ? null : plan && plan.plan === 4 ? 'الخطة صحيحة، لكن موجزك لم يكن متماسكًا بالكامل.' : 'الخطة التي تطابق أدلتك وموجزك، لا الأكثر إثارة.'},
+      {id: 'plan', t: plan ? (plan.plan === 4 ? (plan.revised ? 'الخطة الصحيحة بعد المراجعة' : 'الخطة الصحيحة من أول مرة') : 'أكملت بخطة خاطئة') : 'الخطة', pts: planPts, max: 10, hidden: !plan, tip: planPts >= 10 ? null : plan && plan.plan === 4 ? 'الخطة صحيحة، لكن موجزك لم يكن متماسكًا بالكامل.' : 'الخطة التي تطابق أدلتك وموجزك، لا الأكثر إثارة.'},
     ]},
     {k: 'speed', t: 'السرعة', items: [
       {id: 'speed', t: `الوقت حتى القرار (${fmt(t)})`, pts: S.miniTime == null ? 0 : t <= 420 ? 5 : t <= 600 ? 3 : t <= 840 ? 1 : 0, max: 5, hidden: S.miniTime == null, tip: 'أقل من 7 دقائق = 5 نقاط، أقل من 10 = 3، أقل من 14 = 1.'},
@@ -84,10 +93,4 @@ export function scoreParts() {
 export const totalScore = (parts = scoreParts()) => parts.reduce((s, p) => s + p.pts, 0);
 export function grade(n) {
   return n >= 85 ? {t: 'ممتاز', c: '#2e8b57', stars: 5} : n >= 70 ? {t: 'جيد جدًا', c: '#4f9a68', stars: 4} : n >= 55 ? {t: 'جيد', c: '#b8892f', stars: 3} : n >= 40 ? {t: 'مقبول', c: '#c07a3a', stars: 2} : {t: 'يحتاج مراجعة', c: '#b13a2a', stars: 1};
-}
-/** points of one slide (for the reveal in the meeting) */
-export function slidePoints(slide) {
-  const items = slide.fields.map(fieldItem);
-  if (slide.seg) items.unshift({id: 'segment', t: 'الشريحة المستهدفة', pts: SEG_PTS[S.segment] || 0, max: 10});
-  return {items, pts: items.reduce((s, i) => s + i.pts, 0), max: items.reduce((s, i) => s + i.max, 0)};
 }

@@ -12,7 +12,7 @@ import {anchors, roomAt} from '../world/building.js';
 import {objective, toast, fade, letterbox, hud, $} from '../ui/ui.js';
 import {addHotspot, markDone, setHotspotsBusy, hotspots} from '../ui/hotspots.js';
 import * as D from '../ui/docs.js';
-import {briefDoc, SEGTXT, conflicts} from '../ui/brief.js';
+import {briefDoc} from '../ui/brief.js';
 import {initDeskHands, pick, openLaptop} from '../actors/deskhands.js';
 import {setSteps} from '../ui/tracker.js';
 import {mapState} from '../ui/map.js';
@@ -20,7 +20,7 @@ import {S, gain, log, setNode, evaluateEnding, EVIDENCE, FULL_URL} from './state
 import {sit, stand, startBackground} from './cast.js';
 import {showPlans, tensionButtons, showResult} from './endings.js';
 import * as F from './flow.js';
-import {scoreParts, totalScore, grade, slidePoints, SLIDES, elapsed, clockText} from './score.js';
+import {scoreParts, totalScore, grade, elapsed, clockText, ANSWER_PTS, answerItem, SEG_POINTS} from './score.js';
 
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 let LINES = null;
@@ -38,7 +38,7 @@ const STEPS = [
   {id: 'script', t: '«سيناريو الفيلم»: اقرأ وقرّر', done: () => !!S.nodes.N05, opt: true, hs: 'desk_script'},
   {id: 'envelope', t: 'افتح «الظرف الرمادي»', done: () => !!S.ev.M9, opt: true, hs: 'desk_envelope'},
   {id: 'brief', t: '«التابلت»: ابنِ الموجز واعتمده', done: () => !!S.briefBuilt, hs: 'desk_tablet'},
-  {id: 'meeting', t: 'اعرض موجزك على نادية في قاعة الاجتماعات', done: () => !!S.briefAnswered, hs: 'present'},
+  {id: 'meeting', t: 'قاعة الاجتماعات: أجب عن أسئلة نادية الأربعة', done: () => !!S.briefAnswered, hs: 'present'},
   {id: 'plan', t: 'اختر الخطة', done: () => !!S.ending},
 ];
 function miniObjective() {
@@ -213,12 +213,25 @@ async function meetingGate() {
   })();
   await start;
 }
-const SLIDE_DEF = [
-  {q: 'nadia_q_insight', label: 'لمن؟ ولماذا سيهتمون؟', title: 'لمن؟ ولماذا سيهتمون؟', body: () => `لمن: ${SEGTXT[S.segment]} · لماذا: ${F.briefText('insight')} · الفكرة: ${F.briefText('idea')}`, cards: ['insight', 'idea']},
-  {q: 'nadia_q_ops', label: 'ما تحتاجه الفروع', title: 'هل تستطيع فروعنا تقديمه؟', body: () => F.briefText('ops'), cards: ['ops']},
-  {q: 'nadia_q_measure', label: 'كيف نقيس', title: 'كيف سنعرف أنها نجحت؟', body: () => F.briefText('measure'), cards: ['measure']},
-  {q: 'nadia_q_risk', label: 'الخطر وكيف نتعامل معه', title: 'ما الخطر الرئيسي؟', body: () => F.briefText('risk'), cards: ['risk']},
+// Nadia's four questions. Each option is a spoken answer of the player (voice line) worth points; the strong answer
+// is only available if the evidence behind it was collected at the desk (as in the full version).
+const QUESTIONS = [
+  {k: 'insight', q: 'nadia_q_insight', title: 'لماذا سيهتمون؟', opts: () => {
+    const o = [], seg = S.segment;
+    if (seg === 'A') o.push({id: 'p_ins_a_strong', key: 'strong', need: S.ev.M3 && S.ev.M4 ? null : 'تحتاج: لوحة بيانات الفروع (الانتظار والمقاعد) — من اللابتوب'});
+    if (seg === 'C') o.push({id: 'p_ins_c_strong', key: 'strong', need: S.ev.M3 ? null : 'تحتاج: لوحة بيانات الفروع — من اللابتوب'});
+    if (seg === 'B') o.push({id: 'p_ins_b_strong', key: 'strong', need: S.ev.M4 ? null : 'تحتاج: لوحة بيانات الفروع — من اللابتوب'});
+    return o.concat([{id: 'p_ins_weak', key: 'weak'}, {id: 'p_ins_none', key: 'none'}]);
+  }},
+  {k: 'ops', q: 'nadia_q_ops', title: 'هل تستطيع فروعنا تقديمه؟', opts: () => [
+    {id: 'p_ops_sound', key: 'sound', need: S.ops_checked ? null : 'تحتاج: أن تسأل الفرع قبل الاجتماع — رسالة هنا من اللابتوب'},
+    {id: 'p_ops_unknown', key: 'unknown'}, {id: 'p_ops_ignore', key: 'ignore'}]},
+  {k: 'measure', q: 'nadia_q_measure', title: 'كيف سنعرف أنها نجحت؟', opts: () => [
+    {id: 'p_meas_business', key: 'business'}, {id: 'p_meas_vanity', key: 'vanity'}, {id: 'p_meas_none', key: 'none'}]},
+  {k: 'risk', q: 'nadia_q_risk', title: 'ما الخطر الرئيسي؟ وكيف نتعامل معه؟', opts: () => [
+    {id: 'p_risk_plan', key: 'plan', need: S.ev.M7 ? null : 'تحتاج: تقرير اختبار التواصل — من اللابتوب'}, {id: 'p_risk_none', key: 'none'}]},
 ];
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 function showSlidePoints(title, r) {
   const el = document.createElement('div'); el.className = 'slidepts';
   el.innerHTML = `<div class="sp-h">${title}</div>${r.items.map(i => `<div class="sp-i ${i.max ? (i.pts >= i.max ? 'ok' : i.pts > 0 ? 'mid' : 'no') : 'no'}"><span>${i.t}</span><b>${num(i.pts)}${i.max ? `<small> من ${i.max}</small>` : ''}</b></div>`).join('')}<div class="sp-tot">${num(r.pts)}<small> نقطة</small></div>`;
@@ -229,7 +242,7 @@ function showSlidePoints(title, r) {
 async function meeting() {
   S.scene = 'meeting'; S.meetingStarted = true;
   setHotspotsBusy(true); F.lockControls(); mapState.target = null;
-  setAmbienceLevel(0.35); objective('اعرض موجزك على نادية، ثم اختر الخطة');
+  setAmbienceLevel(0.35); objective('أجب عن أسئلة نادية، ثم اختر الخطة');
   const ch = player.ch, N = C.nadia, seat = anchors.meetSeats[NADIA_SEAT];
   if (!N.seated) { N.walking = null; sit(N, seat); }
   cine.shot(V3(-3.2, 2.0, -6.4), V3(1.5, 1.0, -9.2), 1.2, {fov: 48});
@@ -240,33 +253,36 @@ async function meeting() {
   hud(false); letterbox(true);
   await F.line('nadia_mini_open', {cam: F.camMeet});
   let good = 0, weak = 0;
-  for (let i = 0; i < SLIDES.length; i++) {
-    const sl = SLIDES[i], def = SLIDE_DEF[i];
+  S.answers = S.answers || {};
+  const brief = S.brief || {}, cards = (k) => (brief.cards && brief.cards[k]) || [];
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const Qd = QUESTIONS[i];
     N.mood.smile = 0; N.mood.frown = 0;
-    await F.line(def.q, {cam: F.camMeet});
-    await F.clicker(def.label);
-    F.drawSlide(i + 1, def.title, def.body(), def.cards.flatMap(k => (S.brief && S.brief.cards[k]) || []));
-    await F.slideShot();
-    S.revealed[sl.key] = true;
-    const r = slidePoints(sl);
-    const ok = r.pts >= r.max * 0.7;
+    await F.line(Qd.q, {cam: F.camMeet});
+    // the answer is spoken while the slide with it is on the screen behind the presenter
+    const slideCam = (o) => async () => {
+      F.drawSlide(i + 1, Qd.title, LINES[o.id].t, cards(Qd.k));
+      ch.gesture('m_gestic_presentation_right_01', {fade: 0.3});
+      await cine.shot(V3(-0.6, 1.55, -8.2), V3(4.5, 1.55, -9.35), 0.9, {fov: 44});
+    };
+    const opts = shuffle(Qd.opts()).map(o => ({...o, disabled: !!o.need, cam: slideCam(o),
+      tagline: brief[Qd.k] === o.key ? 'من موجزك ✓' : null}));
+    F.presCam();
+    const key = await F.ask(opts, {q: `<b>نادية:</b> ${Qd.title}`});
+    S.answers[Qd.k] = key; log('answer', Qd.k, key);
+    // points of this answer (and of the segment, revealed with the first answer)
+    const items = [answerItem(Qd.k)];
+    if (i === 0) { S.revealed.s1 = true; items.unshift({t: 'الشريحة المستهدفة', pts: SEG_POINTS(S.segment), max: 10}); }
+    const ok = (ANSWER_PTS[Qd.k][key] || 0) >= 5;
     N.mood.smile = ok ? 0.5 : 0; N.mood.frown = ok ? 0 : 0.35; N.react(ok ? 'nod' : 'skeptical');
-    const shown = showSlidePoints(def.title, r);
+    const shown = showSlidePoints(Qd.title, {items: items.map(it => ({...it, t: it.t === Qd.title ? 'إجابتك' : it.t})), pts: items.reduce((s, it) => s + it.pts, 0), max: items.reduce((s, it) => s + it.max, 0)});
     await F.line(ok ? (good++ % 2 ? 'nadia_r_good2' : 'nadia_r_good1') : (weak++ % 2 ? 'nadia_r_weak2' : 'nadia_r_weak1'), {cam: F.camMeet});
     await shown;
   }
-  const nc = conflicts(S.brief || {}).length;
-  S.revealed.conf = true;
-  if (nc) {
-    N.mood.frown = 0.4;
-    const shown = showSlidePoints('تعارضات في الموجز', {items: [{t: `${nc} تعارض بين الحقول`, pts: -3 * nc, max: 0}], pts: -3 * nc, max: 0});
-    await F.line('nadia_r_conflict', {cam: F.camMeet}); await shown;
-  }
   N.mood.smile = 0; N.mood.frown = 0;
   ch.presenting = false; S.briefAnswered = true;
-  // the brief stands in for the spoken answers of the full version (used by the endings)
-  const b = S.brief || {};
-  S.insight = b.insight || 'none'; S.measure = b.measure || 'none'; S.risk = b.risk === 'plan'; S.opsAnswer = b.ops;
+  // the spoken answers decide how good plan 4 turns out (same rules as the full version)
+  S.insight = S.answers.insight || 'none'; S.measure = S.answers.measure || 'none'; S.risk = S.answers.risk === 'plan'; S.opsAnswer = S.answers.ops;
   await F.line('nadia_plans', {cam: F.camMeet});
   await decision([]);
 }

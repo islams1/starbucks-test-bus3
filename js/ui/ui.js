@@ -48,7 +48,7 @@ export function choose(question, options, {hint = null} = {}) {
       b.innerHTML = `<kbd>${i + 1}</kbd><span>${o.text}${o.tagline ? `<span class="tagline">${o.tagline}</span>` : ''}${o.need ? `<span class="need">${o.need}</span>` : ''}</span>`;
       b.disabled = !!o.disabled;
       b.onclick = () => choiceResolve && choiceResolve(o);
-      b.dataset.idx = i; list.appendChild(b);
+      b.dataset.idx = i; if (o.key) b.dataset.key = o.key; list.appendChild(b);
     });
     show('choices', true);
   });

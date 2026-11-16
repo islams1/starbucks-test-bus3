@@ -22,13 +22,13 @@ const MSAA = {msaa4: 4, msaa2: 2, fxaa: 0, off: 0};
 export const quality = {level: 'high', auto: 'high', gpu: '', software: false, hooks: [], custom: null};
 export const onQuality = (fn) => quality.hooks.push(fn);
 /** dynamic resolution: fraction of the level's pixel ratio actually rendered; mode 60 = free, 30 = steady 30 fps cap */
-export const dyn = {scale: 1, min: MOBILE ? 0.55 : 0.6, enabled: true, fixed: null, cool: 0, mode: 60};
+export const dyn = {scale: 1, min: MOBILE ? 0.65 : 0.75, enabled: true, fixed: null, cool: 0, mode: 60};
 const DYN_KEY = 'bus3_dyn';
 function saveDyn() { try { localStorage.setItem(DYN_KEY, JSON.stringify({gpu: quality.gpu, level: quality.level, scale: dyn.scale, mode: dyn.mode})); } catch (e) {} }
 /** start where this device ended last time (no visible adjusting at the start of every session) */
 export function restoreDyn(level) {
   try { const d = JSON.parse(localStorage.getItem(DYN_KEY) || 'null'); if (d && d.gpu === quality.gpu && d.level === level) { dyn.scale = d.scale; dyn.mode = d.mode; return true; } } catch (e) {}
-  if (level === 'medium' && !MOBILE) dyn.scale = 0.8;     // integrated graphics: start a little lower, adjust from there
+  if (level === 'medium' && !MOBILE) { dyn.scale = 1; dyn.mode = 30; }     // integrated graphics: start a little lower, adjust from there
   return false;
 }
 
@@ -108,8 +108,9 @@ export function startAdaptive() {
     high = fps >= highT ? high + 1 : 0;
     const step = (fn) => { fn(); low = high = 0; dyn.cool = 2; changes++; applyResolution(); applyCap(); saveDyn(); };
     if (low >= 2) {
-      if (dyn.scale > dyn.min + 0.01) return step(() => { dyn.scale = Math.max(dyn.min, dyn.scale - (fps < lowT * 0.7 ? 0.2 : 0.1)); });
-      if (mode === 60 && !forced) return step(() => { dyn.mode = 30; dyn.scale = Math.min(1, dyn.scale + 0.15); });   // steady 30 instead of jittery 40
+      // sharpness first: lock a steady 30 at full resolution before giving up any pixels
+      if (mode === 60 && !forced) return step(() => { dyn.mode = 30; dyn.scale = 1; });
+      if (dyn.scale > dyn.min + 0.01) return step(() => { dyn.scale = Math.max(dyn.min, dyn.scale - 0.05); });
       if (low >= 6 && !quality.custom) {
         low = 0;
         const next = quality.level === 'high' ? 'medium' : quality.level === 'medium' ? 'low' : quality.level === 'low' && fps < 15 ? 'cpu' : null;
