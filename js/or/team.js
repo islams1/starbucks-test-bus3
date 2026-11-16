@@ -5,6 +5,7 @@ import {Character, characters} from '../actors/character.js';
 import {CHEST} from './room.js';
 import {onUpdate} from '../core/engine.js';
 import {setupAssistant} from './assistant.js';
+import {gownTexture, buildBlanket} from './patient.js';
 
 export const T = {};
 export const CAST = {
@@ -56,14 +57,14 @@ function headShape(ch) {
   return {at, pts, all, hairVert, top: pct(1, 0.995), back: pct(2, 0.01), sL: pct(0, 0.01), sR: pct(0, 0.99), nose, chinU};
 }
 /** theatre cap (bouffant, all the hair tucked in) and a pleated surgical mask, fitted to this head and worn on it */
-function capAndMask(ch, color, {mask = true} = {}) {
+function capAndMask(ch, color, {mask = true, puff = 0.08, hairline: hl = 0.1, room = 0.016} = {}) {
   const H = headShape(ch), at = H.at;
   const head = ch.bones.head;
   const noseU = H.nose[1], noseF = H.nose[2], cs = (H.sL + H.sR) / 2;
   const brow = noseF - 0.03, cf = (H.back + brow) / 2;
   const cu = noseU + 0.035;                                                              // about the level of the ears
-  const rs = (H.sR - H.sL) / 2 + 0.016, ru = H.top - cu + 0.016, rf = (brow - H.back) / 2 + 0.02;
-  const hairline = noseU + 0.1, nape = noseU - 0.05;
+  const rs = (H.sR - H.sL) / 2 + room, ru = H.top - cu + room, rf = (brow - H.back) / 2 + room + 0.004;
+  const hairline = noseU + hl, nape = noseU - 0.05;
   const tF = Math.acos(Math.max(-1, Math.min(1, (hairline - cu) / ru))), tB = Math.acos(Math.max(-1, Math.min(1, (nape - cu) / ru)));
   // cap: a dome from the crown down to the hairline in front and the nape behind, roomy at the back
   const NI = 48, NJ = 18, pos = [], idx = [];
@@ -72,8 +73,8 @@ function capAndMask(ch, color, {mask = true} = {}) {
     const tMax = tB + (tF - tB) * fr * fr;
     for (let j = 0; j <= NJ; j++) {
       const th = (j / NJ) * tMax, edge = j === NJ;
-      const puff = 1 + 0.08 * Math.sin(th) * (1 - fr) + 0.01 * Math.sin(ph * 23 + j * 0.7) * Math.sin(th);   // bouffant + soft pleats
-      const k = (edge ? 0.955 : 1) * puff;                                               // the elastic hem pulls in
+      const pf = 1 + puff * Math.sin(th) * (1 - fr) + 0.01 * Math.sin(ph * 23 + j * 0.7) * Math.sin(th);   // bouffant + soft pleats
+      const k = (edge ? 0.955 : 1) * pf;                                               // the elastic hem pulls in
       const p = at(cs + rs * k * Math.sin(th) * Math.sin(ph), cu + ru * k * Math.cos(th), cf + rf * k * Math.sin(th) * Math.cos(ph));
       pos.push(p.x, p.y, p.z);
     }
@@ -95,7 +96,7 @@ function capAndMask(ch, color, {mask = true} = {}) {
   if (!mask) return;
   // mask: from the bridge of the nose to under the chin, cheek to cheek. Each row drapes over the face like the real
   // thing: the convex envelope of the skin at that height (touching the nose and cheekbones, bridging the hollows)
-  const uTop = noseU + 0.03, uBot = H.chinU - 0.004;
+  const uTop = noseU + 0.014, uBot = H.chinU - 0.004;                        // the top edge on the bridge of the nose, under the eyes
   const MI = 30, MJ = 20, rows = [];
   for (let j = 0; j <= MJ; j++) {
     const t = j / MJ, u = uTop + (uBot - uTop) * Math.min(1, t / 0.86);
@@ -156,6 +157,10 @@ export async function loadTeam() {
   p.lockLook = true;
   // theatre caps and masks
   capAndMask(T.layla, CAST.layla.cap); capAndMask(T.rania, CAST.rania.cap);
+  // the patient: a disposable cap, a hospital gown instead of his own clothes, and a warm blanket over him
+  capAndMask(T.patient, 0x7fa9c9, {mask: false, puff: 0.02, hairline: 0.118, room: 0.014});   // snug: his head lies on the pillow
+  try { await gownTexture(T.patient); } catch (e) { console.warn('gown', e); }
+  try { buildBlanket(T.patient); } catch (e) { console.warn('blanket', e); }
   return T;
 }
 export {characters};
