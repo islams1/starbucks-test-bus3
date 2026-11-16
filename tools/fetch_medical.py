@@ -1,6 +1,7 @@
 """Download the Rocketbox medical avatars used in the operating-room situation (MIT licence) and prepare them like the
-other avatars (facial FBX -> model.fbx, TGA -> JPG/PNG). Also makes the two scrub-coloured nurse variants for the
-anaesthetist and the scrub nurse (the library has no female avatar in theatre scrubs).
+other avatars (facial FBX -> model.fbx, TGA -> JPG/PNG). Dr. Layla is the library's own female doctor (white coat,
+stethoscope); the scrub nurse is a scrub-coloured variant of the nurse (the library has no female avatar in theatre
+scrubs). Caps and masks are fitted to each head in code (js/or/team.js).
 Run from the repo root:  python -I tools/fetch_medical.py
 """
 import os, sys, shutil, colorsys
@@ -9,7 +10,7 @@ import fetch_assets as fa
 from PIL import Image
 
 BASE = 'Assets/Avatars/Professions/{n}/'
-AV = {'Medical_Male_05': 1024, 'Medical_Male_04': 1024, 'Medical_Female_01': 1024}   # surgeon (gowned), scrubs, nurse
+AV = {'Medical_Male_05': 1024, 'Medical_Male_04': 1024, 'Medical_Female_01': 1024, 'Medical_Female_02': 2048}   # surgeon (gowned), scrubs, nurse, doctor in a white coat (Dr. Layla, close-ups)
 
 
 def avatar(name, size):
@@ -49,5 +50,4 @@ def scrub_variant(src_name, dst_name, rgb):
 
 if __name__ == '__main__':
     for n, sz in AV.items(): avatar(n, sz)
-    scrub_variant('Medical_Female_01', 'OR_Female_Anaesthesia', (58, 118, 104))   # green scrubs (Dr. Layla)
     scrub_variant('Medical_Female_01', 'OR_Female_Scrub', (52, 96, 150))          # sterile-blue gown (Rania)

@@ -5,17 +5,33 @@ import {playVoice} from '../core/audio.js';
 import {subtitle, hideSubtitle, choose, show, prompt, objective} from '../ui/ui.js';
 import {T as TEAM} from './team.js';
 import {toScreen} from './tools.js';
+import {buildPerformance} from '../actors/performance.js';
+import {OR} from './room.js';
+
+// what each speaker looks at while naming it: the anaesthetist reads her values off her monitor, and looks at the
+// patient when she speaks to him
+const W = (str) => new Set(str.split(' '));
+const monitorPos = () => OR.monA ? OR.monA.mesh.getWorldPosition(new THREE.Vector3()) : new THREE.Vector3(-2.0, 1.72, 0.5);
+const patientFace = () => TEAM.patient && TEAM.patient.headPos ? TEAM.patient.headPos() : new THREE.Vector3(-0.85, 1.1, 0);
+const GLANCES = {
+  layla: [
+    {words: W('الضغط الأكسجين رجفان رجفانا النبض نبض مقطع ST الصدى التنفس نظم مستقيم توقف الكسر القذفي جول'), target: monitorPos, sec: 1.5},
+    {words: W('سيد المريض'), target: patientFace, sec: 1.6},
+  ],
+};
 
 const $ = (id) => document.getElementById(id);
 let LINES = {}, SPK = {};
 export function initLines(data) { LINES = data.lines; SPK = data.speakers; }
 export const lineText = (id) => LINES[id] ? LINES[id].t : id;
+export const lineSpeaker = (id) => LINES[id] ? LINES[id].s : null;
 const MUTE = Q.has('mute');
 
 // ---------------------------------------------------------------- one voice at a time
 let chain = Promise.resolve();
 export function say(id, opt = {}) { const run = chain.then(() => sayImpl(id, opt)); chain = run.catch(() => {}); return run; }
 async function sayImpl(id, {gesture = false} = {}) {
+  const L0 = LINES[id]; if (L0 && L0.s === 'layla') gesture = true;      // the anaesthetist stands free: she talks with her hands
   const L = LINES[id]; if (!L) { console.warn('line?', id); return; }
   const sp = SPK[L.s], url = `assets/vo/or/${id}`;
   if (MUTE) { subtitle(sp.name, sp.role, L.t); await wait(0.35); hideSubtitle(); return; }
@@ -23,7 +39,8 @@ async function sayImpl(id, {gesture = false} = {}) {
   const ch = TEAM[L.s];
   if (L.s !== 'player' && ch && ch.holder.visible) {
     let timeFn = () => 0;
-    const p = ch.say(url, {gesture, emotion: L.e});
+    const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: false, pointTarget: null, glances: GLANCES[L.s]});
+    const p = ch.say(url, {gesture, emotion: L.e, perf});
     await new Promise(r => { const t = () => ch.voice ? (timeFn = ch.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); });
     subtitle(sp.name, sp.role, L.t, words, () => timeFn());
     await p;

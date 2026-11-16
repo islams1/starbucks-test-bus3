@@ -40,6 +40,8 @@ export function buildPerformance(text, words, ctx) {
     const t = at(i);
     // names: glance at the person while saying the name
     for (const f of forms) if (NAMES[f] && NAMES[f] !== ctx.speakerId) ev.push({t: t - 0.1, type: 'look', who: NAMES[f]});
+    // things the speaker checks while naming them (an anaesthetist glances at her monitor when she reads a value)
+    if (ctx.glances) for (const g of ctx.glances) if (forms.some(f => g.words.has(f)) && !ev.some(e => e.type === 'glance' && Math.abs(e.t - t) < 2.2)) ev.push({t: t - 0.15, type: 'glance', target: g.target, sec: g.sec || 1.3});
     if (has(NEG)) {
       negSeen = true; lastNeg = i;
       const next = toks[i + 1] ? strip(toks[i + 1]) : '';

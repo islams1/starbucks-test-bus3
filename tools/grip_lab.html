@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><base href="../"><title>grip lab</title>
+<style>html,body{margin:0;background:#2b2e31;overflow:hidden;font:12px monospace;color:#fff}#gl{position:fixed;inset:0;width:100%;height:100%}#i{position:fixed;left:6px;top:6px;white-space:pre;text-shadow:0 1px 2px #000}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><canvas id="gl"></canvas><div id="i"></div>
+<script type="module">
+// Hand lab: the first-person gloved hand holding each instrument, posed exactly like the game does it, seen close up
+// from several sides — for tuning the grips. Not shipped (tools/ is excluded from the deploy).
+import * as THREE from 'three';
+import {scene, camera, renderer, renderOpts, start, onUpdate, bloom} from './js/core/engine.js';
+import {GRIPS, handFrame} from './js/or/grips.js';
+import {buildRoom, CHEST} from './js/or/room.js';
+import {loadFPHands} from './js/or/fphands.js';
+import {useRig, HANDS, initLab} from './js/or/hands.js';
+import {loadInstrumentModels, buildTools, take, T, KIT} from './js/or/tools.js';
+const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+(async () => {
+  start(); buildRoom();
+  await loadInstrumentModels(); buildTools(scene);
+  const sR = V(CHEST.x + 0.2, 1.45, 0.42), sL = V(CHEST.x - 0.2, 1.45, 0.42);
+  const fp = await loadFPHands(sR, sL);
+  initLab(sR, sL); useRig(fp);
+  renderOpts.skip = false;
+  bloom.strength = 0.08; bloom.threshold = 0.97; renderer.toneMappingExposure = 0.82;
+  camera.fov = 26; camera.updateProjectionMatrix();
+  // what the camera looks at: the middle of the hand
+  const mid = () => { const a = HANDS.rig.arms.R; const w = a.hand.getWorldPosition(V()); return w.lerp(a.chains.middle[1].getWorldPosition(V()), 0.6); };
+  const views = {
+    eye: () => [V(CHEST.x + 0.3, CHEST.y + 0.95, 0.1), CHEST.clone()],
+    near: () => { const h = mid(); return [h.clone().add(V(0.03, 0.3, 0.1)), h]; },
+    side: () => { const h = mid(); return [h.clone().add(V(0.0, 0.04, -0.4)), h]; },        // from across the table
+    front: () => { const h = mid(); return [h.clone().add(V(-0.4, 0.05, 0.0)), h]; },        // from the patient's head
+    back: () => { const h = mid(); return [h.clone().add(V(0.4, 0.06, 0.02)), h]; },         // from the feet
+    thumb: () => { const h = mid(); return [h.clone().add(V(-0.15, 0.08, 0.36)), h]; },
+  };
+  let view = 'eye';
+  onUpdate(() => { const [p, t] = views[view](); camera.position.copy(p); camera.lookAt(t); });
+  // debug: the hand frame (X red, fingers green, palm blue) and the finger targets
+  const dbg = new THREE.Group(); scene.add(dbg); let showDbg = false;
+  const arrows = [0xff3030, 0x30ff30, 0x3080ff].map(c => { const a = new THREE.ArrowHelper(V(1, 0, 0), V(), 0.08, c, 0.012, 0.008); a.traverse(o => { if (o.material) { o.material.depthTest = false; o.renderOrder = 9; } }); dbg.add(a); return a; });
+  onUpdate(() => {
+    dbg.visible = showDbg; if (!showDbg) return;
+    const a = HANDS.rig.arms.R, q = handFrame(a), w = a.hand.getWorldPosition(V());
+    [V(1, 0, 0), V(0, 1, 0), V(0, 0, 1)].forEach((d, i) => { arrows[i].position.copy(w); arrows[i].setDirection(d.applyQuaternion(q)); });
+  });
+  window.__lab = {
+    T, HANDS, KIT, THREE,
+    hold(id, tip = [CHEST.x, CHEST.y + 0.005, 0.0]) { take(id, {fly: false}); T.tip.set(...tip); T.contact = 1; HANDS.R.w = 1; return id; },
+    view(v) { view = v; return v; },
+    dbg(on = true) { showDbg = on; return on; },
+    GRIPS,
+    info(s) { document.getElementById('i').textContent = s; return 1; },
+  };
+  window.__ready = true;
+})().catch(e => { document.getElementById('i').textContent = 'ERR ' + (e.stack || e); console.error(e); });
+</script></body></html>

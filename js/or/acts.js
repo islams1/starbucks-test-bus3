@@ -42,7 +42,7 @@ onUpdate((dt) => { for (let i = puffs.length - 1; i >= 0; i--) { const p = puffs
 export async function actMarking() {
   objective('حدد خط الشق: من الثلمة فوق القص حتى أسفل الناتئ الرهابي');
   await pickTool(['marker', 'scalpel', 'cautery'], 'marker'); trayHide();
-  TL.steady = CHEST.clone().add(V3(-0.13, 0.012, -0.05));
+  TL.steady = CHEST.clone().add(V3(0.05, 0.012, 0.11));       // left hand resting on the near side, clear of the line and the landmarks
   const found = {n: false, x: false};
   const mN = mark(() => NOTCH, '<i></i><span>الثلمة فوق القص</span>', {cls: 'land hidden'});
   const mX = mark(() => XIPH, '<i></i><span>الناتئ الرهابي</span>', {cls: 'land hidden'});
@@ -98,7 +98,7 @@ export async function actIncision() {
   F.incision = [];
 
   await frame((dt) => {
-    TL.steady = TL.tip.clone().add(V3(-0.11, 0.014, -0.05));
+    TL.steady = TL.tip.clone().add(V3(-0.075, 0.012, 0.07));    // left hand just above the blade, beside the line, stretching the skin
     const p = followPlane(skinY(), dt, 0.6); if (!p) return;
     if (ptr.down && inPatch(p)) {
       const v = last ? p.distanceTo(last) / Math.max(dt, 1e-3) : 0; last = p.clone();
@@ -131,7 +131,7 @@ export async function actIncision() {
   const snd = toolSound('cautery'); let hold = 0;
   const bm = F.bleeders.map(b => mark(() => V3(b.x, skinY(), b.z), '<i></i>', {cls: 'bleed'}));
   await frame((dt) => {
-    TL.steady = TL.tip.clone().add(V3(-0.11, 0.014, -0.05));
+    TL.steady = TL.tip.clone().add(V3(-0.075, 0.012, 0.07));    // left hand just above the blade, beside the line, stretching the skin
     const p = followPlane(skinY(), dt, 0.6); if (!p) return;
     let on = null; if (ptr.down) for (const b of F.bleeders) if (!b.done && Math.hypot(b.x - p.x, b.z - p.z) < 0.007) on = b;
     snd.set(ptr.down ? (on ? 1 : 0.35) : 0);
@@ -159,7 +159,7 @@ export async function actSaw() {
   F.sawn = [];
   const G = gauge('النشر');
   await frame((dt) => {
-    TL.steady = TL.tip.clone().add(V3(-0.11, 0.014, -0.05));
+    TL.steady = TL.tip.clone().add(V3(-0.075, 0.012, 0.07));    // left hand just above the blade, beside the line, stretching the skin
     const p = followPlane(skinY(), dt, 0.5); if (!p) return;
     const onBone = ptr.down && Math.abs(p.z) < 0.012 && p.x > x0 - 0.01 && p.x < x1 + 0.01;
     snd.set(ptr.down ? (onBone ? 1 : 0.6) : 0);

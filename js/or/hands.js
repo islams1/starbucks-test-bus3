@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import {onUpdate} from '../core/engine.js';
 import {fpReset, fpFollow} from './fphands.js';
+import {closeHand, handFrame, boneQuat} from './grips.js';
 
 const V = () => new THREE.Vector3();
 const _a = V(), _b = V(), _c = V(), _d = V(), _n = V();
@@ -34,7 +35,7 @@ function solve(side, t, w, set = arms) {
   _d.subVectors(t, _a); const dist = Math.min(Math.max(_d.length(), 0.05), l1 + l2 - 0.002); const dirT = _d.normalize().clone();
   const other = set[side === 'R' ? 'L' : 'R'].up.getWorldPosition(V());
   const outward = _a.clone().sub(other).setY(0).normalize();
-  const back = V().set(0, 0, -1).applyQuaternion(HANDS.ch.holder.quaternion);
+  const back = HANDS.ch ? V().set(0, 0, -1).applyQuaternion(HANDS.ch.holder.quaternion) : HANDS.backDir.clone();
   const pole = outward.multiplyScalar(HANDS.elbowOut).add(new THREE.Vector3(0, -0.8, 0)).addScaledVector(back, HANDS.elbowBack);     // elbows down, a little out and back
   _n.crossVectors(dirT, pole).normalize();
   const cosA = (l1 * l1 + dist * dist - l2 * l2) / (2 * l1 * dist);
@@ -152,11 +153,29 @@ export async function initHands(ch) {
 export function useRig(fp) {
   HANDS.rig = fp; arms = fp.arms;
   HANDS.rigCurl = {axis: new THREE.Vector3(1, 0, 0), sign: 1};
-  onUpdate(() => {
+  const qb = new THREE.Quaternion(), qc = new THREE.Quaternion(), wr = V();
+  onUpdate((dt) => {
     if (!HANDS.on || !HANDS.fp || !HANDS.rig) return;
     fpReset();
     for (const s of ['R', 'L']) {
-      const h = HANDS[s];
+      const h = HANDS[s], a = fp.arms[s];
+      if (h.pose && a.can && h.w > 0.001) {
+        // grip-driven: the wrist goes where the grip needs it, the hand turns exactly, the instrument is placed from
+        // the hand as it really ended up (so it never floats out of the fingers), then the fingers close on it
+        const P = h.pose;
+        solve(s, P.wrist, h.w, fp.arms); fpFollow();
+        a.hand.parent.getWorldQuaternion(_pq);
+        boneQuat(a, P.Qc, qb); qb.premultiply(_pq.clone().invert());
+        a.hand.quaternion.slerp(qb, h.w); a.hand.updateMatrixWorld(true);
+        handFrame(a, qc); a.hand.getWorldPosition(wr);
+        if (P.sock && P.mesh) {
+          const tipW = P.sock.pos.clone().applyQuaternion(qc).add(wr);
+          const dirW = P.sock.dir.clone().applyQuaternion(qc), AW = P.sock.A.clone().applyQuaternion(qc).add(wr);
+          if (P.glue) { P.mesh.position.copy(tipW); P.mesh.quaternion.copy(qc).multiply(P.sock.quat); P.mesh.updateMatrixWorld(true); }
+          h.err = closeHand(a, P.grip, {tipW, dirW, A: AW, r: P.r, w: P.close});
+        } else closeHand(a, P.grip, {w: P.close});
+        continue;
+      }
       solve(s, h.t, h.w, fp.arms);
       fpFollow();
       if (h.fdir) orient(s, h.fdir, h.palm, h.w, fp.arms);
@@ -167,6 +186,8 @@ export function useRig(fp) {
   });
   firstPerson(HANDS.fp !== false);
 }
+/** lab page: hands without a surgeon avatar */
+export function initLab() { HANDS.on = true; HANDS.fp = true; HANDS.backDir = new THREE.Vector3(0, 0, 1); }
 /** first-person body on/off (head hidden so the camera can sit at the eyes) */
 export function handsOn(on) { HANDS.on = on; firstPerson(on); }
 /** first person = only the arms are drawn; third person (cutaways) = the whole surgeon */

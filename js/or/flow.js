@@ -15,7 +15,7 @@ import {fpBlood} from './fphands.js';
 import {T as TL, putDown, trayHide, makeKit, pose} from './tools.js';
 import {setPump, setVentilator} from './sound.js';
 import {SC, award, flag, crisis, showBox, scoreCard, ending} from './score.js';
-import {initLines, say, ask, orders, ordersHide, panel, panelHide, caption, clearMarks, objective, prompt, lineText} from './orui.js';
+import {initLines, say, ask, orders, ordersHide, panel, panelHide, caption, clearMarks, objective, prompt, lineText, lineSpeaker} from './orui.js';
 import * as act from './acts.js';
 import {A} from './acts.js';
 
@@ -68,7 +68,19 @@ function setup() {
   startExertionBreathing(() => Math.max(0, TN.v - 0.15) * 0.8);
   // the team: where they look
   TEAM.rania.lookAt(CHEST.clone()); TEAM.karim.lookAt(V3(0.4, 1.15, -1.5)); TEAM.layla.lookAt(V3(-2.0, 1.65, 0.45));
-  let gT = 0; onUpdate((dt) => { gT += dt; if (gT > 7) { gT = 0; const l = TEAM.layla; if (!l.voice) l._lookOv = {target: Math.random() < 0.5 ? CHEST.clone() : 'camera', until: performance.now() + 2200}; } });
+  // the anaesthetist is never idle: her eyes go round monitor → patient → field → pumps → surgeon, and now and then she
+  // shifts her weight or nods along; her base gaze stays on the monitor
+  let gT = 0, gNext = 4, aT = 0, aNext = 14;
+  onUpdate((dt) => {
+    const l = TEAM.layla; if (!l || !l.holder.visible || l.voice) return;
+    gT += dt; aT += dt;
+    if (gT > gNext) {
+      gT = 0; gNext = 2.8 + Math.random() * 4.5; const r = Math.random();
+      const target = r < 0.3 ? (TEAM.patient && TEAM.patient.headPos ? TEAM.patient.headPos().clone() : CHEST.clone()) : r < 0.55 ? CHEST.clone() : r < 0.75 ? V3(-1.5, 1.35, -0.75) : 'camera';
+      l._lookOv = {target, until: performance.now() + 1300 + Math.random() * 1500};
+    }
+    if (aT > aNext && !l.walking) { aT = 0; aNext = 12 + Math.random() * 14; l.gesture(['f_idle_breathe_01', 'f_gestic_listen_neutral_01', 'f_idle_neutral_02'][Math.floor(Math.random() * 3)], {fade: 0.6}); }
+  });
   // the patient's eyes close with the anaesthetic
   const p = TEAM.patient; p.postIK = () => { if (!p.sleep || !p.morph) return; const inf = p.morph.mesh.morphTargetInfluences, D = p.morph.dict; p._sl = Math.min(1, (p._sl || 0) + 0.012); for (const k of ['AK_09_EyeBlinkLeft', 'AK_10_EyeBlinkRight']) if (D[k] != null) inf[D[k]] = Math.max(inf[D[k]], p._sl); };
   // hands held up in front of the chest when empty (sterile)
@@ -125,7 +137,9 @@ async function s1() {
     el.querySelectorAll('.it').forEach(d => d.onclick = async () => {
       const it = items.find(i => i.id === d.dataset.id); if (busy || done.has(it.id)) return;
       busy = true; d.classList.add('warn');
-      for (const l of it.lines) await say(l);
+      // the surgeon looks at whoever confirms the item
+      for (const l of it.lines) { const sp = lineSpeaker(l), ch = sp && sp !== 'player' && TEAM[sp]; if (ch && ch.holder.visible) eyeView(() => ch.headPos().clone().add(V3(0, -0.1, 0)), 40, 0.8, HEAD); await say(l); }
+      eyeView(() => R.headPos().clone().add(V3(0, -0.15, 0)), 46, 0.8, HEAD);
       if (it.id === 'blood') {
         el.classList.add('hidden');
         const k = await ask([{id: 'pl_blood_ok', key: 'ok'}, {id: 'pl_blood_no', key: 'no'}]);

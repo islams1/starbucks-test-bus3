@@ -4,9 +4,46 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {scene} from '../core/engine.js';
+import {measureHand} from './grips.js';
+import {tex} from '../core/assets.js';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
-const GLOVE = new THREE.Color(0xe6d6b4), SLEEVE = new THREE.Color(0x2a5570);
+const HAND_SCALE = 0.83;
+const CUFF = -0.2;                                // the glove reaches ~6 cm up the forearm, over the sleeve
+let _am = null;
+/** one material, two surfaces cut cleanly along the cuff (per pixel): cream latex glove over a matte blue nonwoven gown sleeve */
+function armMat() {
+  if (_am) return _am;
+  const n = tex('assets/tex/denim_fabric/nor_gl.jpg', {srgb: false, repeat: [7, 7]});
+  const m = new THREE.MeshPhysicalMaterial({vertexColors: true, color: 0xffffff, roughness: 0.9, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35),
+    clearcoat: 0.3, clearcoatRoughness: 0.32, sheen: 0.55, sheenRoughness: 0.75, sheenColor: new THREE.Color(0x7aa6cf), envMapIntensity: 0.55});
+  const glove = new THREE.Color(0xe8dcc2), sleeve = new THREE.Color(0x2c5f8c);
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uGlove = {value: glove}; sh.uniforms.uSleeve = {value: sleeve};
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', `#include <common>
+attribute float cuffD;
+varying float vCuff;`)
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+vCuff = cuffD;`);
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+uniform vec3 uGlove, uSleeve;
+varying float vCuff;
+float gG;`)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        float cw = fwidth(vCuff) * 0.75 + 1e-4;
+        gG = smoothstep(${CUFF.toFixed(3)} - cw, ${CUFF.toFixed(3)} + cw, vCuff);
+        float rim = gG * (1.0 - smoothstep(0.0, 0.03, vCuff - ${CUFF.toFixed(3)}));      // the rolled cuff edge
+        diffuseColor.rgb *= mix(uSleeve, uGlove * (1.0 - 0.16 * rim), gG);`)
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+roughnessFactor = mix(roughnessFactor, 0.4, gG);`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+normal = normalize(mix(normal, nonPerturbedNormal, gG));`)
+      .replace('#include <lights_physical_fragment>', `#include <lights_physical_fragment>
+material.clearcoat *= gG;
+material.sheenColor *= 1.0 - 0.85 * gG;`);
+  };
+  return (_am = m);
+}
 export const FP = {group: null, arms: null, meshes: []};
 
 export async function loadFPHands(shoulderR, shoulderL) {
@@ -28,21 +65,23 @@ export async function loadFPHands(shoulderR, shoulderL) {
   for (const m of meshes) {
     const geo = m.geometry, pos = geo.attributes.position, n = pos.count, col = new Float32Array(n * 3), q = V();
     const sides = ['R', 'L'].map(k => { const a = arms[k], w = wp(a.hand), e = wp(a.fore); return {w, dir: w.clone().sub(e).normalize(), L: w.distanceTo(e) || 1}; });
-    const bw = new Float32Array(n);                                                          // where blood will stain the glove first
+    const bw = new Float32Array(n), gw = new Float32Array(n);                                // where blood will stain the glove first; glove or sleeve
     let span = 0; for (const s of sides) span = Math.max(span, s.L);
     for (let v = 0; v < n; v++) {
       q.fromBufferAttribute(pos, v); m.applyBoneTransform(v, q); q.applyMatrix4(m.matrixWorld);      // where the vertex really is in the rest pose
       const s = sides[0].w.distanceToSquared(q) < sides[1].w.distanceToSquared(q) ? sides[0] : sides[1];
       const d = q.clone().sub(s.w).dot(s.dir), L = s.L;                                        // >0 past the wrist
-      const t = Math.min(1, Math.max(0, (d / L + 0.02) / 0.05));                              // the glove cuff just over the wrist
-      const c = SLEEVE.clone().lerp(GLOVE, t); col[v * 3] = c.r; col[v * 3 + 1] = c.g; col[v * 3 + 2] = c.b;
+      const t = d / L > CUFF ? 1 : 0;                                                         // the glove cuff is pulled over the gown sleeve
+      gw[v] = d / L;                                                                           // the shader cuts the cuff along this, per pixel
+      col[v * 3] = col[v * 3 + 1] = col[v * 3 + 2] = 1;
       const f = q.clone().multiplyScalar(9 / span);                                          // ~9 blotches along a forearm
       const nz = 0.55 * noise3(f.x, f.y, f.z) + 0.3 * noise3(f.x * 2.7, f.y * 2.7, f.z * 2.7) + 0.15 * noise3(f.x * 7, f.y * 7, f.z * 7);
       bw[v] = t * Math.min(1, nz * 0.8 + Math.max(0, d / L) * 0.55);                           // the fingers and the palm first
     }
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
     m.userData.base = col.slice(); m.userData.bw = bw;
-    m.material = new THREE.MeshPhysicalMaterial({vertexColors: true, roughness: 0.42, clearcoat: 0.25, clearcoatRoughness: 0.4, sheen: 0.4, sheenColor: new THREE.Color(0xfff2dc), envMapIntensity: 0.6});
+    geo.setAttribute('cuffD', new THREE.BufferAttribute(gw, 1));
+    m.material = armMat();
     m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false;
   }
   // scale and place the rig at the surgeon's shoulders, arms pointing towards the table
@@ -71,6 +110,15 @@ export async function loadFPHands(shoulderR, shoulderL) {
     const a = arms[k]; a.carrier = B(new RegExp(`^forearm[._]?${k}[._]?001`)); a.end = B(new RegExp(`^forearm[._]?${k}[._]?end`));
     if (a.carrier) { a.fore.updateMatrixWorld(true); a.carrier.updateMatrixWorld(true); a.offset = a.fore.matrixWorld.clone().invert().multiply(a.carrier.matrixWorld); }
   }
+  // finger chains (knuckle → tip) and a real-sized hand: the rig's hand is ~23 cm long at this arm length, a surgeon's ~19 cm
+  for (const k of ['R', 'L']) {
+    const a = arms[k];
+    const chain = (n) => [1, 2, 3].map(i => B(new RegExp(`^${n}[._]?0${i}[._]?${k}_\\d`))).concat([B(new RegExp(`^${n}[._]?03[._]?${k}[._]?end`))]);
+    a.chains = {thumb: chain('thumb'), index: chain('f_index'), middle: chain('f_middle'), ring: chain('f_ring'), pinky: chain('f_pinky')};
+    a.hand.scale.setScalar(HAND_SCALE);
+  }
+  fpFollow(); root.updateMatrixWorld(true);
+  for (const k of ['R', 'L']) measureHand(arms[k]);
   // the bones these arms move are reset to their rest pose every frame (no build-up)
   FP.rest = skel.bones.map(b => [b, b.quaternion.clone(), b.position.clone()]);
   return FP;

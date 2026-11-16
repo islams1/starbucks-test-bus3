@@ -134,6 +134,7 @@ export class Character {
       const m = new THREE.MeshStandardMaterial({map: tex(p + kind + '_color.jpg'), roughness: kind === 'head' ? 0.52 : 0.78, metalness: 0});
       if (this.o.normals !== false) { const n = tex(p + kind + '_normal.jpg', {srgb: false}); n.onError = () => {}; m.normalMap = n; m.normalScale.set(0.9, 0.9); }
       if (kind === 'head') { m.envMapIntensity = 0.8; }
+      if (kind === 'stetoskop') { m.roughness = 0.35; m.metalness = 0.4; }
       return m;
     };
     root.traverse(o => {
@@ -141,7 +142,7 @@ export class Character {
       o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false;
       o.material = (Array.isArray(o.material) ? o.material : [o.material]).map(m => {
         const n = (m.name || '').toLowerCase();
-        const kind = n.includes('opacity') ? 'opacity' : n.includes('protection') ? 'protection' : n.includes('head') ? 'head' : 'body';   // protection = theatre cap/mask/gown (medical avatars)
+        const kind = n.includes('opacity') ? 'opacity' : n.includes('protection') ? 'protection' : n.includes('stetoskop') ? 'stetoskop' : n.includes('head') ? 'head' : 'body';   // protection = theatre cap/mask/gown, stetoskop = the doctor's stethoscope (medical avatars)
         return mats[kind] ||= mk(kind);
       });
       if (o.morphTargetDictionary) this.morph = {mesh: o, dict: pruneMorphs(o, this.o.talks)};
@@ -228,6 +229,7 @@ export class Character {
       else if (e.type === 'tilt') { this._tiltK = 1.2; this._tiltSide = Math.random() < 0.5 ? -1 : 1; this._browKick = 1; }
       else if (e.type === 'emph') { this._accent = 1; this._browKick = 0.8; }
       else if (e.type === 'look') { const c = characters[e.who]; if (c && c.holder.visible) glance(c, 1.4); }
+      else if (e.type === 'glance') glance(typeof e.target === 'function' ? e.target() : e.target, e.sec || 1.3);
       else if (e.type === 'point') { if (this._pointTarget) glance(this._pointTarget, 1.8); if (!this.seated && !this.walking) this.gesture(this.o.presentAnims ? this.o.presentAnims[0] : (this.g === 'm' ? 'm_gestic_presentation_right_01' : 'f_gestic_presentation_left_01'), {fade: 0.3}); }
       else if (e.type === 'shrug') { if (this.walking) continue; const a = this.seated ? (this.g === 'm' ? 'm_sit_table_gestic_shrug_01' : 'f_sit_table_gestic_shrug_01') : (this.g === 'm' ? 'm_gestic_shrug_01' : 'f_gestic_shrug_01'); this.gesture(a, {fade: 0.25}); this._browKick = 1; }
       else if (e.type === 'think') { const h = this.headPos(), q = this.holder.quaternion; const f = new THREE.Vector3(0, 0, 1).applyQuaternion(q), r = new THREE.Vector3(1, 0, 0).applyQuaternion(q); glance(h.clone().addScaledVector(f, 1.2).addScaledVector(r, 0.45).add(new THREE.Vector3(0, -0.55, 0)), 0.9); }
