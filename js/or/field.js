@@ -8,12 +8,12 @@ import {bodyTop} from './body.js';
 import {vit} from './monitor.js';
 import {setThoraxOpen, showThorax} from './thorax.js';
 
-export const F = {stage: 'skin', openK: 0, blood: 0, bleeders: [], marker: [], incision: [], sawn: [], pericardium: 1};
+export const F = {stage: 'skin', openK: 0, blood: 0, bleeders: [], marker: [], incision: [], incD: [], incT: [], sawn: [], pericardium: 1};
 const PX = 0.36, PZ = 0.33;                         // skin patch size (x along the body, z across): a wide prepped window, like real footage
 export const NOTCH = new THREE.Vector3(CHEST.x - 0.105, CHEST.y, 0);     // suprasternal notch (head side)
 export const XIPH = new THREE.Vector3(CHEST.x + 0.105, CHEST.y, 0);      // xiphoid process
 const W = 1536, Hc = 1408;
-let cv, g, tex;
+let cv, g, tex, bcv, bg, btex;                 // colour canvas and a bump (height) canvas for the cut's depth
 /** world (x, z) on the patch → canvas pixels */
 export const toPx = (x, z) => [((x - (CHEST.x - PX / 2)) / PX) * W, ((z + PZ / 2) / PZ) * Hc];
 const mm = (d) => d / 1000;
@@ -38,36 +38,61 @@ function paintSkin() {
   r = g.createRadialGradient(xx, xy, 0, xx, xy, 30); r.addColorStop(0, 'rgba(255,225,195,0.18)'); r.addColorStop(1, 'rgba(255,225,195,0)'); g.fillStyle = r; g.beginPath(); g.arc(xx, xy, 30, 0, 7); g.fill();
 }
 let base = null;
+const hashI = (i, k = 0) => { const h = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return h - Math.floor(h); };
+/** the skin incision, exactly where the blade went: a scratch where it barely touched, a cut through the skin where it
+ *  went at the right depth (the edges draw apart over a second or two and show the yellow fat, blood wells along it),
+ *  a deeper, bloodier gap where it was pressed too hard */
+function drawIncision() {
+  const P = F.incision, now = clock.t;
+  const segs = [];
+  for (let i = 1; i < P.length; i++) {
+    const a = P[i - 1], b = P[i]; if (a.distanceTo(b) > 0.012) continue;                 // a new stroke
+    const d = F.incD[i] ?? 0.5, age = F.incT[i] != null ? now - F.incT[i] : 9;
+    const thru = d >= 0.3, deep = d > 0.72, open = thru ? Math.min(1, age / 1.6) : 0;
+    const gap = thru ? 5 + 11 * open * open * (3 - 2 * open) + (deep ? 6 : 0) : 2.2;      // px (≈ 0.23 mm each): a fresh cut gapes 3–5 mm
+    segs.push([toPx(a.x, a.z), toPx(b.x, b.z), gap, thru, deep, i]);
+  }
+  const pass = (ctx, wOf, style) => { for (const [A, B, gp, th, dp, i] of segs) { const w = wOf(gp, th, dp); if (w <= 0) continue; ctx.strokeStyle = typeof style === 'function' ? style(th, dp, i) : style; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke(); } };
+  // colour: pink bruised margin → pale cut dermis → yellow fat at the bottom → blood along the depth
+  pass(g, (gp, th) => th ? gp + 16 : 7, 'rgba(150,35,32,0.28)');
+  pass(g, (gp, th) => th ? gp + 5 : 0, '#6a1a14');                                         // the raw cut dermis
+  pass(g, (gp) => gp, (th, dp) => th ? (dp ? '#a8741f' : '#cf9a30') : '#8a2c22');           // yellow fat in the depth
+  pass(g, (gp, th) => th ? Math.max(2, gp * 0.78) : 1.2, (th, dp, i) => dp ? '#2a0103' : `rgba(${70 + (hashI(i) * 26 | 0)},2,5,0.98)`);   // blood welling along it
+  // beads of blood along the fresh cut (fixed per point: no flicker while redrawing)
+  for (const [A, B, gp, th, dp, i] of segs) if (th && hashI(i, 1) < (dp ? 0.45 : 0.28)) { const r = 2.5 + hashI(i, 2) * (dp ? 6 : 4); g.fillStyle = dp ? 'rgba(80,3,5,0.92)' : 'rgba(120,8,12,0.9)'; g.beginPath(); g.arc(B[0] + (hashI(i, 3) - 0.5) * gp, B[1] + (hashI(i, 4) - 0.5) * 3, r, 0, 7); g.fill(); }
+  // depth: the gap is low, its edges a little rounded
+  pass(bg, (gp, th) => th ? gp + 6 : 3, 'rgb(205,205,205)');
+  pass(bg, (gp, th) => th ? gp + 2 : 1.4, 'rgb(150,150,150)');
+  pass(bg, (gp, th) => th ? gp : 0, (th, dp) => dp ? 'rgb(30,30,30)' : 'rgb(70,70,70)');
+}
 function redraw() {
   if (!base) { paintSkin(); base = document.createElement('canvas'); base.width = W; base.height = Hc; base.getContext('2d').drawImage(cv, 0, 0); }
   else g.drawImage(base, 0, 0);
+  bg.fillStyle = '#fff'; bg.fillRect(0, 0, W, Hc);
   const line = (pts, style, w) => { if (pts.length < 2) return; g.strokeStyle = style; g.lineWidth = w; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); pts.forEach((p, i) => { const [x, y] = toPx(p.x, p.z); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); };
   line(F.marker, 'rgba(86,40,128,0.9)', 5);
-  if (F.incision.length > 1 && !F.closed) {
-    line(F.incision, 'rgba(120,20,20,0.35)', 22);          // bruised edges
-    line(F.incision, '#5a0d0f', 9);
-    line(F.incision, '#a3191b', 4);
-    for (const p of F.incision) if (Math.random() < 0.08) { const [x, y] = toPx(p.x, p.z); g.fillStyle = 'rgba(160,20,20,0.7)'; g.beginPath(); g.arc(x + (Math.random() - 0.5) * 8, y + (Math.random() - 0.5) * 8, 3 + Math.random() * 4, 0, 7); g.fill(); }
-  }
+  if (F.incision.length > 1 && !F.closed) drawIncision();
   if (F.sawn.length > 1) { line(F.sawn, '#efe3cf', 7); line(F.sawn, 'rgba(150,30,25,0.8)', 2); }
   if (F.closed && F.incision.length > 1) {           // closed wound: fine subcuticular line with a few steri-strip marks
     line(F.incision, '#3b1012', 3);
     const n = F.incision.length; for (let i = 2; i < n - 2; i += Math.max(1, Math.round(n / 14))) { const [x, y] = toPx(F.incision[i].x, F.incision[i].z); g.fillStyle = 'rgba(245,240,230,.85)'; g.fillRect(x - 5, y - 26, 10, 52); }
   }
   for (const b of F.bleeders) { const [x, y] = toPx(b.x, b.z); g.fillStyle = b.done ? 'rgba(60,25,15,0.9)' : '#c1121a'; g.beginPath(); g.arc(x, y, b.done ? 5 : 7, 0, 7); g.fill(); if (!b.done) { g.fillStyle = 'rgba(255,120,120,0.6)'; g.beginPath(); g.arc(x - 2, y - 2, 2, 0, 7); g.fill(); } }
-  tex.needsUpdate = true;
+  tex.needsUpdate = true; btex.needsUpdate = true;
 }
 
 export function buildField(parent) {
   const G = new THREE.Group(); parent.add(G); F.group = G;
   cv = document.createElement('canvas'); cv.width = W; cv.height = Hc; g = cv.getContext('2d');
   tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  bcv = document.createElement('canvas'); bcv.width = W; bcv.height = Hc; bg = bcv.getContext('2d');
+  btex = new THREE.CanvasTexture(bcv); btex.anisotropy = 8;
   // skin patch: gently convex, under the drape window
   const geo = new THREE.PlaneGeometry(PX, PZ, 48, 24); geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) { const z = pos.getZ(i), x = pos.getX(i); pos.setY(i, bodyTop(CHEST.x + x, z) - CHEST.y + 0.002); }   // the chest's own curve
   geo.computeVertexNormals();
-  const skin = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({map: tex, roughness: 0.55, clearcoat: 0.3, clearcoatRoughness: 0.45, sheen: 0.25, sheenColor: new THREE.Color(0xffd8c0), envMapIntensity: 0.45}));
+  const skin = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({map: tex, bumpMap: btex, bumpScale: 0.7, roughness: 0.55, clearcoat: 0.3, clearcoatRoughness: 0.45, sheen: 0.25, sheenColor: new THREE.Color(0xffd8c0), envMapIntensity: 0.45}));
   skin.position.copy(CHEST); skin.receiveShadow = true; G.add(skin); F.skin = skin;
   redraw();
 
@@ -96,7 +121,9 @@ export function buildField(parent) {
   buildLaps(O);
   setOpen(0);
 
+  let lastAnim = 0;
   onUpdate((dt) => {
+    if (F.incAnimUntil && clock.t < F.incAnimUntil && clock.t - lastAnim > 0.08) { lastAnim = clock.t; redraw(); }
     const vent = vit.ventilating && vit.bypass < 0.5;
     const br = vent ? (Math.sin(clock.t * 2 * Math.PI / 5) * 0.5 + 0.5) : 0;
     if (F.stage !== 'open') skin.position.y = CHEST.y + 0.003 * br;

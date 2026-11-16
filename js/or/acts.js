@@ -95,7 +95,7 @@ export async function actIncision() {
   const G = gauge('العمق', {band: [0.35, 0.65]});
   hint('اضغط على أول الخط واسحب على طوله. انتبه لمؤشر العمق: الأخضر = الجلد فقط');
   let depth = 0, deepT = 0, deepWarned = 0, last = null, nIn = 0, nAll = 0, sumDev = 0, lastDraw = 0;
-  F.incision = [];
+  F.incision = []; F.incD = []; F.incT = [];
 
   await frame((dt) => {
     TL.steady = TL.tip.clone().add(V3(-0.075, 0.012, 0.07));    // left hand just above the blade, beside the line, stretching the skin
@@ -104,10 +104,12 @@ export async function actIncision() {
       const v = last ? p.distanceTo(last) / Math.max(dt, 1e-3) : 0; last = p.clone();
       const want = v < 0.006 ? 1.0 : v < 0.14 ? 0.5 : 0.18;      // still = pressing deeper; steady = skin; too fast = shallow
       depth = damp(depth, want, v < 0.006 ? 1.6 : 5, dt);
+      // the blade cuts exactly where it goes (on the line or not); only the cut along the line counts for the score
       const dev = distToPolyline(p, line);
-      if (dev < 0.008) {
-        const prev = F.incision[F.incision.length - 1];
-        if (!prev || prev.distanceTo(p) > 0.0025) { F.incision.push(p.clone()); nAll++; sumDev += dev; if (depth > 0.3 && depth < 0.72) nIn++; const b = Math.floor((p.x - x0) / (x1 - x0) * bins.length); if (b >= 0 && b < bins.length) bins[b] = true; }
+      const prev = F.incision[F.incision.length - 1];
+      if (!prev || prev.distanceTo(p) > 0.0025) {
+        F.incision.push(p.clone()); F.incD.push(depth); F.incT.push(clock.t); F.incAnimUntil = clock.t + 2.2;
+        if (dev < 0.008) { nAll++; sumDev += dev; if (depth > 0.3 && depth < 0.72) nIn++; const b = Math.floor((p.x - x0) / (x1 - x0) * bins.length); if (b >= 0 && b < bins.length) bins[b] = true; }
       }
       if (depth > 0.8) { deepT += dt; if (deepT > 0.35 && clock.t - deepWarned > 4) { deepWarned = clock.t; say('ra_deep'); setTarget({sbp: vit.target.sbp - 6}); SC.deep = (SC.deep || 0) + 1; } } else deepT = 0;
       if (clock.t - lastDraw > 0.06) { lastDraw = clock.t; field.redraw(); }
@@ -313,8 +315,8 @@ export async function actCannulate() {
     }
   });
   sm.remove();
-  const top = aortaTop(A.site); leaveCannula('cannulaA', top.clone().add(V3(0, -0.004, 0)), V3(0.45, 0.8, -0.3).normalize());
-  bloodLine(top.clone().add(V3(0.06, 0.11, -0.04)), V3(0.3, 1.0, -1.32), 0x8e1414);
+  const top = aortaTop(A.site), dA = V3(0.45, 0.8, -0.3).normalize(); leaveCannula('cannulaA', top.clone().add(V3(0, -0.004, 0)), dA);
+  bloodLine(top.clone().addScaledVector(dA, 0.196), V3(0.3, 1.0, -1.32), 0x8e1414);       // the line joins the cannula's end
   snip();
   say('ra_venous');
   await pickTool(['cannulaV', 'cannulaA', 'clamp'], 'cannulaV'); trayHide();
@@ -327,8 +329,8 @@ export async function actCannulate() {
     if (ptr.pressed && pxDist(raPos()) < 60) return true;
   });
   rm.remove(); hint('');
-  const ra = raPos(); leaveCannula('cannulaV', ra.clone().add(V3(0, -0.006, 0)), V3(0.55, 0.75, 0.3).normalize());
-  bloodLine(ra.clone().add(V3(0.05, 0.08, 0.03)), V3(0.7, 0.95, -1.32), 0x3a0e18);
+  const ra = raPos(), dV = V3(0.55, 0.75, 0.3).normalize(); leaveCannula('cannulaV', ra.clone().add(V3(0, -0.006, 0)), dV);
+  bloodLine(ra.clone().addScaledVector(dV, 0.194), V3(0.7, 0.95, -1.32), 0x3a0e18);
   putDown();
   award('cannula', high ? 1 : 3);
   return !high;

@@ -6,6 +6,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {camera, onUpdate, damp} from '../core/engine.js';
 import {reach, HANDS} from './hands.js';
 import {socket, naturalFrame} from './grips.js';
+import {bodyTop} from './body.js';
 import {OR} from './room.js';
 import {click as clickSnd} from './sound.js';
 
@@ -69,7 +70,7 @@ function probe() {
 }
 function cannula(r, col) {
   const g = new THREE.Group();
-  tube([[0, 0, 0], [0.004, 0.006, 0], [0.008, 0.018, 0], [0.008, 0.06, 0], [0.008, 0.14, 0]], r, new THREE.MeshPhysicalMaterial({color: col, roughness: 0.2, clearcoat: 1, transparent: true, opacity: 0.85}), g);
+  tube([[0, 0, 0], [0.004, 0.006, 0], [0.008, 0.018, 0], [0.008, 0.06, 0], [0.008, 0.2, 0]], r, new THREE.MeshPhysicalMaterial({color: col, roughness: 0.2, clearcoat: 1, transparent: true, opacity: 0.85}), g);
   cyl(r * 2.2, r * 2.2, 0.004, plastic(0x2a6fb0), 0.03, g, 0.008);
   return g;
 }
@@ -111,8 +112,8 @@ function flowProbe() {
   // transit-time probe: a small U that sits around the graft
   for (const s of [-1, 1]) box(0.003, 0.012, 0.008, plastic(0x8fd0e8, 0.3), s * 0.004, 0.006, 0, g);
   box(0.011, 0.004, 0.008, plastic(0x8fd0e8, 0.3), 0, 0.013, 0, g);
-  cyl(0.0035, 0.0035, 0.09, plastic(0x2d3236), 0.015, g);
-  tube([[0, 0.1, 0], [0, 0.15, 0.01], [0.04, 0.22, 0.05]], 0.002, plastic(0x3c4044), g);
+  cyl(0.0035, 0.0035, 0.14, plastic(0x2d3236), 0.015, g);
+  tube([[0, 0.155, 0], [0, 0.2, 0.01], [0.04, 0.27, 0.05]], 0.002, plastic(0x3c4044), g);
   return g;
 }
 function suction() {
@@ -136,20 +137,20 @@ function gauze() {
 
 /** id → {name, make, dir (handle direction from the tip, world), grip (m from the tip along the handle), roll, icon} */
 export const KIT = {
-  marker:   {name: 'قلم التحديد', make: marker, g: 'pencil', hold: 0.088, r: 0.0058, grip: 0.11, dir: [0.7, 0.6, 0.4], icon: 'M6 18 L18 6 M15 5 l4 4'},
-  scalpel:  {name: 'المشرط', make: scalpel, g: 'knife', hold: 0.08, r: 0.0032, grip: 0.13, dir: [0.82, 0.45, 0.36], icon: 'M4 18 Q8 12 12 12 L20 6 M12 12 l2 2'},
-  cautery:  {name: 'الكيّ', make: cautery, g: 'pencil', hold: 0.11, r: 0.0052, grip: 0.12, dir: [0.7, 0.6, 0.4], icon: 'M5 19 L17 7 M17 7 l3 -3 M9 15 l2 2'},
-  saw:      {name: 'منشار القص', make: saw, g: 'power', hold: 0.13, r: 0.018, fixed: true, grip: 0.16, dir: [0.0, 0.92, 0.38], icon: 'M6 20 V10 h6 v-6 h4 v6 M6 14 h6'},
-  probe:    {name: 'مسبار الموجات', make: probe, g: 'pencil', hold: 0.1, r: 0.006, grip: 0.12, dir: [0.82, 0.52, 0.22], icon: 'M8 18 h8 M12 18 V6 M9 6 h6'},
-  cannulaA: {name: 'القنية الشريانية', make: () => cannula(0.0035, 0xd8e8ee), g: 'pencil', hold: 0.095, r: 0.004, grip: 0.13, dir: [0.8, 0.55, 0.22], icon: 'M6 18 Q8 10 14 8 L20 4'},
-  cannulaV: {name: 'القنية الوريدية', make: () => cannula(0.0075, 0xd8e8ee), g: 'pencil', hold: 0.095, r: 0.0075, grip: 0.13, dir: [0.8, 0.55, 0.25], icon: 'M5 19 Q8 10 14 8 L20 5'},
-  clamp:    {name: 'الملقط', make: clamp, g: 'palm', hold: 0.15, r: 0.004, grip: 0.21, dir: [0.8, 0.5, 0.33], icon: 'M4 12 h10 M14 12 l4 -4 M14 12 l4 4 M18 8 a2 2 0 1 1 0.1 0 M18 16 a2 2 0 1 1 0.1 0'},
-  needle:   {name: 'حامل الإبرة', make: needleDriver, g: 'palm', hold: 0.12, r: 0.003, grip: 0.19, dir: [0.75, 0.55, 0.36], icon: 'M5 19 L16 8 M16 8 a3 3 0 1 1 3 -3'},
-  paddles:  {name: 'المجاديف الداخلية', make: paddle, g: 'power', hold: 0.245, r: 0.0115, fixed: true, grip: 0.3, dir: [0.5, 0.8, 0.3], icon: 'M7 20 V9 M7 9 a3 3 0 1 1 0.1 0 M17 20 V9 M17 9 a3 3 0 1 1 0.1 0'},
-  flow:     {name: 'مسبار التدفق', make: flowProbe, g: 'pencil', hold: 0.09, r: 0.0035, grip: 0.12, dir: [0.82, 0.52, 0.22], icon: 'M9 6 v6 h6 v-6 M12 12 V20'},
-  suction:  {name: 'الشفّاط', make: suction, g: 'pencil', hold: 0.125, r: 0.0045, grip: 0.17, dir: [0.8, 0.55, 0.25], icon: 'M6 18 Q10 8 18 6 M6 18 a1.5 1.5 0 1 1 0.1 0'},
-  retractor:{name: 'المُبعِد', make: () => new THREE.Group(), g: 'power', hold: 0.07, r: 0.006, fixed: true, grip: 0.07, dir: [0.0, 1, 0.2], icon: 'M4 8 h16 M7 8 v9 M17 8 v9 M20 8 a2 2 0 1 1 0.1 0'},
-  wire:     {name: 'أسلاك القص', make: needleDriver, g: 'palm', hold: 0.12, r: 0.003, grip: 0.19, dir: [0.75, 0.55, 0.36], icon: 'M5 12 c3 -6 11 -6 14 0 c-3 6 -11 6 -14 0'},
+  marker:   {name: 'قلم التحديد', make: marker, len: 0.155, g: 'pencil', hold: 0.088, r: 0.0058, grip: 0.11, dir: [0.7, 0.6, 0.4], icon: 'M6 18 L18 6 M15 5 l4 4'},
+  scalpel:  {name: 'المشرط', make: scalpel, len: 0.165, g: 'knife', hold: 0.08, r: 0.0032, grip: 0.13, dir: [0.82, 0.45, 0.36], icon: 'M4 18 Q8 12 12 12 L20 6 M12 12 l2 2'},
+  cautery:  {name: 'الكيّ', make: cautery, len: 0.144, g: 'pencil', hold: 0.11, r: 0.0052, grip: 0.12, dir: [0.7, 0.6, 0.4], icon: 'M5 19 L17 7 M17 7 l3 -3 M9 15 l2 2'},
+  saw:      {name: 'منشار القص', make: saw, len: 0.2, g: 'power', hold: 0.13, r: 0.018, fixed: true, grip: 0.16, dir: [0.0, 0.92, 0.38], icon: 'M6 20 V10 h6 v-6 h4 v6 M6 14 h6'},
+  probe:    {name: 'مسبار الموجات', make: probe, len: 0.17, g: 'pencil', hold: 0.1, r: 0.006, grip: 0.12, dir: [0.82, 0.52, 0.22], icon: 'M8 18 h8 M12 18 V6 M9 6 h6'},
+  cannulaA: {name: 'القنية الشريانية', make: () => cannula(0.0035, 0xd8e8ee), len: 0.2, g: 'pencil', hold: 0.14, r: 0.004, grip: 0.13, dir: [0.8, 0.55, 0.22], icon: 'M6 18 Q8 10 14 8 L20 4'},
+  cannulaV: {name: 'القنية الوريدية', make: () => cannula(0.0075, 0xd8e8ee), len: 0.2, g: 'pencil', hold: 0.14, r: 0.0075, grip: 0.13, dir: [0.8, 0.55, 0.25], icon: 'M5 19 Q8 10 14 8 L20 5'},
+  clamp:    {name: 'الملقط', make: clamp, len: 0.19, g: 'palm', hold: 0.15, r: 0.004, grip: 0.21, dir: [0.8, 0.5, 0.33], icon: 'M4 12 h10 M14 12 l4 -4 M14 12 l4 4 M18 8 a2 2 0 1 1 0.1 0 M18 16 a2 2 0 1 1 0.1 0'},
+  needle:   {name: 'حامل الإبرة', make: needleDriver, len: 0.17, g: 'palm', hold: 0.12, r: 0.003, grip: 0.19, dir: [0.75, 0.55, 0.36], icon: 'M5 19 L16 8 M16 8 a3 3 0 1 1 3 -3'},
+  paddles:  {name: 'المجاديف الداخلية', make: paddle, len: 0.3, g: 'power', hold: 0.245, r: 0.0115, fixed: true, grip: 0.3, dir: [0.5, 0.8, 0.3], icon: 'M7 20 V9 M7 9 a3 3 0 1 1 0.1 0 M17 20 V9 M17 9 a3 3 0 1 1 0.1 0'},
+  flow:     {name: 'مسبار التدفق', make: flowProbe, len: 0.155, g: 'pencil', hold: 0.125, r: 0.0035, grip: 0.12, dir: [0.82, 0.52, 0.22], icon: 'M9 6 v6 h6 v-6 M12 12 V20'},
+  suction:  {name: 'الشفّاط', make: suction, len: 0.19, g: 'pencil', hold: 0.125, r: 0.0045, grip: 0.17, dir: [0.8, 0.55, 0.25], icon: 'M6 18 Q10 8 18 6 M6 18 a1.5 1.5 0 1 1 0.1 0'},
+  retractor:{name: 'المُبعِد', make: () => new THREE.Group(), len: 0.1, g: 'power', hold: 0.07, r: 0.006, fixed: true, grip: 0.07, dir: [0.0, 1, 0.2], icon: 'M4 8 h16 M7 8 v9 M17 8 v9 M20 8 a2 2 0 1 1 0.1 0'},
+  wire:     {name: 'أسلاك القص', make: needleDriver, len: 0.17, g: 'palm', hold: 0.12, r: 0.003, grip: 0.19, dir: [0.75, 0.55, 0.36], icon: 'M5 12 c3 -6 11 -6 14 0 c-3 6 -11 6 -14 0'},
 };
 // ---------------------------------------------------------------- real instrument models (Sketchfab, CC BY 4.0)
 const LOADED = {};
@@ -248,19 +249,56 @@ export function leftHold(id) { if (T.left && T.meshes[T.left]) T.meshes[T.left].
 
 // ---------------------------------------------------------------- the hand that holds it
 const _dummy = new THREE.Object3D();
-const FORCEPS_K = {g: 'pencil', hold: 0.11, r: 0.0026}, PADDLE_L = {g: 'power', hold: 0.245, r: 0.0115, fixed: true};
+const FORCEPS_K = {g: 'pencil', hold: 0.11, r: 0.0026, len: 0.16}, PADDLE_L = {g: 'power', hold: 0.245, r: 0.0115, fixed: true};
+/** how far the hand's lowest knuckle or fingertip is below the skin (m, 0 = clear); from its last drawn pose */
+const _hp = V3();
+function handBelowSkin(a) {
+  if (!a.chains) return 0;
+  let pen = 0;
+  const test = (b) => { b.getWorldPosition(_hp); pen = Math.max(pen, bodyTop(_hp.x, _hp.z) + 0.009 - _hp.y); };
+  // wrist, knuckles, thumb, index and middle finger (the curled ring and little fingers may rest on the drape)
+  test(a.hand); for (const n in a.chains) { const c = a.chains[n]; const upto = n === 'ring' || n === 'pinky' ? 1 : c.length; for (let i = 0; i < upto; i++) test(c[i]); }
+  return pen;
+}
 /** where the wrist must be and how the hand must turn so that instrument `k` (in grip k.g) has its tip at `tip` */
 function gripPose(side, mesh, k, tip, dir, dt, {glue = true} = {}) {
   const h = HANDS[side], a = HANDS.rig && HANDS.rig.arms[side];
   if (!a || !a.can) { h.pose = null; return false; }
-  const grip = k.g || 'pencil', sock = socket(a, grip, k.hold || 0.06);
+  const grip = k.g || 'pencil', same = h.pose && h.pose.grip === grip && h.pose.mesh === mesh;
+  // working inside the opened chest: the fingers hold the instrument at the near rim of the wound, outside the body,
+  // and the instrument goes down from there to its target — so the hand neither enters the chest nor hides the target
+  const inside = !k.fixed && tip.y < bodyTop(tip.x, tip.z) - 0.008;
+  let hold = k.hold || 0.06, rimDir = null;
+  if (inside) {
+    const G = V3(tip.x + (side === 'R' ? 0.04 : -0.05), 0, 0.185); G.y = bodyTop(G.x, G.z) + 0.07;
+    const d = G.sub(tip), dist = d.length(); rimDir = d.normalize();
+    hold = Math.max(hold, Math.min(dist, (k.len || 0.2) - 0.025));
+  }
+  h.deep = damp(h.deep || 0, inside ? 1 : 0, 6, dt);
+  // and anywhere else, if a knuckle or fingertip would sink below the skin, the hand first slides back up a long
+  // instrument's shaft (as a surgeon chokes up), then tilts up about the tip; the tip stays where it works
+  const pen = handBelowSkin(a);
+  const slideMax = Math.max(0, (k.len || 0) - hold - 0.025);
+  let slide = same ? h.slide || 0 : 0, raise = same ? h.raise || 0 : 0;
+  if (pen > 0.0005) { if (slide < slideMax) slide = Math.min(slideMax, slide + (0.05 + pen * 3) * dt); else raise = Math.min(0.75, raise + (0.4 + pen * 30) * dt); }
+  else if (raise > 0) raise = Math.max(0, raise - 0.25 * dt); else slide = Math.max(0, slide - 0.02 * dt);
+  h.slide = slide = Math.min(slide, slideMax); h.raise = raise;
+  const holdNow = (same && h.holdS != null ? damp(h.holdS, hold, 5, dt) : hold); h.holdS = holdNow;
+  const sock = socket(a, grip, holdNow + slide);
   let want;
   if (k.fixed) { pose(_dummy, tip, dir, k.roll || 0); want = _dummy.quaternion.clone().multiply(sock.quat.clone().invert()); }
-  else want = naturalFrame(a, grip, side, a.up.getWorldPosition(V3()), tip);
-  const same = h.pose && h.pose.grip === grip && h.pose.mesh === mesh;
-  const Qc = same ? h.pose.Qc.slerp(want, 1 - Math.exp(-14 * dt)) : want;
+  else {
+    want = naturalFrame(a, grip, side, a.up.getWorldPosition(V3()), tip);
+    if (rimDir) {                                           // turn the natural hand so the instrument runs from the rim to the tip
+      const hc = sock.dir.clone().negate().applyQuaternion(want);
+      want = new THREE.Quaternion().setFromUnitVectors(hc, rimDir).multiply(want);
+    }
+  }
+  const Qb = same ? h.pose.Qb.slerp(want, 1 - Math.exp(-10 * dt)) : want.clone();
   h.close = same ? damp(h.close ?? 1, 1, glue ? 9 : 3, dt) : (glue ? 1 : 0.25);
-  h.pose = {wrist: tip.clone().sub(sock.pos.clone().applyQuaternion(Qc)), Qc, sock, mesh, grip, r: k.r || 0.004, close: glue ? h.close : 0.25, glue};
+  const Qc = Qb.clone(), hd = sock.dir.clone().negate().applyQuaternion(Qb), ax = V3().crossVectors(hd, V3(0, 1, 0));
+  if (raise > 1e-4 && ax.lengthSq() > 1e-6) Qc.premultiply(new THREE.Quaternion().setFromAxisAngle(ax.normalize(), raise));
+  h.pose = {wrist: tip.clone().sub(sock.pos.clone().applyQuaternion(Qc)), Qb, Qc, sock, mesh, grip, r: k.r || 0.004, close: glue ? h.close : 0.25, glue};
   return true;
 }
 /** an empty hand: `grip` (steady, relaxed, open) with the palm at `at` (offset = palm point in the hand frame) */
