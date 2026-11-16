@@ -141,7 +141,7 @@ export class Character {
       o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false;
       o.material = (Array.isArray(o.material) ? o.material : [o.material]).map(m => {
         const n = (m.name || '').toLowerCase();
-        const kind = n.includes('opacity') ? 'opacity' : n.includes('head') ? 'head' : 'body';
+        const kind = n.includes('opacity') ? 'opacity' : n.includes('protection') ? 'protection' : n.includes('head') ? 'head' : 'body';   // protection = theatre cap/mask/gown (medical avatars)
         return mats[kind] ||= mk(kind);
       });
       if (o.morphTargetDictionary) this.morph = {mesh: o, dict: pruneMorphs(o, this.o.talks)};

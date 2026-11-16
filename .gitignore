@@ -9,3 +9,8 @@ node_modules/
 
 # stand-alone quick-version build (tools/build_mini.py)
 _build/
+__pycache__/
+
+# downloaded with tools/fetch_sketchfab.py but not used by the game
+assets/or_models/nurse/
+assets/or_models/retractor_hand/

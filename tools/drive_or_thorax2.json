@@ -1,0 +1,7 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 3],
+ ["shot", "t1_view.png"],
+ ["eval", "(async()=>{const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x+0.12,C.y+0.3,-0.02), new __or.THREE.Vector3(C.x-0.01,C.y-0.04,-0.035), {fov:30}); return 1})()"], ["wait", 1.2], ["shot", "t5_closeL.png"],
+ ["wait", 2.5], ["shot", "t5b_closeL.png"],
+ ["eval", "(async()=>{const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x+0.05,C.y+0.25,0.32), new __or.THREE.Vector3(C.x,C.y-0.05,0), {fov:34}); return 1})()"], ["wait", 1.2], ["shot", "t3_side.png"],
+ ["eval", "(async()=>{const o=__or; o.F.open.visible=false; const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x+0.35,C.y+0.35,0.45), new __or.THREE.Vector3(C.x,C.y-0.08,0), {fov:40}); return 1})()"], ["wait", 1.2], ["shot", "t6_anat.png"]
+]

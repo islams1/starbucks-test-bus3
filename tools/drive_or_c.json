@@ -1,0 +1,7 @@
+[["waitfor", "#tray:not(.hidden)", 240000], ["wait", 1.5], ["shot", "c0_tray.png"], ["click", "#tray .tl[data-id=marker]"], ["wait", 1.0],
+ ["mmove", 600, 380, 5], ["wait", 0.8], ["shot", "c1_marker.png"],
+ ["dragjs", "Array.from({length:26},(_, i)=>__or.scr(-0.553+i*(0.235/25),1.119,0))", 3, 0.03, "hold"], ["wait", 0.2], ["shot", "c2_draw.png"], ["mup"],
+ ["waitfor", "#tray:not(.hidden)", 60000], ["wait", 0.5], ["click", "#tray .tl[data-id=scalpel]"], ["wait", 0.8],
+ ["dragjs", "Array.from({length:20},(_, i)=>__or.scr(-0.553+i*(0.235/39),1.119,0))", 3, 0.05, "hold"], ["wait", 0.1], ["shot", "c3_cutting.png"],
+ ["eval", "(()=>{const f=__orflow; f.cine.stop(); __or.camera.position.set(-0.1,1.5,0.55); __or.camera.lookAt(-0.5,1.17,0.03); __or.camera.fov=40; __or.camera.updateProjectionMatrix(); return 1})()"], ["wait", 0.6], ["shot", "c4_hands_close.png"]
+]

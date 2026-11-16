@@ -1,0 +1,8 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 3],
+ ["shot", "t1_view.png"],
+ ["eval", "(()=>{const o=__or; o.TEAM.patient && 0; const c=o.camera; window.__hold=true; return 1})()"],
+ ["eval", "(()=>{const o=__or,T=o.THREE; const c=o.camera; const go=(e,t,f)=>{ (window.__cine||{}); c.position.set(...e); c.lookAt(...t); c.fov=f; c.updateProjectionMatrix(); }; window.__go=go; return 1})()"],
+ ["eval", "(async()=>{const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x+0.02,C.y+0.55,0.0), new __or.THREE.Vector3(C.x,C.y-0.04,0), {fov:30}); return 1})()"], ["wait", 1.2], ["shot", "t2_top.png"],
+ ["eval", "(async()=>{const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x+0.05,C.y+0.25,0.32), new __or.THREE.Vector3(C.x,C.y-0.05,0), {fov:34}); return 1})()"], ["wait", 1.2], ["shot", "t3_side.png"],
+ ["eval", "(async()=>{const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x-0.35,C.y+0.3,0.05), new __or.THREE.Vector3(C.x,C.y-0.05,0), {fov:34}); return 1})()"], ["wait", 1.2], ["shot", "t4_head.png"]
+]

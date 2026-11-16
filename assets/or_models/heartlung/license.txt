@@ -1,0 +1,11 @@
+Model Information:
+* title:	Heartlung Machine
+* source:	https://sketchfab.com/3d-models/heartlung-machine-34f7d192bd8d4ca498b5e3d4948101ba
+* author:	Kevin Gille (https://sketchfab.com/kevingille)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Heartlung Machine" (https://sketchfab.com/3d-models/heartlung-machine-34f7d192bd8d4ca498b5e3d4948101ba) by Kevin Gille (https://sketchfab.com/kevingille) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

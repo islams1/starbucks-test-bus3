@@ -1,0 +1,4 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 1],
+ ["eval", "(async()=>{const o=__or, T=o.THREE, m=o.H.mesh; o.H.group.updateMatrixWorld(true); const p=m.geometry.attributes.position, v=new T.Vector3(), out=[]; const step=Math.max(1,Math.floor(p.count/9000)); for(let i=0;i<p.count;i+=step){v.fromBufferAttribute(p,i).applyMatrix4(m.matrixWorld); out.push(+v.x.toFixed(4),+v.y.toFixed(4),+v.z.toFixed(4));} const B=await import('/js/or/body.js'); const bt=[]; for(let x=-0.7;x<=-0.2;x+=0.01){const row=[]; for(let z=-0.2;z<=0.2001;z+=0.02) row.push(+B.bodyTop(x,z).toFixed(4)); bt.push(row);} const HM=await import('/js/or/heart.js'); window.__dump=JSON.stringify({heartOffset:HM.HEART_OFFSET.toArray(), heart:out, bodyTop:bt, chest:o.CHEST.toArray(), count:p.count}); return window.__dump.length})()"],
+ ["eval", "window.__dump"]
+]

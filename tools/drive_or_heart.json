@@ -1,0 +1,11 @@
+[["waitfor", "#cmds button[data-id=hep]", 240000], ["wait", 1.2],
+ ["eval", "(()=>{window.__ap=(k,dy=0.0145)=>{const H=__orflow.H; const p=H.aortaCurve.getPointAt(k).clone(); H.group.localToWorld(p); return __or.scr(p.x,p.y+dy,p.z)}; return 1})()"],
+ ["shot", "g1_heart.png"], ["click", "#cmds button[data-id=hep]"],
+ ["waitfor", "#choices:not(.hidden)", 60000], ["click", "#choicelist .choice[data-key=a]"],
+ ["waitfor", "#tray:not(.hidden)", 60000], ["wait", 0.6], ["click", "#tray .tl[data-id=probe]"], ["wait", 1],
+ ["dragjs", "Array.from({length:20},(_, i)=>__ap(0.08+i*0.03))", 3, 0.05, "hold"], ["wait", 0.2], ["shot", "g2_scan.png"], ["mup"],
+ ["click", "#usdone"], ["wait", 0.4], ["clickjs", "__ap(0.9)"],
+ ["waitfor", "#tray:not(.hidden)", 60000], ["waitjs", "__or.vit.sbp < 106", 30], ["wait", 0.5], ["click", "#tray .tl[data-id=cannulaA]"], ["wait", 0.8], ["mmove", 700, 300, 4], ["wait", 0.6], ["shot", "g3_cannula.png"], ["clickjs", "__ap(0.9)"],
+ ["waitfor", "#tray:not(.hidden)", 60000], ["wait", 0.5], ["click", "#tray .tl[data-id=cannulaV]"], ["wait", 0.8], ["clickjs", "(()=>{const p=__orflow.H.ra.getWorldPosition(new __or.THREE.Vector3()); return __or.scr(p.x,p.y+0.014,p.z)})()"],
+ ["waitfor", "#cmds button[data-id=cpb]", 60000], ["wait", 0.8], ["shot", "g4_cannulas.png"]
+]

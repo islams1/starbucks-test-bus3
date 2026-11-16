@@ -1,0 +1,114 @@
+/* Operating-room quick version (or.html) — builds on game.css */
+body.or #loading{background:radial-gradient(ellipse at 50% 40%,#0f1a1c 0%,#050607 70%)}
+body.or .brandmark{color:#e0705f}
+.or-howto{display:grid;gap:10px;margin:14px 0 18px;color:var(--ink2);line-height:1.8;font-size:.95rem}
+.or-howto .warn{color:#e8c4bc;background:rgba(224,112,95,.08);border:1px solid rgba(224,112,95,.3);border-radius:10px;padding:8px 12px}
+
+/* vital signs strip (top-left) */
+#vitals{position:fixed;top:14px;left:14px;z-index:30;background:rgba(4,8,10,.86);border:1px solid #1d2b30;border-radius:10px;padding:6px 8px 4px;pointer-events:none;direction:ltr}
+#vitals canvas{display:block;width:390px;height:126px}
+#vitals .clocks{display:flex;justify-content:space-between;gap:12px;font-size:.78rem;color:#9fb3b8;direction:rtl;padding:2px 2px 0}
+#vitals .clocks b{font:700 .9rem Inter;color:#e8f0f0;direction:ltr;unicode-bidi:isolate;margin-inline-start:4px}
+#vitals.alarm{border-color:#e0453a;box-shadow:0 0 0 2px rgba(224,69,58,.45),0 0 26px rgba(224,69,58,.35);animation:alarmpulse .9s infinite}
+@keyframes alarmpulse{50%{box-shadow:0 0 0 2px rgba(224,69,58,.15),0 0 8px rgba(224,69,58,.15)}}
+#alarmtint{position:fixed;inset:0;z-index:9;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(190,20,10,.38));opacity:0;transition:opacity .35s}
+#alarmtint.on{opacity:1;animation:tintpulse 1s infinite}
+@keyframes tintpulse{50%{opacity:.55}}
+body.or #objective{top:auto;bottom:118px;right:18px;max-width:330px}
+
+/* instrument tray (bottom) */
+#tray{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:32;display:flex;gap:8px;background:rgba(14,22,26,.82);border:1px solid #27424a;border-radius:14px;padding:8px 10px;backdrop-filter:blur(6px);max-width:94vw;flex-wrap:wrap;justify-content:center}
+#tray .tl{display:grid;justify-items:center;gap:3px;min-width:74px;padding:6px 6px 5px;border-radius:10px;border:1px solid transparent;background:rgba(255,255,255,.03);color:#dfe9ea;font-size:.74rem;cursor:pointer;transition:.15s}
+#tray .tl svg{width:36px;height:24px}
+#tray .tl:hover{border-color:#4f8a94;background:rgba(79,138,148,.12)}
+#tray .tl.want{border-color:var(--accent);box-shadow:0 0 0 1px rgba(217,178,111,.4),0 0 14px rgba(217,178,111,.35);animation:glow 1.6s ease-in-out infinite}
+#tray .tl.held{background:rgba(127,199,154,.18);border-color:#7fc79a}
+#tray .lbl{font-size:.72rem;color:#8fa7ab;align-self:center;padding:0 6px}
+
+/* orders to the team (right side) */
+#cmds{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:32;display:grid;gap:8px}
+#cmds button{min-width:170px;background:rgba(14,22,26,.88);color:#e8f0f0;border:1px solid #2f5560;border-radius:10px;padding:9px 14px;font-size:.92rem;text-align:start;display:flex;gap:8px;align-items:center}
+#cmds button::before{content:"🗣";opacity:.75}
+#cmds button:hover{border-color:var(--accent)}
+#cmds button.want{border-color:var(--accent);animation:glow 1.6s ease-in-out infinite}
+
+/* side panel: ultrasound / flow / ROTEM / echo readouts */
+#orpanel{position:fixed;left:14px;top:178px;z-index:30;background:rgba(4,8,10,.9);border:1px solid #1d2b30;border-radius:10px;padding:8px;color:#dfe9ea;width:300px;font-size:.85rem;line-height:1.6}
+#orpanel h4{margin:0 0 6px;font-size:.88rem;color:#9fd2c6}
+#orpanel canvas{display:block;width:100%;border-radius:6px;background:#000}
+#orpanel .row{display:flex;justify-content:space-between;gap:10px;direction:rtl}
+#orpanel .row b{font:700 .95rem Inter;direction:ltr;unicode-bidi:isolate}
+#orpanel .bad{color:#ff7b6b}#orpanel .ok{color:#7fd6a0}
+
+/* time-out checklist */
+#ckl{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:34;width:min(520px,92vw);background:#f4f1ea;color:#1f2326;border-radius:14px;padding:16px 18px;box-shadow:0 24px 60px rgba(0,0,0,.55);font-family:var(--ar)}
+#ckl h3{margin:0 0 4px}#ckl p{margin:0 0 10px;color:#5b6166;font-size:.9rem}
+#ckl .it{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid #d6d0c4;border-radius:10px;margin-bottom:7px;background:#fff;cursor:pointer;transition:.15s}
+#ckl .it .bx{width:20px;height:20px;border:2px solid #8a9298;border-radius:5px;display:grid;place-items:center;font-size:.8rem;flex:none}
+#ckl .it.done{background:#e6f2ea;border-color:#86b597}#ckl .it.done .bx{background:#2e8b57;border-color:#2e8b57;color:#fff}
+#ckl .it.warn{background:#fbebe7;border-color:#d79082}
+#ckl .acts{display:flex;gap:8px;justify-content:space-between;margin-top:10px}
+#ckl .acts button{border-radius:9px;padding:8px 14px;font-size:.9rem;border:0}
+#ckl .acts .go{background:#1f6f54;color:#fff}#ckl .acts .short{background:#e3ddd2;color:#3a3f43}
+
+/* gauge shown while cutting / sawing / cranking */
+#gauge{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:31;background:rgba(10,16,18,.82);border:1px solid #2f5560;border-radius:10px;padding:6px 12px;color:#dfe9ea;font-size:.85rem;display:flex;gap:10px;align-items:center;pointer-events:none}
+#gauge .bar{width:180px;height:8px;background:#22343a;border-radius:4px;overflow:hidden;direction:ltr}
+#gauge .bar i{display:block;height:100%;width:0;background:#7fd6a0;transition:width .08s}
+#gauge .bar i.hot{background:#ff7b6b}
+.hidden{display:none!important}
+@media (max-width:760px){#vitals canvas{width:300px;height:97px}#cmds button{min-width:130px;font-size:.82rem}#tray .tl{min-width:58px}#orpanel{width:240px}}
+
+/* markers that follow points in the field */
+#hotspots .mk{position:absolute;transform:translate(-50%,-50%);pointer-events:none;display:flex;align-items:center;gap:6px;direction:rtl;white-space:nowrap}
+#hotspots .mk.click{pointer-events:auto;cursor:pointer}
+#hotspots .mk i{display:block;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 12px rgba(255,255,255,.4);flex:none}
+#hotspots .mk span{background:rgba(8,14,16,.82);color:#e8f0f0;font-size:.78rem;padding:2px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.12)}
+#hotspots .mk.land i{width:10px;height:10px;border-color:#c9a7ff;box-shadow:0 0 10px rgba(201,167,255,.7)}
+#hotspots .mk.bleed i{width:9px;height:9px;border-color:#ff6b6b;animation:pulse 1s infinite}
+#hotspots .mk.crank i{width:30px;height:30px;border:2px dashed #ffd166;background:rgba(255,209,102,.08);animation:spin 3s linear infinite}
+#hotspots .mk.site i{width:12px;height:12px;border-color:#7fd6a0;box-shadow:0 0 14px rgba(127,214,160,.8);animation:pulse 1.4s infinite}
+#hotspots .mk.pad i{width:42px;height:42px;border:3px solid #ffd166;background:rgba(255,209,102,.12);animation:pulse 1s infinite}
+#hotspots .mk.graft i{border-color:#5ad1ff}#hotspots .mk.graft.bad i{border-color:#ff7b6b;animation:pulse 1s infinite}
+#hotspots .mk.search i{border-color:#ffd166}#hotspots .mk.search.done{opacity:.35;pointer-events:none}#hotspots .mk.search.glow i{box-shadow:0 0 0 4px rgba(255,209,102,.45),0 0 18px #ffd166;animation:pulse 1s infinite}
+#hotspots .mk.gauze i{border-color:#fff;width:20px;height:20px;animation:pulse .9s infinite}
+#hotspots .mk.stitch{width:0;height:0}
+#hotspots .mk.stitch b{position:absolute;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:rgba(10,20,24,.65);border:1.5px solid rgba(255,255,255,.55);color:#fff;font:700 .62rem Inter;display:grid;place-items:center}
+#hotspots .mk.stitch s{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #ffd166;transform:translate(-50%,-50%) scale(var(--s,2));opacity:0}
+#hotspots .mk.stitch.on b{border-color:#ffd166;box-shadow:0 0 10px #ffd166}#hotspots .mk.stitch.on s{opacity:1}
+#hotspots .mk.stitch.ok b{background:#1f6f54;border-color:#7fd6a0}#hotspots .mk.stitch.bad b{background:#7a2620;border-color:#ff7b6b}
+@keyframes pulse{50%{transform:scale(1.25);opacity:.7}}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* time-skip captions */
+#orcap{position:fixed;inset:0;z-index:61;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .6s;background:rgba(0,0,0,.72);color:#e8f0f0;font-size:1.25rem;line-height:1.9;text-align:center;padding:0 12vw}
+#orcap.on{opacity:1}
+/* points popup */
+.ptpop{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:baseline;gap:10px;background:rgba(10,16,18,.9);border:1px solid #2f5560;border-radius:12px;padding:8px 16px;color:#e8f0f0;animation:ptin 3.6s forwards;pointer-events:none}
+.ptpop b{font:700 1.5rem Inter}.ptpop.good b{color:#7fd6a0}.ptpop.mid b{color:#ffd166}.ptpop.bad b{color:#ff7b6b}.ptpop small{color:#8fa7ab;font:600 .8rem Inter}
+@keyframes ptin{0%{opacity:0;transform:translate(-50%,-10px)}8%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+/* score card items */
+.sc-items{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sc-items li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.88rem;color:#dfe9ea}
+.sc-items li b{font:700 .85rem Inter}.sc-items li.ok b{color:#7fd6a0}.sc-items li.mid b{color:#ffd166}.sc-items li.no b{color:#ff7b6b}
+.sc-items li small{grid-column:1/-1;color:#8fa7ab;font-size:.78rem;line-height:1.6}
+.sc-end{color:#c9d6d8;line-height:1.9;max-width:640px}
+/* panel extras */
+#orpanel .pbtn,#orpanel .joules button{margin-top:8px;width:100%;background:#1f6f54;color:#fff;border:0;border-radius:8px;padding:8px;font-size:.88rem;cursor:pointer}
+#orpanel .joules{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}#orpanel .joules button{margin:0;background:#2b3e44;font:700 .85rem Inter}#orpanel .joules button:hover{background:#c0392b}
+#orpanel .note{color:#8fa7ab;font-size:.78rem;margin:6px 0 0}
+#gauge .bar{position:relative}#gauge .bar s{position:absolute;top:0;bottom:0;background:rgba(127,214,160,.25);border-left:1px solid #7fd6a0;border-right:1px solid #7fd6a0}
+#gauge b{font:700 .8rem Inter;min-width:3.2em}
+body.or #scorebox{top:14px}
+body.or #subs{bottom:112px}
+
+body.or #subs{z-index:62}
+body.or #scorecard{z-index:63}
+body.or #prompt{bottom:30%}
+body.or #ckl{left:auto;right:3vw;top:20%;transform:none;width:min(430px,90vw)}
+body.or #prompt{pointer-events:none}
+body.or #hotspots{z-index:33}
+.credits-card{background:#14181b;color:#dfe6ea;border:1px solid #2b3338;border-radius:14px;padding:22px 26px;max-width:min(680px,92vw);font-size:.9rem;line-height:1.7}
+.credits-card h3{margin:0 0 10px;font-size:1.15rem}
+.credits-card ul{margin:0;padding-left:18px}
+.credits-card a{color:#8fd3c7}
+.credits-card small{color:#8a979e}

@@ -3,12 +3,13 @@ Vertices are snapped to a grid (cell = bbox diagonal / resolution); vertices in 
 and UV are merged, degenerate triangles dropped. UV seams and hard edges survive because UV/normal are in the key.
 Usage (from the repo root):
   python -I tools/decimate.py assets/models/hanging_industrial_lamp/hanging_industrial_lamp.gltf hanging_industrial_lamp_lod 60
-  args: <source.gltf> <output name> <resolution (cells along the diagonal)>
+  args: <source.gltf> <output name> <resolution (cells along the diagonal)> [uv precision, default 24]
 """
 import json, os, sys
 import numpy as np
 
 src, out_name, res = sys.argv[1], sys.argv[2], float(sys.argv[3])
+UVQ = float(sys.argv[4]) if len(sys.argv) > 4 else 24      # UV precision in the merge key (raise it to keep texture seams intact)
 d = os.path.dirname(src)
 g = json.load(open(src, encoding='utf8'))
 binb = open(os.path.join(d, g['buffers'][0]['uri']), 'rb').read()
@@ -53,7 +54,7 @@ for mesh in g['meshes']:
         cell = diag / res
         key = [np.floor((pos - pos.min(0)) / cell).astype(np.int64)]
         if 'NORMAL' in attrs: key.append(np.round(attrs['NORMAL'] * 2).astype(np.int64))          # ~60° normal buckets
-        if 'TEXCOORD_0' in attrs: key.append(np.floor(attrs['TEXCOORD_0'] * 24).astype(np.int64))  # keep UV islands apart
+        if 'TEXCOORD_0' in attrs: key.append(np.floor(attrs['TEXCOORD_0'] * UVQ).astype(np.int64))  # keep UV islands apart
         k = np.concatenate(key, 1)
         uniq, inv = np.unique(k, axis=0, return_inverse=True); inv = inv.reshape(-1)
         n = len(uniq); cnt = np.bincount(inv, minlength=n)[:, None]

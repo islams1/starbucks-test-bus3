@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>heart preview</title>
+<style>html,body{margin:0;background:#1b1d1f;overflow:hidden}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const r = new THREE.WebGLRenderer({antialias: true}); r.setSize(innerWidth, innerHeight); document.body.appendChild(r.domElement);
+r.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene(); scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+const cam = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.01, 10);
+scene.add(new THREE.DirectionalLight(0xffffff, 2.5).translateY(1).translateZ(0.3));
+const COL = {myocardium: 0x7a1c1f, cavities: 0x5a1015, lad: 0xb03a3a, diagonal: 0xb03a3a, circumflex: 0xb03a3a, rca: 0xb03a3a, marginal: 0xb03a3a, pda: 0xb03a3a, veins: 0x4a1a30, aorta: 0xe0c9a2, pulmonary_trunk: 0xb5646a, svc: 0x4b2238, lima: 0xc06060};
+new GLTFLoader().load('../assets/or_models/bp3d_heart.glb', (g) => {
+  g.scene.traverse(o => { if (o.isMesh) { o.geometry.computeVertexNormals(); o.material = new THREE.MeshPhysicalMaterial({color: COL[o.name] ?? 0x888888, roughness: 0.4, clearcoat: 0.6}); o.visible = o.name !== 'cavities' || window.__cav; } });
+  scene.add(g.scene); window.__g = g.scene; window.__ready = true;
+});
+window.__view = (x, y, z, fov = 35) => { cam.position.set(x, y, z); cam.lookAt(0, 0, 0); cam.fov = fov; cam.updateProjectionMatrix(); };
+window.__view(0, 0.45, 0.05);
+(function f() { requestAnimationFrame(f); r.render(scene, cam); })();
+</script></body></html>

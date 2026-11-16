@@ -17,6 +17,22 @@ def run(pg, steps):
         elif k=='down': pg.keyboard.down(st[1])
         elif k=='up': pg.keyboard.up(st[1])
         elif k=='eval': print('eval', st[1][:60], '=>', pg.evaluate(st[1]), flush=True)
+        elif k=='mmove': pg.mouse.move(st[1], st[2], steps=st[3] if len(st)>3 else 1)
+        elif k=='mdown': pg.mouse.down()
+        elif k=='mup': pg.mouse.up()
+        elif k=='dragjs':
+            pts=pg.evaluate(st[1]); per=st[2] if len(st)>2 else 4; dl=st[3] if len(st)>3 else 0.016
+            if not pts: continue                  # nothing to drag (e.g. the handle is already gone)
+            pg.mouse.move(pts[0][0], pts[0][1]); time.sleep(0.1); pg.mouse.down()
+            for q in pts[1:]: pg.mouse.move(q[0], q[1], steps=per); time.sleep(dl)
+            if not (len(st)>4 and st[4]=='hold'): pg.mouse.up()
+        elif k=='clickjs':
+            q=pg.evaluate(st[1]); pg.mouse.move(q[0], q[1], steps=3); time.sleep(0.05); pg.mouse.down(); time.sleep(0.06); pg.mouse.up()
+        elif k=='waitjs':
+            t0w=time.time()
+            while not pg.evaluate(st[1]):
+                if time.time()-t0w > (st[2] if len(st)>2 else 60): raise Exception('waitjs timeout: '+st[1][:80])
+                time.sleep(0.2)
         elif k=='waitfor': pg.wait_for_selector(st[1], timeout=st[2] if len(st)>2 else 120000, state=st[3] if len(st)>3 else 'visible')
 with sync_playwright() as p:
     b=p.chromium.launch(channel='msedge', headless=True, args=(['--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-gpu'] if os.environ.get('CPU') else ['--use-angle=d3d11'])+['--enable-gpu','--ignore-gpu-blocklist','--autoplay-policy=no-user-gesture-required']+(['--disable-gpu-vsync','--disable-frame-rate-limit'] if os.environ.get('UNCAP') else []))

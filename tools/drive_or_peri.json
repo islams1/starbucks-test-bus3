@@ -1,0 +1,5 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 1],
+ ["eval", "(()=>{__or.F.pericardium=1; return 1})()"], ["wait", 3], ["shot", "p1_closed.png"],
+ ["eval", "(async()=>{const m=await import('/js/core/cine.js'); const C=__or.CHEST; m.hold(()=>new __or.THREE.Vector3(C.x+0.12,C.y+0.32,0.02), new __or.THREE.Vector3(C.x-0.01,C.y-0.04,0), {fov:28}); return 1})()"], ["wait", 1.2], ["shot", "p2_close.png"],
+ ["eval", "(()=>{__or.F.pericardium=0; return 1})()"], ["wait", 3], ["shot", "p3_open.png"]
+]

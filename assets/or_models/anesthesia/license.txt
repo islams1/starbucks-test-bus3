@@ -1,0 +1,11 @@
+Model Information:
+* title:	Anesthesia Machine on a Medical Cart
+* source:	https://sketchfab.com/3d-models/anesthesia-machine-on-a-medical-cart-6b28fafc23244ef9a47e84dbde09b5a4
+* author:	kkso199 (https://sketchfab.com/kkso199)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Anesthesia Machine on a Medical Cart" (https://sketchfab.com/3d-models/anesthesia-machine-on-a-medical-cart-6b28fafc23244ef9a47e84dbde09b5a4) by kkso199 (https://sketchfab.com/kkso199) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

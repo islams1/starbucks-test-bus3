@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Cpath d=%22M32 56C14 42 6 32 6 21a12 12 0 0 1 26-6a12 12 0 0 1 26 6c0 11-8 21-26 35z%22 fill=%22%23c0392b%22/%3E%3C/svg%3E">
+<title>عودة النبض — جراحة القلب المفتوح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/or.css">
+</head>
+<body class="or">
+<canvas id="gl"></canvas>
+
+<div id="loading" class="screen">
+  <div class="load-inner">
+    <div class="brandmark"><svg viewBox="0 0 64 64"><path d="M32 54C15 41 8 31 8 21a11 11 0 0 1 24-5a11 11 0 0 1 24 5c0 10-7 20-24 33z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M14 30h10l4-8 6 16 4-8h12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/></svg></div>
+    <div class="load-title">عودة النبض</div>
+    <div class="load-sub">جراحة القلب المفتوح — النسخة السريعة التفاعلية</div>
+    <div class="bar"><i id="loadbar"></i></div>
+    <div id="loadtxt" class="load-txt">جارٍ تجهيز غرفة العمليات…</div>
+    <div id="loaderr" class="load-err hidden"></div>
+  </div>
+</div>
+
+<div id="menu" class="screen hidden">
+  <div class="menu-card">
+    <div class="tag">SYRA-EDU-MED-01 · النسخة السريعة</div>
+    <h1>عودة النبض</h1>
+    <p class="lead">أنت الجرّاح الرئيسي في عملية تحويل مسار ثلاثة شرايين تاجية للسيد عادل حمدي (62 عامًا)، بعد نوبة قلبية قبل ثلاثة أيام. الفريق في مكانه، والقائمة متأخرة. كل ما تفعله بيدك يُحسب: من خط الشق حتى تسليم المريض للعناية المركزة.</p>
+    <div class="modes"><button class="mode" data-mode="or" style="grid-column:1/-1"><b>ادخل غرفة العمليات</b><span>12–15 دقيقة · نقاط من 100 · لا نقاط على السرعة</span></button></div>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>&nbsp;</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>&nbsp;</small></button></div>
+    <div class="menu-foot">محاكاة تعليمية: المريض والفريق والأرقام خيالية · يُفضَّل استخدام سماعات · <a href="#" id="creditsbtn">المصادر والتراخيص</a></div>
+  </div>
+</div>
+
+<div id="howto" class="screen hidden">
+  <div class="howto-card">
+    <h2>قبل أن تبدأ</h2>
+    <div class="or-howto">
+      <div><b>الأدوات:</b> تختارها من صينية رانيا أسفل الشاشة، وتظهر في يدك.</div>
+      <div><b>الحركة:</b> اسحب بالماوس (أو بإصبعك) لترسم وتقطع وتنشر. اضغط مع الاستمرار للمنشار والشفّاط والكيّ.</div>
+      <div><b>الأوامر للفريق:</b> أزرار على الجانب («أوقفوا التنفس»، «هيبارين»…)، وكل أمر يُرَدّ عليه بصوت.</div>
+      <div><b>الشاشة:</b> العلامات الحيوية أعلى الشاشة تتغير مع كل ما تفعله. راقبها.</div>
+      <div class="warn"><b>تنبيه:</b> يدور هذا الموقف داخل غرفة عمليات قلب. القلب يظهر حقيقيًا، لكن دون مشاهد صادمة.</div>
+    </div>
+    <div class="task-card"><b>المهمة:</b> تحويل مسار ×3 بأمان، من التوقف المؤقت حتى التسليم للعناية المركزة. <span class="ok">النقاط:</span> وقفات السلامة 20 · أفعال اليدين 30 · القرارات 30 · الأزمات 15 · التسليم 5.</div>
+    <button id="startbtn" class="primary">ابدأ</button>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="objective"><div class="obj-label">الآن</div><div id="objtext"></div></div>
+  <div id="prompt"></div>
+  <div id="toasts"></div>
+</div>
+<div id="vitals" class="hidden">
+  <canvas id="vitc" width="520" height="168"></canvas>
+  <div class="clocks"><span>الدورة الخارجية <b id="clkcpb">—</b></span><span>الملقط <b id="clkxc">—</b></span></div>
+</div>
+<div id="cmds" class="hidden"></div>
+<div id="tray" class="hidden"></div>
+<div id="orpanel" class="hidden"></div>
+<div id="ckl" class="hidden"></div>
+<div id="hotspots"></div>
+
+<div id="subs" class="hidden"><div class="who"><b id="subwho"></b><span id="subrole"></span></div><div id="subtext"></div></div>
+<div id="choices" class="hidden"><div id="choiceq"></div><div id="choicelist"></div></div>
+<div id="doc" class="hidden"><div id="docbody"></div><button id="docclose" aria-label="إغلاق">✕</button></div>
+<div id="fade"></div>
+<div id="letterbox"><i></i><i></i></div>
+<div id="clicktolock" class="hidden"></div>
+<div id="alarmtint"></div>
+
+<script>
+(function(){
+  function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
+    e.innerHTML='<b>تعذّر تشغيل المحاكاة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge مع تفعيل «تسريع الأجهزة».</small>'; }
+  window.__showErr=showErr;
+  addEventListener('error',function(ev){ if(!document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||'error'); });
+  addEventListener('unhandledrejection',function(ev){ if(!document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });
+  try { if(!document.createElement('canvas').getContext('webgl2')) showErr('WebGL2 غير مدعوم.'); } catch(e){ showErr(e.message); }
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="js/or/main.js"></script>
+</body>
+</html>
