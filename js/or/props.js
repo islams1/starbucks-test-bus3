@@ -30,7 +30,7 @@ function fit(obj, {height = null, size = null, keep = null, dropFlat = false} = 
 const hideStandIns = (g, keep = []) => { for (const ch of [...g.children]) if (!keep.includes(ch)) ch.visible = false; };
 
 export async function buildProps() {
-  const [anaes, hlm, iv, cart, lamps, trolley, trolley2, surgeon] = await Promise.all(['anesthesia', 'heartlung', 'ivpole', 'cart', 'optable', 'trolley', 'trolley', 'surgeon'].map(s => load(s).catch(e => { console.warn('model', s, e); return null; })));
+  const [anaes, hlm, iv, cart, lamps, trolley, trolley2] = await Promise.all(['anesthesia', 'heartlung', 'ivpole', 'cart', 'optable', 'trolley', 'trolley'].map(s => load(s).catch(e => { console.warn('model', s, e); return null; })));
   if (anaes) {
     const m = fit(anaes, {height: 1.5}); OR.A.add(m); m.rotation.y = 0;
     hideStandIns(OR.A, [m, OR.monA && OR.monA.group]);
@@ -51,8 +51,6 @@ export async function buildProps() {
     const m = fit(trolley, {height: 0.92, dropFlat: true}); m.position.set(0.62, 0, -1.08); m.rotation.y = 0; OR.root.add(m);
   }
   if (trolley2) { const m = fit(trolley2, {height: 0.92, dropFlat: true}); m.scale.multiplyScalar(0.75); m.position.set(0.7, 0, 0.78); m.rotation.y = Math.PI / 2; OR.root.add(m); OR.mayo.set(0.7, 0.95, 0.7); }
-  // the assistant surgeon across the table (a scanned person, standing still)
-  if (surgeon) { const m = fit(surgeon, {height: 1.78}); m.position.set(CHEST_X - 0.2, 0, -0.62); m.rotation.y = 0; OR.root.add(m); OR.assistant = m; }
+  // (the assistant surgeon across the table is a live team member now: team.js)
   return true;
 }
-const CHEST_X = -0.45;

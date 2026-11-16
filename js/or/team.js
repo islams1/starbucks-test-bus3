@@ -3,6 +3,8 @@
 import * as THREE from 'three';
 import {Character, characters} from '../actors/character.js';
 import {CHEST} from './room.js';
+import {onUpdate} from '../core/engine.js';
+import {setupAssistant} from './assistant.js';
 
 export const T = {};
 export const CAST = {
@@ -13,6 +15,7 @@ export const CAST = {
   haddad:  {avatar: 'Medical_Male_05', gender: 'm', height: 1.82, idle: 'm_idle_neutral_01', talkAnims: ['m_gestic_talk_neutral_02']},
   patient: {avatar: 'Male_Adult_03', gender: 'm', height: 1.76, idle: 'm_idle_neutral_01', talks: true},
   huda:    {avatar: 'Medical_Female_01', gender: 'f', height: 1.65, idle: 'f_idle_neutral_01', talkAnims: ['f_gestic_talk_neutral_01']},
+  assist:  {avatar: 'Medical_Male_05', gender: 'm', height: 1.79, idle: 'm_idle_neutral_01', talkAnims: ['m_gestic_talk_neutral_01']},
 };
 
 /** the head's shape, measured on the skin that moves with it (hair cards left out), in the character's frame:
@@ -139,6 +142,8 @@ export async function loadTeam() {
   place('layla', -1.42, -0.42, 0.5, 'f_idle_neutral_01');
   place('karim', 0.5, -2.12, 0, 'm_work_table');
   place('rania', 0.05, -0.62, 0, 'f_work_table');
+  place('assist', CHEST.x - 0.2, -0.64, 0, 'm_idle_neutral_01');       // the assistant surgeon, across the table from the player
+  await setupAssistant(T.assist, {rania: T.rania, layla: T.layla}); onUpdate((dt) => T.assist._life && T.assist._life(dt));
   place('haddad', 2.2, 2.4, Math.PI, 'm_idle_neutral_01'); T.haddad.holder.visible = false;
   place('huda', 2.0, 2.7, Math.PI, 'f_idle_neutral_01'); T.huda.holder.visible = false;
   place('player', CHEST.x + 0.02, 0.5, Math.PI, 'm_idle_neutral_01');

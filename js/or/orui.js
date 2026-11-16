@@ -29,9 +29,19 @@ const MUTE = Q.has('mute');
 
 // ---------------------------------------------------------------- one voice at a time
 let chain = Promise.resolve();
+/** the team turns to whoever is talking (people busy at a table only sometimes look up) */
+function listen(who, sec) {
+  for (const id of ['assist', 'layla', 'rania', 'karim']) {
+    const c = TEAM[id]; if (!c || c === who || !c.holder.visible || c.voice) continue;
+    const busy = /work|sit|documents/.test(c.baseName || '');
+    if (Math.random() > (busy ? 0.35 : 0.85)) continue;
+    setTimeout(() => { if (!c.voice) c._lookOv = {target: who, until: performance.now() + Math.min(sec, 3.5) * 1000}; }, 200 + Math.random() * 600);
+  }
+}
 export function say(id, opt = {}) { const run = chain.then(() => sayImpl(id, opt)); chain = run.catch(() => {}); return run; }
 async function sayImpl(id, {gesture = false} = {}) {
-  const L0 = LINES[id]; if (L0 && L0.s === 'layla') gesture = true;      // the anaesthetist stands free: she talks with her hands
+  const L0 = LINES[id], busy = (c) => /work|sit|documents/.test(c.baseName || '');
+  if (L0 && TEAM[L0.s] && L0.s !== 'player' && !busy(TEAM[L0.s])) gesture = true;      // standing free: talking with the hands
   const L = LINES[id]; if (!L) { console.warn('line?', id); return; }
   const sp = SPK[L.s], url = `assets/vo/or/${id}`;
   if (MUTE) { subtitle(sp.name, sp.role, L.t); await wait(0.35); hideSubtitle(); return; }
@@ -40,13 +50,20 @@ async function sayImpl(id, {gesture = false} = {}) {
   if (L.s !== 'player' && ch && ch.holder.visible) {
     let timeFn = () => 0;
     const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: false, pointTarget: null, glances: GLANCES[L.s]});
+    // a free-standing speaker talks to the surgeon (meaning-driven glances still go to the monitor, the patient…);
+    // the others turn to whoever is talking
+    const prevLook = ch.look.target, faceUs = !busy(ch); if (faceUs) ch.lookAt('camera');
+    const lineSec = words.length ? (words[words.length - 1][0] + words[words.length - 1][1]) / 1000 : 2.5;
+    listen(ch, lineSec);
     const p = ch.say(url, {gesture, emotion: L.e, perf});
+    p.then(() => { if (faceUs && ch.look.target === 'camera') ch.lookAt(prevLook); });
     await new Promise(r => { const t = () => ch.voice ? (timeFn = ch.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); });
     subtitle(sp.name, sp.role, L.t, words, () => timeFn());
     await p;
   } else {
     const radio = L.s === 'haddad';
     const v = await playVoice(url + '.mp3', null, {radio, volume: L.s === 'player' ? 0.85 : 1});
+    if (L.s === 'player') listen('camera', words.length ? (words[words.length - 1][0] + words[words.length - 1][1]) / 1000 : 2.5);
     subtitle(sp.name + (radio ? ' · الإنتركم' : ''), sp.role, L.t, words, v.time);
     await v.done;
   }

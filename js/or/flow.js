@@ -118,7 +118,8 @@ async function s0() {
   await caption('بعد أربعين دقيقة: المريض نائم على جهاز التنفس، والصدر معقَّم ومغطّى', 3000);
 }
 async function s1() {
-  const R = TEAM.rania; R.setBase('f_documents_check');
+  // the time-out: everyone stops; the scrub nurse turns from her table and leads it, talking to the team
+  const R = TEAM.rania; R.setBase('f_idle_neutral_02'); R.lookAt('camera');
   eyeView(() => R.headPos().clone().add(V3(0, -0.15, 0)), 46, 0, HEAD);
   await fade(false, 900);
   objective('التوقف المؤقت قبل الشق');
@@ -156,7 +157,7 @@ async function s1() {
   SC.bloodOrdered = bloodOk;
   if (!done.has('abx') || !done.has('blood')) flag('unsafe');
   award('timeout', Math.round(5 * done.size / items.length) + (bloodOk ? 3 : 0));
-  R.setBase('f_work_table');
+  R.setBase('f_work_table'); R.lookAt(CHEST.clone());
 }
 async function s2() { TL.restW = 0; TL.restLW = 0; eyeView(CHEST.clone().add(V3(0.0, 0, 0.01)), 19); await act.actMarking(); }   // from here the hands are in view only when they work
 async function s3() { await act.actIncision(); putDown(); }

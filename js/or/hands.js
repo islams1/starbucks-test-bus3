@@ -59,7 +59,7 @@ function orient(side, fdir, palm, w, set = arms) {
   rotWorld(A.hand, f, ang * w);
 }
 /** paint gloves (hand + finger bones) and gown sleeves (forearm) into the body texture */
-async function gloveTexture(ch) {
+export async function gloveTexture(ch, {sleeves = true, sleeve = [44, 92, 138]} = {}) {
   const mesh = ch.mesh, geo = mesh.geometry, sk = mesh.skeleton;
   const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   const mat = mats.find(m => m.map && /body_color/.test(m.map.image?.src || m.map.source?.data?.src || '')) || mats.find(m => m.map) || mats[0];
@@ -78,7 +78,8 @@ async function gloveTexture(ch) {
       const a = vi(i), b = vi(i + 1), c = vi(i + 2);
       const ca = domClass(a), cb = domClass(b), cc = domClass(c);
       const n1 = (ca === 1) + (cb === 1) + (cc === 1), n2 = (ca === 2) + (cb === 2) + (cc === 2);
-      const k = n1 >= 2 ? 1 : n2 >= 2 || (n1 === 1 && n2 >= 1) ? 2 : 0;
+      let k = n1 >= 2 ? 1 : n2 >= 2 || (n1 === 1 && n2 >= 1) ? 2 : 0;
+      if (k === 2 && !sleeves) k = 0;
       if (!k) continue;
       mg.fillStyle = k === 1 ? '#ff0000' : '#00ff00'; mg.strokeStyle = mg.fillStyle; mg.lineWidth = 3;
       mg.beginPath(); [a, b, c].forEach((v, j) => { const x = uv.getX(v) * W, y = (1 - uv.getY(v)) * Hh; j ? mg.lineTo(x, y) : mg.moveTo(x, y); }); mg.closePath(); mg.fill(); mg.stroke();
@@ -90,7 +91,7 @@ async function gloveTexture(ch) {
     if (!mk[i + 3]) continue;
     const lum = (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11) / 255;
     const glove = mk[i] > 128, s = glove ? 0.2 + 1.15 * lum : 0.7 + 0.45 * lum;     // keep the knuckles and creases readable
-    const col = glove ? [214, 192, 150] : [44, 92, 138];          // latex glove / sterile gown sleeve
+    const col = glove ? [214, 192, 150] : sleeve;                 // latex glove / sterile gown sleeve
     d[i] = Math.min(255, col[0] * s); d[i + 1] = Math.min(255, col[1] * s); d[i + 2] = Math.min(255, col[2] * s);
   }
   og.putImageData(px, 0, 0);

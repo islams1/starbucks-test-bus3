@@ -80,7 +80,7 @@ async function boot() {
 /** the 3D models' authors and licences (CC BY 4.0 requires the credit) */
 async function showCredits() {
   const c = await fetch('assets/or_models/CREDITS.json').then(r => r.json()).catch(() => ({}));
-  const used = Object.entries(c).filter(([k]) => !['nurse', 'retractor_hand', 'bp3d_heart'].includes(k));
+  const used = Object.entries(c).filter(([k]) => !['nurse', 'retractor_hand', 'bp3d_heart', 'surgeon'].includes(k));
   const esc = (t) => String(t).replace(/[&<>"]/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[ch]));
   $('docbody').innerHTML = `<div class="credits-card" dir="ltr"><h3 dir="rtl">المصادر والتراخيص</h3><ul>${used.map(([, [t, a, u, l]]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a> — ${esc(a)} <small>(${esc(l)})</small></li>`).join('')}
     <li>Textures: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> <small>(CC0)</small></li>
