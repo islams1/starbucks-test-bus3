@@ -171,7 +171,7 @@ export class Character {
   play(name, {fade = 0.45, once = false, speed = 1, offset = null} = {}) {
     const a = this.action(name); if (!a) return;
     if (this.cur === a && !once) { a.timeScale = speed; return a; }
-    a.reset(); a.enabled = true; a.timeScale = speed;
+    a.reset(); a.enabled = true; a.timeScale = speed; a.weight = 1;     // (a talk overlay may have lowered it)
     a.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity); a.clampWhenFinished = once;
     a.time = offset != null ? offset : (once ? 0 : Math.random() * a.getClip().duration);
     a.play();
@@ -244,7 +244,9 @@ export class Character {
     else if (type === 'surprise') { this.emote('shocked', 0.8); this.blink.next = 0.05; }
     else if (type === 'skeptical') this.emote('skeptical', 0.9);
   }
-  async say(url, {getPos = null, radio = false, gesture = true, emotion = null, perf = null} = {}) {
+  /** gestureWeight (0..1): instead of switching to the talk clip, lay it over the current pose with a weight that
+   *  follows the voice — the hands move while words come, settle in the pauses, and come to rest at the end */
+  async say(url, {getPos = null, radio = false, gesture = true, emotion = null, perf = null, gestureWeight = null} = {}) {
     if (emotion) this.emote(emotion);
     // a breath before speaking: chest rises, lips part slightly, audible inhale
     if (!radio) { this._inhale = 0.42; breath(0.6); await new Promise(r => setTimeout(r, 300)); }
@@ -258,11 +260,18 @@ export class Character {
     const pool = this.presenting || loop === 'present' ? presentPool : (emotion && TALK[this.g][emotion]) || this.o.talkAnims;
     // the same line always gets the same gesture loop (stable, not random each time)
     let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) | 0;
-    if (standingTalk) { prev = this.curName; this.play(pool[Math.abs(h) % pool.length], {fade: 0.6}); }
+    const talkName = pool && pool.length ? pool[Math.abs(h) % pool.length] : null;   // (the patient has no talk clips)
+    if (standingTalk && talkName && gestureWeight != null && this.cur && this.curName !== talkName) {
+      if (this._talkOv) this._endTalkOverlay(true);
+      const a = this.action(talkName);
+      if (a) { a.reset(); a.enabled = true; a.weight = 1; a.setLoop(THREE.LoopRepeat, Infinity); a.time = (Math.abs(h) % 997) / 997 * a.getClip().duration; a.play(); a.setEffectiveWeight(0);
+        this._talkOv = {a, base: this.cur, max: gestureWeight, w: 0, env: 0, ending: false}; }
+    } else if (standingTalk && talkName) { prev = this.curName; this.play(talkName, {fade: 0.6}); }
     this._events = perf ? perf.events.slice() : []; this._pointTarget = perf ? perf.pointTarget : null;
     await voice.done;
     this.voice = null; this.words = null; this._events = [];
-    if (standingTalk && this.baseName && !this.walking) this.play(this.baseName, {fade: 0.8});
+    if (this._talkOv) this._talkOv.ending = true;                                  // the hands come to rest
+    else if (standingTalk && this.baseName && !this.walking) this.play(this.baseName, {fade: 0.8});
     // the expression lingers a moment, then relaxes towards a softer version of it
     setTimeout(() => { if (!this.voice) for (const k in this.mood) this.mood[k] *= 0.45; }, 1400);
   }
@@ -318,6 +327,7 @@ export class Character {
     // Gaze, breathing and the desk IK turn some bones a little on top of the animation every frame. Put those bones
     // back to last frame's pure animation pose first: if no clip happens to write them this frame, the offsets would
     // otherwise pile up frame after frame (upper body bending and twisting further and further).
+    if (this._talkOv) this._updateTalkOverlay(dt);
     const post = this._post || (this._post = this._postBones().map(b => [b, b.quaternion.clone()]));
     for (const [b, q] of post) b.quaternion.copy(q);
     this.mixer.update(dt);
@@ -326,6 +336,23 @@ export class Character {
     this.updateFace(dt, t);
     this.updateGaze(dt);
     if (this.postIK) this.postIK(dt);
+  }
+  /** the talk clip's weight follows the speech envelope: quick to rise on words, slow to fall in pauses */
+  _updateTalkOverlay(dt) {
+    const ov = this._talkOv;
+    if (this.cur !== ov.base || this.walking) { this._endTalkOverlay(); return; }      // something else took over the body
+    const amp = this.voice ? clamp(this.voice.amp() * 6, 0, 1) : 0;
+    const want = ov.ending ? 0 : amp;
+    ov.env = damp(ov.env, want, want > ov.env ? 6 : 1.4, dt);
+    const w = ov.ending ? ov.env * ov.max : (0.3 + 0.7 * ov.env) * ov.max;           // a little life between words too
+    ov.w = damp(ov.w, w, ov.ending ? 2.2 : 5, dt);
+    ov.a.setEffectiveWeight(ov.w); ov.base.setEffectiveWeight(1 - ov.w);
+    if (ov.ending && ov.w < 0.01) this._endTalkOverlay(true);
+  }
+  _endTalkOverlay(now = false) {
+    const ov = this._talkOv; if (!ov) return; this._talkOv = null;
+    ov.base.weight = 1; if (ov.base === this.cur && !ov.base._weightInterpolant) ov.base.setEffectiveWeight(1);
+    if (now) ov.a.stop(); else ov.a.fadeOut(0.4);
   }
   _postBones() {
     const sk = this.mesh.skeleton, b = this.bones;
