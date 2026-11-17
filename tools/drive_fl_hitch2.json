@@ -1,0 +1,2 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["wait", 0.5],
+ ["eval", "(async()=>{const E=await import('/js/core/engine.js'); const out=[]; let last=performance.now(); const t0=last; await new Promise(res=>{ const f=()=>{ const now=performance.now(); const dt=now-last; last=now; const fd=document.getElementById('fade'); const op=fd?getComputedStyle(fd).opacity:'?'; if(dt>80) out.push({t:+((now-t0)/1000).toFixed(2), dt:Math.round(dt), fadeOpacity:op}); if(now-t0<16000) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); }); return JSON.stringify(out)})()"]]

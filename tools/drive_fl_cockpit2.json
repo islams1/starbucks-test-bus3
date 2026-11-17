@@ -1,0 +1,8 @@
+[["waitjs", "window.__ready === true", 60],
+ ["eval", "__load('../_src/flight_raw/cockpit/scene.gltf')"], ["wait", 2],
+ ["eval", "(()=>{const T=__THREE; __scene.add(new T.AmbientLight(0xffffff,1.2)); return 1})()"],
+ ["eval", "__look(0.5,4.45,8.6, 0.5,4.25,11.0, 70)"], ["wait",0.6], ["shot","e1.jpg"],
+ ["eval", "__look(0.5,4.45,9.2, 0.5,4.25,11.6, 70)"], ["wait",0.6], ["shot","e2.jpg"],
+ ["eval", "__look(0.55,4.35,9.6, 0.55,4.2,12, 70)"], ["wait",0.6], ["shot","e3.jpg"],
+ ["eval", "__look(0.0,5.2,8.0, 0.0,3.6,10.5, 70)"], ["wait",0.6], ["shot","e4.jpg"]
+]

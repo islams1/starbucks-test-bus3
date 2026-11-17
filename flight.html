@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Cpath d=%22M6 36l22-4 10-22h6l-6 22 18-2 4-8h4l-2 12 2 12h-4l-4-8-18-2 6 22h-6l-10-22-22-4z%22 fill=%22%232f80c8%22/%3E%3C/svg%3E">
+<title>٢٠٨ ثانية — الرحلة ١٥٤٩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/flight.css">
+</head>
+<body class="flight">
+<canvas id="gl"></canvas>
+
+<div id="loading" class="screen">
+  <div class="load-inner">
+    <div class="load-title">٢٠٨ ثانية</div>
+    <div class="load-sub">الرحلة ١٥٤٩ — نيويورك، ١٥ يناير ٢٠٠٩</div>
+    <div class="bar"><i id="loadbar"></i></div>
+    <div id="loadtxt" class="load-txt">جارٍ تجهيز نيويورك…</div>
+    <div id="loaderr" class="load-err hidden"></div>
+  </div>
+</div>
+
+<div id="menu" class="screen hidden">
+  <div class="menu-card">
+    <div class="tag">تمثيل تعليمي لحادثة حقيقية · مبني على تقرير التحقيق الأمريكي (NTSB AAR-10/03)</div>
+    <h1>٢٠٨ ثانية</h1>
+    <p class="lead">١٥ يناير ٢٠٠٩، الساعة ٣:٢٥ عصرًا. أنت كابتن الرحلة ١٥٤٩ المتجهة من لاغوارديا في نيويورك إلى شارلوت، وعلى متنها ١٥٠ راكبًا و٥ من الطاقم. بعد دقيقة ونصف من الإقلاع، ستصطدم الطائرة بسرب من الإوز ويتوقف المحركان. من تلك اللحظة، كل قرار لك: من يقود، ماذا تقول للمراقبة، أين تذهب، ومتى تُعِدّ الركاب.</p>
+    <div class="modes">
+      <button class="mode" data-mode="real"><b>الوقت الحقيقي</b><span>كما حدث: ٢٠٨ ثوانٍ لا تتوقف · تقود بيدك · صوت المراقب الحقيقي</span></button>
+      <button class="mode" data-mode="learn"><b>وضع التعلّم</b><span>يتوقف الوقت عند كل سؤال، والأزرار المطلوبة تضيء، مع شرح</span></button>
+    </div>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>&nbsp;</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>&nbsp;</small></button></div>
+    <div class="menu-foot">الكلام في القمرة وفي الراديو بالإنجليزية مع ترجمة عربية · صوت مراقب الإقلاع من التسجيل الحقيقي لهيئة الطيران الأمريكية · يُفضَّل استخدام سماعات · <a href="#" id="creditsbtn">المصادر والتراخيص</a></div>
+  </div>
+</div>
+
+<div id="howto" class="screen hidden">
+  <div class="howto-card">
+    <h2>قبل الإقلاع</h2>
+    <div class="or-howto">
+      <div><b>مكانك:</b> المقعد الأيسر — الكابتن. اسحب بالماوس لتلفت رأسك، ونقرتان لتعود للأمام.</div>
+      <div><b>القيادة بيدك:</b> بعد الاصطدام حرّك العصا (الأسهم أو <b>WASD</b> أو العصا أسفل الشاشة أو يد ألعاب) فتصبح الطائرة معك. سحب = المقدمة لأعلى والسرعة تقل، دفع = السرعة تزيد. بلا محركات: كل متر ارتفاع ثمين.</div>
+      <div><b>أزرار القمرة:</b> اضغط عليها بنفسك — وحدة الطاقة (APU) في السقف، أذرع المحركات والقلابات (<b>F</b>) في المنتصف، زر الهبوط على الماء، والإخلاء. مرّر الماوس على أي زر لتعرف ما هو. القائمة الجانبية تذكّرك بالمطلوب — اضغط أي بند لترى مكانه.</div>
+      <div><b>الراديو والركاب:</b> <b>T</b> أو زر VHF1 للكلام مع المراقبة، و<b>P</b> للإعلان للركاب.</div>
+      <div><b>الشاشة أمامك:</b> الدائرة الخضراء المتقطعة على شاشة الملاحة هي المسافة التي ما زال الانزلاق يصل إليها. المطار خارجها = لن تصله.</div>
+      <div class="warn"><b>تنبيه:</b> تمثيل لحادثة حقيقية نجا فيها كل من على الطائرة. لا مشاهد عنيفة.</div>
+    </div>
+    <button id="startbtn" class="primary">أقلِع</button>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="clock"><b id="clk">15:25:46</b><span id="tplus"></span></div>
+  <div id="objective"><div class="obj-label">الآن</div><div id="objtext"></div></div>
+  <div id="actions"></div>
+  <div id="ask" class="hidden"><div id="askq"></div><div id="asklist"></div><div class="askbar"><i id="askbar"></i></div></div>
+  <div id="subs"></div>
+  <div id="radiohint" class="hidden">📻 المراقب يكلّمك — اضغط <b>T</b> أو زر <b>VHF1</b> في الكابينة للرد</div>
+  <div id="toasts"></div>
+</div>
+<div id="caption"></div>
+<div id="debrief" class="hidden"></div>
+<div id="doc" class="hidden"><div id="docbody"></div><button id="docclose" aria-label="إغلاق">✕</button></div>
+<div id="fade"></div>
+<div id="letterbox"><i></i><i></i></div>
+
+<script>
+(function(){
+  function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
+    e.innerHTML='<b>تعذّر تشغيل المحاكاة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge مع تفعيل «تسريع الأجهزة».</small>'; }
+  window.__showErr=showErr;
+  addEventListener('error',function(ev){ if(!document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||'error'); });
+  addEventListener('unhandledrejection',function(ev){ if(!document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });
+  window.__ENGINE = {logDepth: true};
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="js/flight/main.js"></script>
+</body>
+</html>

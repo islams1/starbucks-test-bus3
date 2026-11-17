@@ -1,0 +1,4 @@
+[["waitjs","window.__ready === true",60],
+ ["eval","__load('../_src/or_models_raw/anesthesia/scene.gltf')"],["wait",2],["eval","__camAt(0.3,0.15,1)"],["wait",0.6],["shot","anraw.png"],
+ ["eval","__load('../assets/or_models/anesthesia/model.gltf')"],["wait",2],["eval","__camAt(0.3,0.15,1)"],["wait",0.6],["shot","anlod.png"]
+]

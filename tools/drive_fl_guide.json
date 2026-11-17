@@ -1,0 +1,12 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 18],
+ ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), FL=await import('/js/flight/flow.js'), CKm=await import('/js/flight/cockpit.js'), cine=await import('/js/core/cine.js'), THREE=await import('three'), F=await import('/js/flight/fly.js'); window.__G={A,FL,CKm,cine,THREE,F}; A.AC.t=-8; return 1})()"],
+ ["waitjs", "__G.A.AC.t > -3.2", 20], ["shot", "k1_geese.jpg"],
+ ["waitjs", "__G.A.AC.t > -1.4", 20], ["shot", "k2_geese.jpg"],
+ ["waitjs", "__G.A.AC.t > 1.6", 20], ["wait", 0.3], ["shot", "k3_keys.jpg"],
+ ["down", "a"], ["wait", 0.5], ["shot", "k4_pressA.jpg"], ["up", "a"],
+ ["waitjs", "__G.A.AC.t > 5.5", 20], ["wait", 1.2], ["shot", "k5_apu_focus.jpg"],
+ ["eval", "(()=>{const C=__G.FL; return JSON.stringify({guided: C.STATE.guided && C.STATE.guided.id, fly: __G.F.FLY.on})})()"],
+ ["eval", "(()=>{const b=[...document.querySelectorAll('.act')].find(x=>x.textContent.includes('قائمة الطوارئ')); b && b.click(); return !!b})()"],
+ ["waitjs", "__G.A.AC.t > 40.9", 60], ["eval", "(()=>{__G.CKm.lookTo(-1.05,-0.55); __G.CKm.CK.fovT=50; return 1})()"], ["wait", 0.6], ["shot", "k6_fo_ign.jpg"],
+ ["waitjs", "__G.A.AC.t > 44.6", 20], ["wait", 0.4], ["shot", "k7_fo_idle.jpg"],
+ ["eval", "(()=>{const it=(id)=>__G.FL.STATE && 0; return JSON.stringify({})})()"]]

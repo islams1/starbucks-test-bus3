@@ -1,0 +1,1 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["eval", "(async()=>{const G=(await import('/js/flight/gtiles.js')).GT; const c=G.tiles.lruCache; return JSON.stringify(Object.keys(c).filter(k=>typeof c[k]!=='object'&&typeof c[k]!=='function').reduce((o,k)=>(o[k]=c[k],o),{}))})()"]]

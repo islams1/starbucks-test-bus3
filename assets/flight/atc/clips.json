@@ -1,0 +1,352 @@
+{
+ "atc_radar": {
+  "utc": "2026:00",
+  "who": "L116",
+  "text": "cactus fifteen forty nine new york departure radar contact climb and maintain one five thousand",
+  "start": 382.68,
+  "dur": 5.52,
+  "game": -71
+ },
+ "bg_jl1": {
+  "utc": "2027:03",
+  "who": "BTA2750",
+  "text": "new york jetlink twenty seven sixty is five thousand turning right to one five zero",
+  "start": 445.68,
+  "dur": 5.52,
+  "game": -8
+ },
+ "bg_jl2": {
+  "utc": "2027:07",
+  "who": "L116",
+  "text": "jetlink twenty seven sixty climb maintain one zero thousand",
+  "start": 449.68,
+  "dur": 5.52,
+  "game": -4
+ },
+ "bg_jl3": {
+  "utc": "2027:11",
+  "who": "BTA2760",
+  "text": "one zero thousand jetlink twenty seven sixty",
+  "start": 453.68,
+  "dur": 6.82,
+  "game": 0
+ },
+ "atc_270": {
+  "utc": "2027:32",
+  "who": "L116",
+  "text": "cactus fifteen forty nine turn left heading two seven zero",
+  "start": 477.53,
+  "dur": 2.67,
+  "game": 21
+ },
+ "atc_220": {
+  "utc": "2027:42",
+  "who": "L116",
+  "text": "okay yea you need to return to laguardia turn left heading of uh two two zero",
+  "start": 484.68,
+  "dur": 5.52,
+  "game": 31
+ },
+ "atc_rwy13": {
+  "utc": "2028:05",
+  "who": "L116",
+  "text": "cactus fifteen twenty nine if we can get it to you do you want to try to land runway one three",
+  "start": 507.68,
+  "dur": 7.52,
+  "game": 54
+ },
+ "bg_jl4": {
+  "utc": "2028:17",
+  "who": "L116",
+  "text": "jetlink twenty seven sixty turn left zero seven zero",
+  "start": 519.68,
+  "dur": 3.52,
+  "game": 66
+ },
+ "bg_jl5": {
+  "utc": "2028:19",
+  "who": "BTA2760",
+  "text": "left turn zero seven zero jetlink twenty seven sixty",
+  "start": 521.68,
+  "dur": 8.37,
+  "game": 68
+ },
+ "atc_31": {
+  "utc": "2028:31",
+  "who": "L116",
+  "text": "alright cactus fifteen forty nine it's going to be left traffic to runway three one",
+  "start": 534.83,
+  "dur": 3.37,
+  "game": 80
+ },
+ "atc_land": {
+  "utc": "2028:36",
+  "who": "L116",
+  "text": "okay what do you need to land",
+  "start": 538.68,
+  "dur": 7.67,
+  "game": 85
+ },
+ "atc_rwy4": {
+  "utc": "2028:46",
+  "who": "L116",
+  "text": "cactus fifteen forty nine runway four is available if you want to make left traffic to runway four",
+  "start": 550.53,
+  "dur": 3.67,
+  "game": 95
+ },
+ "atc_teb_right": {
+  "utc": "2028:55",
+  "who": "L116",
+  "text": "okay yea off to your right side is teterboro airport",
+  "start": 557.68,
+  "dur": 8.52,
+  "game": 104
+ },
+ "atc_teb_q": {
+  "utc": "2029:02",
+  "who": "L116",
+  "text": "do you want to try and go to teterboro",
+  "start": 564.68,
+  "dur": 2.52,
+  "game": 111
+ },
+ "atc_teb_280": {
+  "utc": "2029:21",
+  "who": "L116",
+  "text": "cactus fifteen twenty nine turn right two eight zero you can land runway one at teterboro",
+  "start": 583.68,
+  "dur": 5.52,
+  "game": 130
+ },
+ "atc_teb_which": {
+  "utc": "2029:26",
+  "who": "L116",
+  "text": "okay which runway would you like at teterboro",
+  "start": 588.68,
+  "dur": 3.52,
+  "game": 135
+ },
+ "atc_sayagain": {
+  "utc": "2029:33",
+  "who": "L116",
+  "text": "i'm sorry say again cactus",
+  "start": 595.68,
+  "dur": 3.82,
+  "game": 142
+ },
+ "bg_jl6": {
+  "utc": "2029:41",
+  "who": "L116",
+  "text": "jetlink twenty seven sixty contact new york one two six point eight",
+  "start": 604.38,
+  "dur": 4.82,
+  "game": 150
+ },
+ "bg_jl7": {
+  "utc": "2029:45",
+  "who": "BTA2760",
+  "text": "twenty six eight jetlink twenty seven sixty",
+  "start": 607.68,
+  "dur": 7.52,
+  "game": 154
+ },
+ "atc_lost": {
+  "utc": "2029:51",
+  "who": "L116",
+  "text": "cactus ah cactus fifteen forty nine radar contact is lost you also got newark airport off your two o'clock and about seven miles",
+  "start": 613.68,
+  "dur": 10.37,
+  "game": 160
+ },
+ "bg_eg1": {
+  "utc": "2030:06",
+  "who": "L116",
+  "text": "eagle flight forty seven eighteen turn left heading two one zero",
+  "start": 628.88,
+  "dur": 4.32,
+  "game": 175
+ },
+ "bg_eg2": {
+  "utc": "2030:09",
+  "who": "EGF4718",
+  "text": "two one zero un forty seven eighteen i don't know i think he said he was going in the hudson",
+  "start": 631.68,
+  "dur": 6.52,
+  "game": 178
+ },
+ "atc_still": {
+  "utc": "2030:14",
+  "who": "L116",
+  "text": "cactus fifteen twenty nine uh you still on",
+  "start": 636.68,
+  "dur": 9.52,
+  "game": 183
+ },
+ "atc_newark": {
+  "utc": "2030:22",
+  "who": "L116",
+  "text": "cactus fifteen twenty nine if you can ah you got ah runway two nine available at newark off your two o'clock and seven miles",
+  "start": 644.68,
+  "dur": 11.52,
+  "game": 191
+ },
+ "_replay": {
+  "utc0": "2025:48",
+  "start": 372.3,
+  "dur": 291.99999999999994,
+  "strikeAt": 83
+ },
+ "_transcript": [
+  {
+   "utc": "2025:51",
+   "who": "AWE1549",
+   "text": "Cactus fifteen forty-nine, seven hundred, climbing five thousand.",
+   "at": 3
+  },
+  {
+   "utc": "2026:00",
+   "who": "L116",
+   "text": "Cactus fifteen forty-nine, New York departure, radar contact, climb and maintain one five thousand.",
+   "at": 12
+  },
+  {
+   "utc": "2026:04",
+   "who": "AWE1549",
+   "text": "Maintain one five thousand, Cactus fifteen forty-nine.",
+   "at": 16
+  },
+  {
+   "utc": "2027:32",
+   "who": "L116",
+   "text": "Cactus fifteen forty-nine, turn left heading two seven zero.",
+   "at": 104
+  },
+  {
+   "utc": "2027:36",
+   "who": "AWE1549",
+   "text": "Ah, this is uh, Cactus fifteen thirty-nine. Hit birds. We lost thrust in both engines. We're turning back towards LaGuardia.",
+   "at": 108
+  },
+  {
+   "utc": "2027:42",
+   "who": "L116",
+   "text": "Okay, yeah, you need to return to LaGuardia? Turn left heading of uh, two two zero.",
+   "at": 114
+  },
+  {
+   "utc": "2027:46",
+   "who": "AWE1549",
+   "text": "Two two zero.",
+   "at": 118
+  },
+  {
+   "utc": "2028:05",
+   "who": "L116",
+   "text": "Cactus fifteen twenty-nine, if we can get it to you, do you want to try to land runway one three?",
+   "at": 137
+  },
+  {
+   "utc": "2028:11",
+   "who": "AWE1549",
+   "text": "We're unable. We may end up in the Hudson.",
+   "at": 143
+  },
+  {
+   "utc": "2028:31",
+   "who": "L116",
+   "text": "Alright Cactus fifteen forty-nine, it's going to be left traffic to runway three one.",
+   "at": 163
+  },
+  {
+   "utc": "2028:34",
+   "who": "AWE1549",
+   "text": "Unable.",
+   "at": 166
+  },
+  {
+   "utc": "2028:36",
+   "who": "L116",
+   "text": "Okay, what do you need to land?",
+   "at": 168
+  },
+  {
+   "utc": "2028:46",
+   "who": "L116",
+   "text": "Cactus fifteen forty-nine, runway four is available if you want to make left traffic to runway four.",
+   "at": 178
+  },
+  {
+   "utc": "2028:50",
+   "who": "AWE1549",
+   "text": "I am not sure if we can make any runway. Oh, what's over to our right? Anything in New Jersey? Maybe Teterboro?",
+   "at": 182
+  },
+  {
+   "utc": "2028:55",
+   "who": "L116",
+   "text": "Okay yeah, off to your right side is Teterboro Airport.",
+   "at": 187
+  },
+  {
+   "utc": "2029:02",
+   "who": "L116",
+   "text": "Do you want to try and go to Teterboro?",
+   "at": 194
+  },
+  {
+   "utc": "2029:03",
+   "who": "AWE1549",
+   "text": "Yes.",
+   "at": 195
+  },
+  {
+   "utc": "2029:21",
+   "who": "L116",
+   "text": "Cactus fifteen twenty-nine, turn right two eight zero, you can land runway one at Teterboro.",
+   "at": 213
+  },
+  {
+   "utc": "2029:25",
+   "who": "AWE1549",
+   "text": "We can't do it.",
+   "at": 217
+  },
+  {
+   "utc": "2029:26",
+   "who": "L116",
+   "text": "Okay, which runway would you like at Teterboro?",
+   "at": 218
+  },
+  {
+   "utc": "2029:28",
+   "who": "AWE1549",
+   "text": "We're gonna be in the Hudson.",
+   "at": 220
+  },
+  {
+   "utc": "2029:33",
+   "who": "L116",
+   "text": "I'm sorry, say again, Cactus?",
+   "at": 225
+  },
+  {
+   "utc": "2029:51",
+   "who": "L116",
+   "text": "Cactus, ah, Cactus fifteen forty-nine, radar contact is lost. You also got Newark airport off your two o'clock and about seven miles.",
+   "at": 243
+  },
+  {
+   "utc": "2030:14",
+   "who": "L116",
+   "text": "Cactus fifteen twenty-nine, uh, you still on?",
+   "at": 266
+  },
+  {
+   "utc": "2030:22",
+   "who": "L116",
+   "text": "Cactus fifteen twenty-nine, if you can, ah, you got ah, runway two nine available at Newark, off your two o'clock and seven miles.",
+   "at": 274
+  }
+ ]
+}

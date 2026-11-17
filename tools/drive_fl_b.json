@@ -1,0 +1,6 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 8], ["shot", "b1_fwd.jpg"],
+ ["eval", "(()=>{const f=__fl; f.CK.head.ty=1.1; f.CK.head.tp=-0.15; return 1})()"], ["wait", 1.2], ["shot", "b2_left.jpg"],
+ ["eval", "(()=>{const f=__fl; f.AC.t=120; f.CK.head.ty=0.15; f.CK.head.tp=-0.12; return 1})()"], ["wait", 2], ["shot", "b3_gwb.jpg"],
+ ["eval", "(()=>{const f=__fl; f.AC.t=170; f.CK.head.ty=0.0; f.CK.head.tp=-0.05; return 1})()"], ["wait", 2], ["shot", "b4_river.jpg"],
+ ["eval", "(()=>{const f=__fl; f.CK.head.ty=0.9; return 1})()"], ["wait", 1.2], ["shot", "b5_manhattan.jpg"]
+]

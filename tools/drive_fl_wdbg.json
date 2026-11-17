@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 6],
+ ["eval", "(()=>{const f=__fl; f.AC.t=195; f.CK.head.ty=0.0; f.CK.head.tp=-0.08; const w=f.W.water; return JSON.stringify({vis:w.visible, pos:w.position.toArray().map(v=>Math.round(v)), parent: !!w.parent, core: w.material.uniforms.uCore.value.toArray().map(Math.round), mask: !!w.material.uniforms.uMask.value, mimg: w.material.uniforms.uMask.value && w.material.uniforms.uMask.value.image && w.material.uniforms.uMask.value.image.width, ac: f.AC.pos.toArray().map(Math.round)})})()"],
+ ["wait", 2], ["shot", "d1.jpg"],
+ ["eval", "(()=>{__fl.W.water.visible=false; return 1})()"], ["wait", 1], ["shot", "d2.jpg"]
+]

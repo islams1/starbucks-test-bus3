@@ -1,0 +1,2 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 6], ["shot", "m1.jpg"], ["wait", 5], ["shot", "m2.jpg"], ["wait", 4], ["shot", "m3.jpg"],
+ ["eval", "(async()=>{const M=(await import('/js/flight/mapbox.js')).MB; return JSON.stringify({on:M.on, detail:M.detail.size, meshes:[...M.detail.values()].filter(p=>p.mesh).length, loading:M.loading})})()"]]

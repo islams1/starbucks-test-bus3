@@ -1,0 +1,33 @@
+[
+[
+"waitfor",
+"#hud:not(.hidden)",
+300000
+],
+[
+"waitfor",
+"#hud.cine",
+120000
+],
+[
+"waitfor",
+"#hud:not(.cine)",
+120000
+],
+[
+"wait",
+1.5
+],
+[
+"eval",
+"(async()=>{const A=await import('/js/flight/aircraft.js'); A.AC.t=40; return 1})()"
+],
+[
+"wait",
+2
+],
+[
+"eval",
+"(async()=>{const G=(await import('/js/flight/gtiles.js')).GT, E=await import('/js/core/engine.js'); const info=E.renderer.info; const out=[]; let last=performance.now(); const t0=last; let n=0, sum=0; info.autoReset=true; const p0=info.programs.length; await new Promise(res=>{ const f=()=>{ const now=performance.now(); const dt=now-last; last=now; n++; sum+=dt; if(dt>50) out.push({t:+((now-t0)/1000).toFixed(1), dt:Math.round(dt), parsing:G.tiles.stats.parsing, dl:G.tiles.stats.downloading, vis:G.tiles.stats.visible, calls:info.render.calls}); if(now-t0<15000) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); }); return JSON.stringify({avg:+(sum/n).toFixed(1), n, slow:out.length, worst:out.sort((a,b)=>b.dt-a.dt).slice(0,8), stats:{...E.stats}, progs:[p0, info.programs.length]})})()"
+]
+]

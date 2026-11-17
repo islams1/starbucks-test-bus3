@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 9],
+ ["eval", "(async()=>{const FL=await import('/js/flight/flow.js'), A=await import('/js/flight/aircraft.js'), F=await import('/js/flight/fly.js'); window.__T={FL,A,F}; A.AC.t=4; return 1})()"], ["wait", 1],
+ ["eval", "(()=>{const {A,F}=__T; F.takeControl(); const r=A.AIRPORTS.LGA13, a=r.hdg*Math.PI/180; F.FLY.pos.set(r.p.x + Math.sin(a)*100, 12, r.p.z - Math.cos(a)*100); F.FLY.psi=a; F.FLY.gam=-0.035; F.FLY.phi=0; F.FLY.V=80; return 1})()"],
+ ["waitjs", "__T.FL.STATE.end", 40], ["eval", "JSON.stringify({end: __T.FL.STATE.end, landing: __T.FL.STATE.landing})"], ["wait", 3], ["shot", "r1.jpg"],
+ ["waitfor", "#debrief:not(.hidden)", 60000], ["wait", 1], ["shot", "r2.jpg"]]

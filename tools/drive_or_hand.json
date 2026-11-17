@@ -1,0 +1,8 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 2],
+ ["eval", "(()=>{const o=__or; o.take('scalpel',{fly:false}); o.TOOLS.tip.copy(o.CHEST).add(new o.THREE.Vector3(-0.04,0.006,0)); o.TOOLS.contact=1; o.TOOLS.steady=o.CHEST.clone().add(new o.THREE.Vector3(-0.15,0.014,-0.05)); return 1})()"],
+ ["wait", 1.2],
+ ["eval", "(()=>{const o=__or; const h=o.TEAM.player.mesh.skeleton.getBoneByName('Bip01_R_Hand').getWorldPosition(new o.THREE.Vector3()); window.__h=h; o.camera.position.set(h.x+0.05,h.y+0.12,h.z+0.25); o.camera.lookAt(h); o.camera.fov=40; o.camera.updateProjectionMatrix(); return JSON.stringify(h)})()"], ["wait", 0.6], ["shot", "h1_front.png"],
+ ["eval", "(()=>{const o=__or, h=window.__h; o.camera.position.set(h.x+0.28,h.y+0.05,h.z+0.0); o.camera.lookAt(h); return 1})()"], ["wait", 0.6], ["shot", "h2_side.png"],
+ ["eval", "(()=>{const o=__or, h=window.__h; o.camera.position.set(h.x-0.02,h.y+0.3,h.z+0.05); o.camera.lookAt(h); return 1})()"], ["wait", 0.6], ["shot", "h3_top.png"],
+ ["eval", "(()=>{const o=__or; o.HANDS.curlSign=-1; return 1})()"], ["wait", 0.6], ["shot", "h4_top_neg.png"]
+]

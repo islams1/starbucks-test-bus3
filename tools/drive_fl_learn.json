@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 2.2], ["shot", "o1.jpg"], ["wait", 2], ["shot", "o2.jpg"], ["wait", 5],
+ ["eval", "(async()=>{const FL=await import('/js/flight/flow.js'), A=await import('/js/flight/aircraft.js'), E=await import('/js/core/engine.js'); window.__T={FL,A,E}; A.AC.t=-3; return 1})()"],
+ ["waitjs", "__T.A.AC.t > 3", 30], ["wait", 1.5], ["shot", "l1.jpg"],
+ ["key", "t"], ["wait", 1.5], ["shot", "l2_paused.jpg"], ["eval", "JSON.stringify({paused: __T.E.clock.paused, t: __T.A.AC.t})"],
+ ["wait", 2], ["eval", "JSON.stringify({paused: __T.E.clock.paused, t: __T.A.AC.t})"]]

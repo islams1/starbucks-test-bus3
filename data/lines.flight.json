@@ -1,0 +1,450 @@
+{
+ "speakers": {
+  "player": {
+   "name": "أنت",
+   "role": "الكابتن",
+   "voice": "en-US-GuyNeural",
+   "rate": "-4%",
+   "pitch": "-2Hz"
+  },
+  "fo": {
+   "name": "مساعد الطيار",
+   "role": "الضابط الأول",
+   "voice": "en-US-ChristopherNeural",
+   "rate": "+2%",
+   "pitch": "+0Hz"
+  },
+  "fa1": {
+   "name": "المضيفة",
+   "role": "طاقم الكابينة — الأمام",
+   "voice": "en-US-JennyNeural",
+   "rate": "+6%",
+   "pitch": "+0Hz"
+  },
+  "fa2": {
+   "name": "المضيفة",
+   "role": "طاقم الكابينة — الخلف",
+   "voice": "en-US-AriaNeural",
+   "rate": "+8%",
+   "pitch": "+0Hz"
+  },
+  "gpws": {
+   "name": "نظام التحذير",
+   "role": "صوت آلي",
+   "voice": "en-US-EricNeural",
+   "rate": "-4%",
+   "pitch": "-6Hz"
+  },
+  "atc": {
+   "name": "مراقب الإقلاع — نيويورك",
+   "role": "تسجيل حقيقي من هيئة الطيران الأمريكية",
+   "voice": "",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  }
+ },
+ "lines": {
+  "cp_dep": {
+   "s": "player",
+   "e": "calm",
+   "t": "Cactus fifteen forty-nine, seven hundred, climbing five thousand.",
+   "ar": "كاكتس ١٥٤٩، على ارتفاع سبعمئة قدم، نصعد إلى خمسة آلاف."
+  },
+  "cp_maint": {
+   "s": "player",
+   "e": "calm",
+   "t": "Maintain one five thousand, Cactus fifteen forty-nine.",
+   "ar": "نحافظ على خمسة عشر ألفًا، كاكتس ١٥٤٩."
+  },
+  "cp_view": {
+   "s": "player",
+   "e": "calm",
+   "t": "What a view of the Hudson today.",
+   "ar": "يا له من منظر للهدسون اليوم."
+  },
+  "fo_yeah": {
+   "s": "fo",
+   "e": "calm",
+   "t": "Yeah.",
+   "ar": "فعلًا."
+  },
+  "cp_birds": {
+   "s": "player",
+   "e": "tense",
+   "t": "Birds!",
+   "ar": "طيور!"
+  },
+  "fo_uhoh": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Uh-oh.",
+   "ar": "أوه، لا."
+  },
+  "cp_rollback": {
+   "s": "player",
+   "e": "tense",
+   "t": "We got one roll... both of 'em rolling back.",
+   "ar": "واحد يتراجع… الاثنان يتراجعان!"
+  },
+  "cp_ign": {
+   "s": "player",
+   "e": "firm",
+   "t": "Ignition, start.",
+   "ar": "الإشعال: تشغيل."
+  },
+  "cp_apu": {
+   "s": "player",
+   "e": "firm",
+   "t": "I'm starting the APU.",
+   "ar": "أشغّل وحدة الطاقة المساعدة."
+  },
+  "cp_myac": {
+   "s": "player",
+   "e": "firm",
+   "t": "My aircraft.",
+   "ar": "الطائرة معي."
+  },
+  "fo_yourac": {
+   "s": "fo",
+   "e": "firm",
+   "t": "Your aircraft.",
+   "ar": "الطائرة معك."
+  },
+  "cp_qrh": {
+   "s": "player",
+   "e": "firm",
+   "t": "Get the QRH. Loss of thrust on both engines.",
+   "ar": "هات دليل الطوارئ: فقدان الدفع في المحركين."
+  },
+  "fo_qrh1": {
+   "s": "fo",
+   "e": "firm",
+   "t": "If fuel remaining, engine mode selector, ignition.",
+   "ar": "إن بقي وقود: محدد وضع المحرك على الإشعال."
+  },
+  "cp_ignition": {
+   "s": "player",
+   "e": "firm",
+   "t": "Ignition.",
+   "ar": "الإشعال."
+  },
+  "fo_qrh2": {
+   "s": "fo",
+   "e": "firm",
+   "t": "Thrust levers, confirm idle.",
+   "ar": "أذرع الدفع: تأكيد الوضع الخامل."
+  },
+  "cp_idle": {
+   "s": "player",
+   "e": "firm",
+   "t": "Idle.",
+   "ar": "خامل."
+  },
+  "fo_qrh3": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Airspeed optimum relight, three hundred knots. We don't have that.",
+   "ar": "السرعة المثلى لإعادة الإشعال ثلاثمئة عقدة… ليست معنا."
+  },
+  "cp_wedont": {
+   "s": "player",
+   "e": "tense",
+   "t": "We don't.",
+   "ar": "ليست معنا."
+  },
+  "cp_mayday": {
+   "s": "player",
+   "e": "firm",
+   "t": "Mayday, mayday, mayday. Cactus fifteen forty-nine, hit birds. We've lost thrust in both engines. We're turning back towards LaGuardia.",
+   "ar": "استغاثة، استغاثة، استغاثة. كاكتس ١٥٤٩، اصطدمنا بطيور. فقدنا الدفع في المحركين. نعود باتجاه لاغوارديا."
+  },
+  "cp_vague": {
+   "s": "player",
+   "e": "tense",
+   "t": "Departure, Cactus fifteen forty-nine, we've got a problem. Stand by.",
+   "ar": "المراقبة، كاكتس ١٥٤٩، لدينا مشكلة. انتظروا."
+  },
+  "cp_220": {
+   "s": "player",
+   "e": "calm",
+   "t": "Two two zero.",
+   "ar": "مئتان وعشرون."
+  },
+  "cp_unable_hudson": {
+   "s": "player",
+   "e": "firm",
+   "t": "We're unable. We may end up in the Hudson.",
+   "ar": "لا نستطيع. قد ننتهي في نهر الهدسون."
+  },
+  "cp_accept13": {
+   "s": "player",
+   "e": "firm",
+   "t": "Affirm, runway one three. We'll try.",
+   "ar": "نعم، المدرج ١٣. سنحاول."
+  },
+  "cp_unable": {
+   "s": "player",
+   "e": "firm",
+   "t": "Unable.",
+   "ar": "لا نستطيع."
+  },
+  "cp_teb_q": {
+   "s": "player",
+   "e": "tense",
+   "t": "I'm not sure we can make any runway. What's over to our right? Anything in New Jersey? Maybe Teterboro?",
+   "ar": "لست متأكدًا أننا نصل إلى أي مدرج. ماذا على يميننا؟ أي شيء في نيوجيرسي؟ ربما تيتربورو؟"
+  },
+  "cp_accept4": {
+   "s": "player",
+   "e": "firm",
+   "t": "Runway four. We'll take it.",
+   "ar": "المدرج ٤. سنأخذه."
+  },
+  "cp_yes": {
+   "s": "player",
+   "e": "firm",
+   "t": "Yes.",
+   "ar": "نعم."
+  },
+  "cp_teb_go": {
+   "s": "player",
+   "e": "firm",
+   "t": "Right two eight zero. Teterboro.",
+   "ar": "يمينًا ٢٨٠. إلى تيتربورو."
+  },
+  "cp_cant": {
+   "s": "player",
+   "e": "firm",
+   "t": "We can't do it.",
+   "ar": "لا نستطيع."
+  },
+  "cp_hudson": {
+   "s": "player",
+   "e": "firm",
+   "t": "We're gonna be in the Hudson.",
+   "ar": "سنكون في الهدسون."
+  },
+  "cp_pa": {
+   "s": "player",
+   "e": "firm",
+   "t": "This is the Captain. Brace for impact.",
+   "ar": "هنا الكابتن. استعدوا للارتطام."
+  },
+  "fa_brace": {
+   "s": "fa1",
+   "e": "shocked",
+   "t": "Brace! Brace! Brace! Heads down, stay down!",
+   "ar": "اتخذوا وضع الاستعداد! الرؤوس لأسفل، ابقوا هكذا!"
+  },
+  "fa_brace2": {
+   "s": "fa2",
+   "e": "shocked",
+   "t": "Heads down! Stay down! Heads down! Stay down!",
+   "ar": "الرؤوس لأسفل! ابقوا هكذا!"
+  },
+  "fo_fac": {
+   "s": "fo",
+   "e": "tense",
+   "t": "FAC one, off, then on.",
+   "ar": "حاسوب الطيران الأول: إطفاء ثم تشغيل."
+  },
+  "fo_norelight": {
+   "s": "fo",
+   "e": "tense",
+   "t": "No relight after thirty seconds. Engine master one and two, confirm.",
+   "ar": "لا إشعال بعد ثلاثين ثانية. مفتاحا المحركين الأول والثاني: تأكيد."
+  },
+  "fo_master2": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Engine master two, back on.",
+   "ar": "مفتاح المحرك الثاني: أُعيد تشغيله."
+  },
+  "cp_backon": {
+   "s": "player",
+   "e": "firm",
+   "t": "Back on.",
+   "ar": "أُعيد."
+  },
+  "fo_power": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Is that all the power you got? Want number one? Or we got power on number one.",
+   "ar": "هل هذه كل القوة؟ تريد المحرك الأول؟ أم لدينا قوة في الأول؟"
+  },
+  "cp_tryone": {
+   "s": "player",
+   "e": "firm",
+   "t": "Go ahead, try number one.",
+   "ar": "تفضل، جرّب المحرك الأول."
+  },
+  "fo_backon": {
+   "s": "fo",
+   "e": "tense",
+   "t": "I put it back on.",
+   "ar": "أعدت تشغيله."
+  },
+  "fo_norelight2": {
+   "s": "fo",
+   "e": "tense",
+   "t": "No relight.",
+   "ar": "لا إشعال."
+  },
+  "cp_flaps": {
+   "s": "player",
+   "e": "firm",
+   "t": "Okay, let's go put the flaps out. Put the flaps out.",
+   "ar": "حسنًا، أنزل القلابات. أنزل القلابات."
+  },
+  "fo_flapsout": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Got flaps out.",
+   "ar": "القلابات نزلت."
+  },
+  "fo_250": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Two hundred fifty feet in the air.",
+   "ar": "مئتان وخمسون قدمًا فوق الماء."
+  },
+  "fo_170": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Hundred and seventy knots. Got no power on either one? Try the other one.",
+   "ar": "مئة وسبعون عقدة. لا قوة في أيٍّ منهما؟ جرّب الآخر."
+  },
+  "cp_other": {
+   "s": "player",
+   "e": "firm",
+   "t": "Try the other one.",
+   "ar": "جرّب الآخر."
+  },
+  "fo_150": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Hundred and fifty knots.",
+   "ar": "مئة وخمسون عقدة."
+  },
+  "fo_flaps2": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Got flaps two. You want more?",
+   "ar": "القلابات على ٢. تريد المزيد؟"
+  },
+  "cp_stay2": {
+   "s": "player",
+   "e": "firm",
+   "t": "No, let's stay at two.",
+   "ar": "لا، لنبقَ على ٢."
+  },
+  "cp_flaps3": {
+   "s": "player",
+   "e": "firm",
+   "t": "Flaps three.",
+   "ar": "القلابات على ٣."
+  },
+  "cp_ideas": {
+   "s": "player",
+   "e": "calm",
+   "t": "Got any ideas?",
+   "ar": "عندك أي فكرة؟"
+  },
+  "fo_actually": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Actually, not.",
+   "ar": "في الحقيقة… لا."
+  },
+  "fo_switch": {
+   "s": "fo",
+   "e": "tense",
+   "t": "Switch?",
+   "ar": "مفتاح الطوارئ؟"
+  },
+  "cp_yes2": {
+   "s": "player",
+   "e": "firm",
+   "t": "Yes.",
+   "ar": "نعم."
+  },
+  "cp_brace": {
+   "s": "player",
+   "e": "firm",
+   "t": "We're gonna brace.",
+   "ar": "سنستعد للارتطام."
+  },
+  "gp_1000": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "One thousand.",
+   "ar": "ألف قدم."
+  },
+  "gp_toolow": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "Too low, terrain.",
+   "ar": "منخفض جدًا: تضاريس."
+  },
+  "gp_gear": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "Too low, gear.",
+   "ar": "منخفض جدًا: العجلات."
+  },
+  "gp_pullup": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "Terrain, terrain. Pull up. Pull up.",
+   "ar": "تضاريس، تضاريس. ارتفع. ارتفع."
+  },
+  "gp_100": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "One hundred.",
+   "ar": "مئة."
+  },
+  "gp_50": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "Fifty.",
+   "ar": "خمسون."
+  },
+  "cp_evac": {
+   "s": "player",
+   "e": "firm",
+   "t": "Evacuate.",
+   "ar": "إخلاء."
+  },
+  "fa_evac": {
+   "s": "fa1",
+   "e": "shocked",
+   "t": "Evacuate! Unfasten your seatbelts! Come this way! Leave everything!",
+   "ar": "إخلاء! فكّوا الأحزمة! من هنا! اتركوا كل شيء!"
+  },
+  "fa_vests": {
+   "s": "fa2",
+   "e": "shocked",
+   "t": "Life vests! Life vests are under your seat!",
+   "ar": "سترات النجاة! تحت مقاعدكم!"
+  },
+  "cp_walk": {
+   "s": "player",
+   "e": "calm",
+   "t": "I'm going to walk the cabin. Make sure everyone is out.",
+   "ar": "سأمرّ على الكابينة. أتأكد أن الجميع خرجوا."
+  },
+  "fo_ok": {
+   "s": "fo",
+   "e": "calm",
+   "t": "Okay.",
+   "ar": "حسنًا."
+  },
+  "gp_stall": {
+   "s": "gpws",
+   "e": "calm",
+   "t": "Stall. Stall.",
+   "ar": "انهيار السرعة! انهيار السرعة!"
+  }
+ }
+}

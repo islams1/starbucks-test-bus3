@@ -1,0 +1,9 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 10],
+ ["eval", "(async()=>{const C=await import('/js/flight/controls.js'), E=await import('/js/core/engine.js'), FL=await import('/js/flight/flow.js'), A=await import('/js/flight/aircraft.js'), F=await import('/js/flight/fly.js'); window.__T={C,E,FL,A,F}; __T.pos=(id)=>{const o=C.CTL.items[id]; const v=o.getWorldPosition(new o.position.constructor()); v.project(E.camera); return [(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight]}; A.AC.t=180; return 1})()"],
+ ["wait", 1.5],
+ ["eval", "(()=>{const {A,F}=__T; F.takeControl(); F.FLY.pos.set(-3900, 6, 5000); F.FLY.gam=-0.03; F.FLY.psi=205*Math.PI/180; F.FLY.phi=0; F.FLY.V=70; return 1})()"],
+ ["waitjs", "__T.FL.STATE.evacWait", 20], ["wait", 0.3],
+ ["eval", "(()=>{__T.C.focus('evac'); return 1})()"], ["wait", 1.2],
+ ["eval", "JSON.stringify({p: __T.pos('evac'), d: __T.pos('ditching'), on: (window.__ckOn = 1)})"], ["shot", "e2.jpg"],
+ ["clickjs", "__T.pos('evac')"], ["wait", 0.6], ["shot", "e3.jpg"],
+ ["eval", "JSON.stringify({evac: __T.FL.STATE.acts.evac, end: __T.FL.STATE.end, ditch: __T.FL.STATE.acts.ditching, hover: __T.C.CTL.hover && __T.C.CTL.hover.userData.id})"]]

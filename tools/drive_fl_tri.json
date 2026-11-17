@@ -1,0 +1,33 @@
+[
+[
+"waitfor",
+"#hud:not(.hidden)",
+300000
+],
+[
+"waitfor",
+"#hud.cine",
+120000
+],
+[
+"waitfor",
+"#hud:not(.cine)",
+120000
+],
+[
+"wait",
+1.5
+],
+[
+"eval",
+"(async()=>{const A=await import('/js/flight/aircraft.js'); A.AC.t=40; return 1})()"
+],
+[
+"wait",
+4
+],
+[
+"eval",
+"(async()=>{const E=await import('/js/core/engine.js'), Wm=await import('/js/flight/world.js'); const info=E.renderer.info; info.autoReset=false; const res={}; for (const refl of [true,false]) { Wm.W.reflect=refl; await new Promise(r=>setTimeout(r,500)); let fr=[]; const off=E.onUpdate(()=>{ fr.push([info.render.triangles, info.render.calls]); info.reset(); }); const dts=[]; let last=performance.now(); const t0=last; await new Promise(res2=>{ const f=()=>{ const now=performance.now(); dts.push(now-last); last=now; if(now-t0<6000) requestAnimationFrame(f); else res2(); }; requestAnimationFrame(f); }); off(); fr=fr.slice(2); const avg=(a)=>Math.round(a.reduce((x,y)=>x+y,0)/a.length); res[refl?'mirror':'nomirror']={tri:avg(fr.map(x=>x[0])), triMax:Math.max(...fr.map(x=>x[0])), calls:avg(fr.map(x=>x[1])), slow:dts.filter(d=>d>45).length, n:dts.length}; } info.autoReset=true; Wm.W.reflect=true; return JSON.stringify(res)})()"
+]
+]

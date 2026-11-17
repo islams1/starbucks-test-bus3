@@ -1,0 +1,7 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 2],
+ ["eval", "(()=>{const o=__or; o.take('scalpel',{fly:false}); o.TOOLS.tip.copy(o.CHEST).add(new o.THREE.Vector3(-0.06,0.004,0)); o.TOOLS.steady=o.CHEST.clone().add(new o.THREE.Vector3(-0.1,0.01,-0.05)); return 1})()"],
+ ["wait", 1.5],
+ ["eval", "(()=>{const o=__or, p=o.TEAM.player; const V=()=>new o.THREE.Vector3(); const sk=p.mesh.skeleton; const B=n=>sk.getBoneByName(n); return JSON.stringify({hand:B('Bip01_R_Hand').getWorldPosition(V()), t:o.HANDS.R.t, lhand:B('Bip01_L_Hand').getWorldPosition(V()), lt:o.HANDS.L.t, head:B('Bip01_Head').getWorldPosition(V()), neck:B('Bip01_Neck').getWorldPosition(V())})})()"],
+ ["eval", "(()=>{const o=__or; o.camera.position.set(0.6,1.6,1.1); o.camera.lookAt(-0.4,1.2,0.2); o.camera.fov=45; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 1.2], ["shot", "d1_side.png"],
+ ["eval", "(()=>{const o=__or; o.camera.position.set(-0.43,1.6,0.3); o.camera.lookAt(o.CHEST); o.camera.fov=40; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 1.2], ["shot", "d2_eye.png"]
+]

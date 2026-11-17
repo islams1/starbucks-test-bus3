@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["wait", 21],
+ ["eval", "(async()=>{const G=(await import('/js/flight/gtiles.js')).GT, CKm=await import('/js/flight/cockpit.js'), cine=await import('/js/core/cine.js'), THREE=await import('three'); window.__R={G,cine,THREE}; CKm.seat(false); CKm.CK.group.visible=false; document.getElementById('hud').classList.add('cine'); const V=(x,y,z)=>new THREE.Vector3(x,y,z); window.__V=V; G.holder.rotation.y=0; cine.hold(V(193-1100,350,-3523+1100), V(193,60,-3523), {fov:50}); return 1})()"], ["wait", 12], ["shot", "r0.jpg"],
+ ["eval", "(()=>{__R.G.holder.rotation.y=Math.PI/2; return 1})()"], ["wait", 12], ["shot", "r90.jpg"],
+ ["eval", "(()=>{__R.G.holder.rotation.y=-Math.PI/2; return 1})()"], ["wait", 12], ["shot", "rm90.jpg"],
+ ["eval", "(()=>{__R.G.holder.rotation.y=Math.PI; return 1})()"], ["wait", 12], ["shot", "r180.jpg"]]

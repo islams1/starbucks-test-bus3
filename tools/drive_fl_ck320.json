@@ -1,0 +1,6 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 18],
+ ["eval", "(async()=>{const C=await import('/js/flight/controls.js'), CKm=await import('/js/flight/cockpit.js'); window.__K={C,CKm}; for (const P of Object.values(C.CTL.panels)) P.visible=false; CKm.CK.group.children.forEach(o=>{ if(o.isMesh && o.geometry && o.geometry.type==='ExtrudeGeometry') o.visible=false; }); document.getElementById('keys') && (document.getElementById('keys').style.display='none'); CKm.lookTo(0,-0.18); return 1})()"],
+ ["wait", 1.2], ["shot", "n1.jpg"],
+ ["eval", "(()=>{__K.CKm.lookTo(-0.7,-0.55); return 1})()"], ["wait", 1.2], ["shot", "n2.jpg"],
+ ["eval", "(()=>{__K.CKm.lookTo(-0.5,0.75); return 1})()"], ["wait", 1.2], ["shot", "n3.jpg"],
+ ["eval", "(()=>{__K.CKm.lookTo(0.9,-0.1); return 1})()"], ["wait", 1.2], ["shot", "n4.jpg"]]

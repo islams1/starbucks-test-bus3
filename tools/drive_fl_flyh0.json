@@ -1,0 +1,37 @@
+[
+[
+"waitfor",
+"#hud:not(.hidden)",
+300000
+],
+[
+"waitfor",
+"#hud.cine",
+120000
+],
+[
+"waitfor",
+"#hud:not(.cine)",
+120000
+],
+[
+"wait",
+1.5
+],
+[
+"eval",
+"(async()=>{const A=await import('/js/flight/aircraft.js'); A.AC.t=40; return 1})()"
+],
+[
+"wait",
+2
+],
+[
+"eval",
+"(async()=>{const G=(await import('/js/flight/gtiles.js')).GT; G.tiles.parseQueue.maxJobs=0; G.tiles.downloadQueue.maxJobs=0; return 1})()"
+],
+[
+"eval",
+"(async()=>{const G=(await import('/js/flight/gtiles.js')).GT, E=await import('/js/core/engine.js'); const lt=[]; const po=new PerformanceObserver(l=>{for(const e of l.getEntries()) lt.push(Math.round(e.duration));}); po.observe({type:'longtask', buffered:false}); const dts=[]; let last=performance.now(); const t0=last; await new Promise(res=>{ const f=()=>{ const now=performance.now(); dts.push(now-last); last=now; if(now-t0<15000) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); }); po.disconnect(); const h={'<40':0,'40-60':0,'60-80':0,'80-120':0,'>120':0}; for(const d of dts){ if(d<40)h['<40']++; else if(d<60)h['40-60']++; else if(d<80)h['60-80']++; else if(d<120)h['80-120']++; else h['>120']++; } lt.sort((a,b)=>b-a); return JSON.stringify({n:dts.length, avg:+(dts.reduce((a,b)=>a+b,0)/dts.length).toFixed(1), h, longtasks:lt.length, ltTop:lt.slice(0,10), ltSum:lt.reduce((a,b)=>a+b,0)})})()"
+]
+]

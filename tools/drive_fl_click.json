@@ -1,0 +1,8 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 19],
+ ["eval", "(async()=>{const C=await import('/js/flight/controls.js'), E=await import('/js/core/engine.js'); window.__K={C,E,log:[]}; C.onControl((id,st)=>__K.log.push(id+':'+st)); __K.pos=(id,dx,dy)=>{const o=C.CTL.items[id]; const v=(o.userData.cap||o).getWorldPosition(new o.position.constructor()); v.project(E.camera); return [(v.x+1)/2*innerWidth+dx,(1-v.y)/2*innerHeight+dy]}; C.focus('apu_master', 20000); return 1})()"], ["wait", 1.5],
+ ["clickjs", "__K.pos('apu_master', 30, 22)"], ["wait", 0.3],
+ ["eval", "(()=>{__K.C.focus('flaps', 20000); return 1})()"], ["wait", 1.5],
+ ["clickjs", "__K.pos('flaps', -35, 25)"], ["wait", 0.3],
+ ["eval", "(()=>{__K.C.focus('evac', 20000); return 1})()"], ["wait", 1.5],
+ ["clickjs", "__K.pos('evac', 0, -40)"], ["wait", 0.3],
+ ["eval", "JSON.stringify(__K.log)"]]

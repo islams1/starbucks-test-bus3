@@ -1,0 +1,7 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 2],
+ ["eval", "(()=>{const o=__or; o.TEAM.patient.holder.visible=false; o.OR.blanket.visible=false; o.take('scalpel',{fly:false}); o.TOOLS.tip.copy(o.CHEST).add(new o.THREE.Vector3(-0.04,0.006,0)); o.TOOLS.contact=1; o.TOOLS.steady=o.TOOLS.tip.clone().add(new o.THREE.Vector3(-0.11,0.014,-0.05)); o.camera.position.set(o.CHEST.x+0.04,1.93,0.72); o.camera.lookAt(o.CHEST); o.camera.fov=24; o.camera.updateProjectionMatrix(); return 1})()"],
+ ["wait", 1.2], ["shot", "m1_back035.png"],
+ ["eval", "(()=>{const o=__or; o.HANDS.elbowBack=0.7; o.HANDS.elbowOut=0.15; return 1})()"], ["wait", 0.8], ["shot", "m2_back07.png"],
+ ["eval", "(()=>{const o=__or; o.HANDS.elbowBack=0.0; o.HANDS.elbowOut=0.55; return 1})()"], ["wait", 0.8], ["shot", "m3_out.png"],
+ ["eval", "(()=>{const o=__or; o.HANDS.elbowBack=0.35; o.HANDS.elbowOut=0.3; o.camera.position.set(o.CHEST.x+0.25,1.5,0.6); o.camera.lookAt(o.CHEST.x,1.25,0.2); o.camera.fov=50; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 0.8], ["shot", "m4_side.png"]
+]

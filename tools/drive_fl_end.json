@@ -1,0 +1,6 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 6],
+ ["eval", "(()=>{const f=__fl; f.AC.t=-5.5; f.CK.head.ty=0.0; f.CK.head.tp=0.02; return 1})()"], ["wait", 3.6], ["shot", "g1_geese.jpg"], ["wait", 0.5], ["shot", "g2_geese.jpg"],
+ ["eval", "(()=>{const f=__fl; f.AC.t=203; f.CK.head.ty=0.0; f.CK.head.tp=-0.04; return 1})()"], ["wait", 4], ["shot", "h1_flare.jpg"],
+ ["wait", 9], ["shot", "h2_water.jpg"], ["wait", 6], ["shot", "h3_rescue.jpg"], ["wait", 8], ["shot", "h4_rescue.jpg"],
+ ["waitfor", "#debrief:not(.hidden)", 60000], ["wait", 1], ["shot", "h5_debrief.jpg"]
+]

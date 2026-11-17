@@ -1,0 +1,6 @@
+[["waitfor", "#tray:not(.hidden)", 240000], ["wait", 1.5], ["shot", "l1_overhead_skin.png"],
+ ["click", "#tray .tl[data-id=marker]"], ["wait", 1], ["mmove", 640, 360, 4], ["wait", 0.8], ["shot", "l2_marker.png"],
+ ["eval", "(()=>{const f=__orflow; f.cine.stop(); const c=__or.camera; c.position.set(0.9,1.75,1.6); c.lookAt(-0.3,1.0,0); c.fov=50; c.updateProjectionMatrix(); __or.HANDS.arms.visible=false; return 1})()"], ["wait", 1], ["shot", "l3_room.png"],
+ ["eval", "(()=>{const c=__or.camera; c.position.set(0.2,1.45,0.9); c.lookAt(-0.45,1.05,0); c.fov=45; c.updateProjectionMatrix(); return 1})()"], ["wait", 1], ["shot", "l4_body.png"],
+ ["eval", "(()=>{const c=__or.camera; c.position.set(-2.3,1.7,2.4); c.lookAt(0,1.0,-0.4); c.fov=55; c.updateProjectionMatrix(); return 1})()"], ["wait", 1], ["shot", "l5_room2.png"]
+]

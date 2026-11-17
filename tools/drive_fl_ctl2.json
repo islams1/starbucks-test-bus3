@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 8],
+ ["eval", "(async()=>{const m=await import('/js/flight/controls.js'); const P=m.CTL.panels; const r=(o)=>o.position.toArray().map(v=>+v.toFixed(3)); return JSON.stringify({ov:r(P.ov), pd:r(P.pd), gs:r(P.gs), pfd: r(__fl.CK.screens.pfd.m)})})()"],
+ ["eval", "(()=>{const f=__fl; f.CK.head.ty=-0.6; f.CK.head.tp=1.1; return 1})()"], ["wait", 1.2], ["shot", "o1.jpg"],
+ ["eval", "(()=>{const f=__fl; f.CK.head.ty=-0.9; f.CK.head.tp=0.7; return 1})()"], ["wait", 1.2], ["shot", "o2.jpg"]
+]

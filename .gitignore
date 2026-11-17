@@ -14,3 +14,6 @@ __pycache__/
 # downloaded with tools/fetch_sketchfab.py but not used by the game
 assets/or_models/nurse/
 assets/or_models/retractor_hand/
+
+# browser config with the Google Maps key (from .env.local via tools/flight_config.py)
+flight.local.json

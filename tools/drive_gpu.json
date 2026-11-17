@@ -1,0 +1,1 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["eval", "(async()=>{const q=await import('/js/core/quality.js'); return JSON.stringify({gpu:q.quality.gpu, auto:q.quality.auto, level:q.quality.level, dpr:devicePixelRatio})})()"]]

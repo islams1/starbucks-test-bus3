@@ -13,7 +13,9 @@ export const Q = new URLSearchParams(location.search);
 // ---------- software-rendering detection (no GPU / acceleration off) — decided before the renderer exists ----------
 export const SOFTWARE = (() => { try { const gl = document.createElement('canvas').getContext('webgl2'); const e = gl && gl.getExtension('WEBGL_debug_renderer_info'); const r = gl ? String(gl.getParameter(e ? e.UNMASKED_RENDERER_WEBGL : gl.RENDERER)) : ''; return /swiftshader|llvmpipe|basic render|software|microsoft basic/i.test(r) || Q.get('q') === 'cpu'; } catch (e) { return false; } })();
 // ---------- renderer ----------
-export const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('gl'), antialias: !SOFTWARE, powerPreference: 'high-performance'});
+// a page may ask for a logarithmic depth buffer before loading the engine (window.__ENGINE = {logDepth: true}): needed when
+// the view reaches tens of kilometres (the flight scenery) — near and far objects then keep their depth precision
+export const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('gl'), antialias: !SOFTWARE, powerPreference: 'high-performance', logarithmicDepthBuffer: !!(window.__ENGINE && window.__ENGINE.logDepth)});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -92,6 +94,9 @@ addEventListener('resize', onResize);
 // ---------- update loop ----------
 const updaters = new Set();
 export const onUpdate = (fn) => { updaters.add(fn); return () => updaters.delete(fn); };
+/** runs after every onUpdate of the frame: cameras that follow something moving (no one-frame lag) */
+const lateUpdaters = new Set();
+export const onLateUpdate = (fn) => { lateUpdaters.add(fn); return () => lateUpdaters.delete(fn); };
 const overlays = new Set();          // extra viewport renders (video call)
 export const onOverlay = (fn) => { overlays.add(fn); return () => overlays.delete(fn); };
 export const clock = {t: 0, dt: 0, paused: false, scale: 1};
@@ -112,6 +117,7 @@ function frame(now) {
   clock.dt = dt; clock.t += dt;
   const t0 = performance.now();
   for (const f of updaters) f(dt, clock.t);
+  for (const f of lateUpdaters) f(dt, clock.t);
   const t1 = performance.now();
   grade.uniforms.time.value = clock.t * 60 % 1000;
   if (renderer.shadowMap.enabled && ++shadowCtl.n >= shadowCtl.every) { renderer.shadowMap.needsUpdate = true; shadowCtl.n = 0; }

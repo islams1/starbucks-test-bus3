@@ -1,0 +1,8 @@
+[["waitjs", "window.__ready === true", 60],
+ ["eval", "__load('../_src/flight_raw/cockpit/scene.gltf')"], ["wait", 2], ["shot", "c1.jpg"], ["eval", "__camAt(0.05,0.1,0.25)"], ["wait", 0.5], ["shot", "c1b.jpg"],
+ ["eval", "__load('../_src/flight_raw/cockpit_a320/scene.gltf')"], ["wait", 2], ["shot", "c2.jpg"], ["eval", "__camAt(0.05,0.15,0.3)"], ["wait", 0.5], ["shot", "c2b.jpg"],
+ ["eval", "__load('../_src/flight_raw/a320/scene.gltf')"], ["wait", 2], ["shot", "a320.jpg"],
+ ["eval", "__load('../_src/flight_raw/manhattan/scene.gltf')"], ["wait", 4], ["shot", "man.jpg"], ["eval", "__camAt(0,1,0.01)"], ["wait", 0.5], ["shot", "man_top.jpg"],
+ ["eval", "__load('../_src/flight_raw/goose_fly/scene.gltf')"], ["wait", 1], ["shot", "goose.jpg"],
+ ["eval", "__load('../_src/flight_raw/swan/scene.gltf')"], ["wait", 1.5], ["shot", "swan.jpg"]
+]

@@ -1,0 +1,4 @@
+[["waitjs","window.__ready === true",60],
+ ["eval","(async()=>{await __load('../_src/flight_raw/manhattan/scene.gltf'); const T=__THREE; const b=new T.Box3().setFromObject(__cur); __scene.add(new T.AmbientLight(0xffffff,1.0)); return JSON.stringify({min:b.min.toArray().map(v=>+v.toFixed(1)), max:b.max.toArray().map(v=>+v.toFixed(1))})})()"],
+ ["eval","__camAt(0.3,0.5,0.6)"], ["wait",1], ["shot","mh1.jpg"],
+ ["eval","__camAt(0.05,0.12,0.25)"], ["wait",1], ["shot","mh2.jpg"]]
