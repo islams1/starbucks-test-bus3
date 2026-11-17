@@ -38,6 +38,14 @@ function listen(who, sec) {
     setTimeout(() => { if (!c.voice) c._lookOv = {target: who, until: performance.now() + Math.min(sec, 3.5) * 1000}; }, 200 + Math.random() * 600);
   }
 }
+/** whom a line is spoken to: someone named at its start, the whole team, or (by default) the surgeon */
+const VOC = [[/^(سيد\s+|يا\s+)?عادل/, 'patient'], [/^رانيا/, 'rania'], [/^ليلى/, 'layla'], [/^كريم/, 'karim']];
+function addressee(L, ch) {
+  const t = L.t.trim();
+  for (const [re, id] of VOC) if (re.test(t) && TEAM[id] && TEAM[id] !== ch && TEAM[id].holder.visible) return TEAM[id];
+  if (/الجميع|من فضلكم/.test(t)) return 'team';
+  return 'camera';
+}
 export function say(id, opt = {}) { const run = chain.then(() => sayImpl(id, opt)); chain = run.catch(() => {}); return run; }
 async function sayImpl(id, {gesture = false} = {}) {
   const L0 = LINES[id], busy = (c) => /work|sit|documents/.test(c.baseName || '');
@@ -52,11 +60,18 @@ async function sayImpl(id, {gesture = false} = {}) {
     const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: false, pointTarget: null, glances: GLANCES[L.s]});
     // a free-standing speaker talks to the surgeon (meaning-driven glances still go to the monitor, the patient…);
     // the others turn to whoever is talking
-    const prevLook = ch.look.target, faceUs = !busy(ch); if (faceUs) ch.lookAt('camera');
+    const prevLook = ch.look.target, faceUs = !busy(ch), to = addressee(L, ch);
     const lineSec = words.length ? (words[words.length - 1][0] + words[words.length - 1][1]) / 1000 : 2.5;
+    if (faceUs) ch.lookAt(to === 'team' ? 'camera' : to);
+    if (to === 'team') {                                // speaking to everyone: the eyes go round the room
+      const ppl = ['camera', ...['layla', 'karim', 'assist', 'rania'].map(k => TEAM[k]).filter(c => c && c !== ch && c.holder.visible)];
+      ppl.slice(1).forEach((c, i) => perf.events.push({t: lineSec * (i + 1) / ppl.length - 0.2, type: 'glance', target: c, sec: Math.min(1.4, lineSec / ppl.length + 0.2)}));
+      perf.events.sort((a, b) => a.t - b.t);
+    }
     listen(ch, lineSec);
-    const p = ch.say(url, {gesture, emotion: L.e, perf});
-    p.then(() => { if (faceUs && ch.look.target === 'camera') ch.lookAt(prevLook); });
+    // the hands follow the voice (calm, professional): the talk clip is laid over the pose and moves with the words
+    const p = ch.say(url, {gesture, emotion: L.e, perf, gestureWeight: ['haddad', 'huda'].includes(L.s) ? 0.65 : 0.55});
+    p.then(() => { if (faceUs && ch.look.target === (to === 'team' ? 'camera' : to)) ch.lookAt(prevLook); });
     await new Promise(r => { const t = () => ch.voice ? (timeFn = ch.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); });
     subtitle(sp.name, sp.role, L.t, words, () => timeFn());
     await p;

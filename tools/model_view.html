@@ -24,5 +24,7 @@ window.__load = (url) => new Promise(res => new GLTFLoader().load(url, (g) => {
 }));
 (function f() { requestAnimationFrame(f); r.render(scene, cam); })();
 window.__camAt = (dx, dy, dz) => { const b = new THREE.Box3().setFromObject(window.__cur), c = b.getCenter(new THREE.Vector3()), d = b.getSize(new THREE.Vector3()).length(); cam.position.copy(c).add(new THREE.Vector3(dx, dy, dz).multiplyScalar(d * 1.4)); cam.up.set(0, 1, 0); if (Math.abs(dy) > 0.9) cam.up.set(0, 0, -1); cam.lookAt(c); return 1; };
+window.__cam = cam; window.__THREE = THREE; window.__scene = scene;
+window.__look = (px, py, pz, tx, ty, tz, fov = 60) => { cam.position.set(px, py, pz); cam.fov = fov; cam.near = 0.01; cam.far = 1000; cam.up.set(0, 1, 0); cam.lookAt(tx, ty, tz); cam.updateProjectionMatrix(); return 1; };
 window.__ready = true;
 </script></body></html>
