@@ -1,0 +1,2 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["wait", 10],
+ ["eval", "(async()=>{const G=(await import('/js/flight/gtiles.js')).GT; return JSON.stringify(G.tiles.stats)})()"]]

@@ -1,6 +1,6 @@
 // Cinematic camera: tweened shots, spline flights, dialogue framing, gentle handheld noise.
 import * as THREE from 'three';
-import {camera, onUpdate, clamp} from './engine.js';
+import {camera, onUpdate, onLateUpdate, clamp} from './engine.js';
 
 const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
@@ -9,7 +9,8 @@ let shake = 0.0, shakeT = 0;
 export const cine = {fovBase: 50};
 const _look = new THREE.Vector3();
 
-onUpdate((dt, t) => {
+// after the scene has moved this frame: a shot that follows a moving subject must not lag a frame behind it
+onLateUpdate((dt, t) => {
   if (active) active.update(dt);
   if (active && shake > 0) {  // subtle handheld breathing
     shakeT += dt;

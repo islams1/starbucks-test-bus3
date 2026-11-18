@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 2.6],
+ ["eval", "(async()=>{const w=(await import('/js/flight/world.js')).W, A=(await import('/js/flight/aircraft.js')).AC; window.__W=w; window.__A=A; w.water.material.uniforms.uDebug.value=1; w.hideInReflectionNow=()=>[A.group]; return 1})()"], ["wait", 0.3], ["shot", "u1_noAC.jpg"],
+ ["eval", "(()=>{__W.hideInReflectionNow=()=>[__W.clouds]; return 1})()"], ["wait", 0.3], ["shot", "u2_noclouds.jpg"],
+ ["eval", "(()=>{__W.hideInReflectionNow=()=>[__W.sky]; return 1})()"], ["wait", 0.3], ["shot", "u3_nosky.jpg"],
+ ["eval", "(()=>{const sc=__W.group.parent; const names=[]; sc.children.forEach(o=>names.push((o.type||'')+':'+(o.name||'')+':'+(o.children?o.children.length:0))); return names.join(' | ')})()"]]

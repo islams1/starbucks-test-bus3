@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 19],
+ ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), cine=await import('/js/core/cine.js'), CKm=await import('/js/flight/cockpit.js'), THREE=await import('three'); window.__G={A,cine,CKm,THREE}; A.AC.t=-5.5; return 1})()"],
+ ["wait", 0.5],
+ ["eval", "(()=>{const {A,cine,CKm,THREE}=__G; const f=A.AC.flock; CKm.seat(false); CKm.CK.group.visible=false; const g=f.children[0]; cine.hold(()=>g.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(6,1.5,6)), ()=>g.getWorldPosition(new THREE.Vector3()), {fov:30}); const m=A.AC.mixers[0]; return JSON.stringify({vis:f.visible, n:f.children.length, scale:+g.scale.x.toFixed(1), act: m._actions.map(a=>[a.isRunning(), +a.time.toFixed(2), a.getClip().duration]), childScale: g.children.map(c=>c.type)})})()"],
+ ["wait", 0.4], ["shot", "g1.jpg"], ["wait", 0.25], ["shot", "g2.jpg"], ["wait", 0.25], ["shot", "g3.jpg"]]

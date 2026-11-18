@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 18],
+ ["eval", "(async()=>{const FO=await import('/js/flight/fo.js'), CKm=await import('/js/flight/cockpit.js'); window.__F={FO,CKm}; const fo=CKm.CK.fo; return JSON.stringify({fo: !!fo, reach: !!FO.FO.reach, postIK: !!(fo && fo.postIK), mesh: !!(fo && fo.mesh), skel: !!(fo && fo.mesh && fo.mesh.skeleton), bone: !!(fo && fo.mesh && fo.mesh.skeleton && fo.mesh.skeleton.getBoneByName('Bip01_L_UpperArm')), keys: fo ? Object.keys(fo).slice(0,40).join(',') : ''})})()"],
+ ["eval", "(()=>{__F.CKm.lookTo(-1.05,-0.5); return 1})()"], ["wait", 0.8],
+ ["eval", "(()=>{__F.FO.foSet('engmode', 2, 1.2); return 1})()"], ["wait", 0.85], ["shot", "f1.jpg"], ["wait", 0.7], ["shot", "f2.jpg"],
+ ["eval", "(()=>{__F.FO.foSet('thrust', 3, 1.2); return 1})()"], ["wait", 0.9], ["shot", "f3.jpg"]]

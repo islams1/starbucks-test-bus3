@@ -1,0 +1,7 @@
+[["waitjs", "window.__ready === true", 60], ["wait", 1],
+ ["eval", "(()=>{window.__only=(n)=>__g.traverse(o=>{if(o.isMesh)o.visible=n.includes(o.name)}); return 1})()"],
+ ["eval", "(__only(['ventricles']), __view(0, 0.42, 0.02), 1)"], ["wait", 0.4], ["shot", "hp1_ventricles.png"],
+ ["eval", "(__only(['cavities']), 1)"], ["wait", 0.4], ["shot", "hp2_cavities.png"],
+ ["eval", "(__only(['ra','la']), 1)"], ["wait", 0.4], ["shot", "hp3_atria.png"],
+ ["eval", "(__only(['ventricles','cavities','ra','la','lad','diagonal','rca','circumflex','marginal','pda','veins','aorta','pulmonary_trunk','svc']), 1)"], ["wait", 0.4], ["shot", "hp4_all.png"]
+]

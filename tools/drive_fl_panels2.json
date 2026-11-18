@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 10],
+ ["eval", "(async()=>{const C=await import('/js/flight/controls.js'); window.__P={C}; C.focus('apu_master', 60000); return 1})()"], ["wait", 1.5], ["shot", "q_ov.jpg"],
+ ["eval", "(()=>{__P.C.focus('engmode', 60000); return 1})()"], ["wait", 1.5], ["shot", "q_pd.jpg"],
+ ["eval", "(()=>{__P.C.focus('mwarn', 60000); return 1})()"], ["wait", 1.5], ["shot", "q_gs.jpg"],
+ ["eval", "(async()=>{(await import('/js/flight/cockpit.js')).lookTo(-0.75,-0.45); __P.C.CTL.zoomT && clearTimeout(__P.C.CTL.zoomT); (await import('/js/flight/cockpit.js')).CK.fovT=null; return 1})()"], ["wait", 1.5], ["shot", "q_wide.jpg"]]

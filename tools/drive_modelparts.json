@@ -1,0 +1,6 @@
+[["waitjs","window.__ready === true",60],
+ ["eval","__load('../assets/or_models/optable/model.gltf')"],["wait",1],
+ ["eval","(()=>{let out=[]; __cur.traverse(o=>{if(o.isMesh){o.visible=/LAmp/.test(o.name); if(o.visible){const b=new __cur.constructor().position; }}}); return 1})()"],["wait",0.6],["shot","op_lamps.png"],
+ ["eval","(()=>{__cur.traverse(o=>{if(o.isMesh)o.visible=/Table_0/.test(o.name)}); return 1})()"],["wait",0.6],["shot","op_table.png"],
+ ["eval","(()=>{__cur.traverse(o=>{if(o.isMesh)o.visible=/_I_0/.test(o.name)}); return 1})()"],["wait",0.6],["shot","op_rig.png"]
+]

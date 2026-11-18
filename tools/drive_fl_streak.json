@@ -1,0 +1,4 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 2.6], ["shot", "t0.jpg"],
+ ["eval", "(async()=>{const w=(await import('/js/flight/world.js')).W; window.__W=w; w.water.material.uniforms.uDebug.value=1; return 1})()"], ["wait", 0.3], ["shot", "t1_reflonly.jpg"],
+ ["eval", "(()=>{__W.water.material.uniforms.uDebug.value=0; __W.water.visible=false; return 1})()"], ["wait", 0.3], ["shot", "t2_nowater.jpg"],
+ ["eval", "(()=>{__W.water.visible=true; __W.reflect=false; return 1})()"], ["wait", 0.3], ["shot", "t3_noreflect.jpg"]]

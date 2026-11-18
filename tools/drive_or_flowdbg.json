@@ -1,0 +1,5 @@
+[["waitfor", "#tray:not(.hidden)", 240000], ["wait", 0.5], ["click", "#tray .tl[data-id=flow]"], ["wait", 1.2],
+ ["eval", "JSON.stringify([...document.querySelectorAll('#hotspots .mk.graft')].map(e=>({t:e.textContent, l:e.style.left, top:e.style.top, vis:e.style.visibility})))"],
+ ["eval", "(()=>{const H=__orflow.H; const g=H.grafts.LAD; const p=g.geometry.parameters.path.getPointAt(0.62).clone(); g.parent.localToWorld(p); return JSON.stringify({p:p.toArray().map(v=>+v.toFixed(3)), lad:H.targets.LAD.toArray().map(v=>+v.toFixed(3)), cam:__or.camera.position.toArray().map(v=>+v.toFixed(3))})})()"],
+ ["shot", "fd1.png"]
+]

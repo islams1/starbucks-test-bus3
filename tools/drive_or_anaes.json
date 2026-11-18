@@ -1,0 +1,4 @@
+[["waitfor", "#tray:not(.hidden)", 240000], ["wait", 1.5],
+ ["eval", "(()=>{const f=__orflow; f.cine.stop(); const c=__or.camera; c.position.set(-1.0,1.5,1.4); c.lookAt(-1.9,1.0,0.5); c.fov=45; c.updateProjectionMatrix(); __or.HANDS.arms.visible=false; return 1})()"], ["wait", 1], ["shot", "an1.png"],
+ ["eval", "(()=>{const c=__or.camera; c.position.set(-0.6,1.7,1.8); c.lookAt(0.5,1.0,-1.5); c.fov=50; c.updateProjectionMatrix(); return 1})()"], ["wait", 1], ["shot", "an2_pump.png"]
+]

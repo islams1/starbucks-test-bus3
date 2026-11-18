@@ -1,0 +1,9 @@
+[["waitjs", "window.__ready === true", 60],
+ ["eval", "__load('../_src/flight_raw/cockpit/scene.gltf')"], ["wait", 2],
+ ["eval", "(()=>{const T=__THREE; const b=new T.Box3().setFromObject(__cur); window.__b=b; return JSON.stringify({min:b.min.toArray().map(v=>+v.toFixed(2)),max:b.max.toArray().map(v=>+v.toFixed(2))})})()"],
+ ["eval", "(()=>{const b=__b,c=b.getCenter(new __THREE.Vector3()); return __look(c.x,c.y+6,c.z+0.01,c.x,c.y,c.z,60)})()"], ["wait",0.6], ["shot","top.jpg"],
+ ["eval", "(()=>{const b=__b,c=b.getCenter(new __THREE.Vector3()); return __look(c.x+7,c.y,c.z,c.x,c.y,c.z,60)})()"], ["wait",0.6], ["shot","side_x.jpg"],
+ ["eval", "(()=>{const b=__b,c=b.getCenter(new __THREE.Vector3()); return __look(c.x,c.y,c.z+7,c.x,c.y,c.z,60)})()"], ["wait",0.6], ["shot","side_z.jpg"],
+ ["eval", "(()=>{const b=__b,c=b.getCenter(new __THREE.Vector3()); return __look(c.x,c.y+0.3,c.z,c.x,c.y+0.1,c.z-3,75)})()"], ["wait",0.6], ["shot","in_mz.jpg"],
+ ["eval", "(()=>{const b=__b,c=b.getCenter(new __THREE.Vector3()); return __look(c.x,c.y+0.3,c.z,c.x,c.y+0.1,c.z+3,75)})()"], ["wait",0.6], ["shot","in_pz.jpg"]
+]

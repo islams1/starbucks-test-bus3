@@ -1,0 +1,4 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 10],
+ ["eval", "(async()=>{const FL=await import('/js/flight/flow.js'), A=await import('/js/flight/aircraft.js'), F=await import('/js/flight/fly.js'); window.__T={FL,A,F}; A.AC.t=200; return 1})()"], ["wait", 1.5],
+ ["eval", "(()=>{const {A,F}=__T; F.takeControl(); const s=A.sampleReal(208,{pos:A.AC.pos.clone()}); F.FLY.pos.set(s.pos.x, 4.5, s.pos.z); F.FLY.gam=-0.035; F.FLY.psi=s.hdg*Math.PI/180; F.FLY.phi=0; F.FLY.V=66; return 1})()"],
+ ["waitjs", "__T.FL.STATE.end", 20], ["wait", 0.45], ["shot", "s1.jpg"], ["wait", 0.5], ["shot", "s2.jpg"], ["eval", "(async()=>{(await import('/js/flight/cockpit.js')).lookTo(1.1,-0.1); return 1})()"], ["wait", 0.6], ["shot", "s3.jpg"]]

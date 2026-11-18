@@ -1,0 +1,25 @@
+[
+[
+"waitfor",
+"#hud:not(.hidden)",
+300000
+],
+[
+"waitfor",
+"#hud.cine",
+120000
+],
+[
+"waitfor",
+"#hud:not(.cine)",
+120000
+],
+[
+"wait",
+3
+],
+[
+"eval",
+"(async()=>{const E=await import('/js/core/engine.js'); const out={}; for (const cap of [30,0,30,0]) { E.frameCap.fps=cap; await new Promise(r=>setTimeout(r,800)); const dts=[]; let last=performance.now(), lf=E.stats.lastNow; const t0=last; await new Promise(res=>{ const f=()=>{ const now=performance.now(); if (E.stats.lastNow!==lf){ dts.push(E.stats.lastNow-lf); lf=E.stats.lastNow; } if(now-t0<7000) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); }); const h={'<40':0,'40-60':0,'60-80':0,'>80':0}; for(const d of dts){ if(d<40)h['<40']++; else if(d<60)h['40-60']++; else if(d<80)h['60-80']++; else h['>80']++; } const m=dts.reduce((a,b)=>a+b,0)/dts.length; const sd=Math.sqrt(dts.reduce((a,b)=>a+(b-m)**2,0)/dts.length); (out['cap'+cap]=out['cap'+cap]||[]).push({n:dts.length, avg:+m.toFixed(1), sd:+sd.toFixed(1), h}); } return JSON.stringify(out)})()"
+]
+]

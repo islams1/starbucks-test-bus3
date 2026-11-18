@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["wait", 5], ["shot", "g1.jpg"],
+ ["eval", "(async()=>{const G=(await import('/js/flight/gtiles.js')).GT; return JSON.stringify({on:G.on, kids: G.tiles && G.tiles.group.children.length})})()"],
+ ["wait", 6], ["shot", "g2.jpg"],
+ ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), CKm=await import('/js/flight/cockpit.js'), cine=await import('/js/core/cine.js'), THREE=await import('three'); window.__B={A,CKm,cine,THREE}; CKm.seat(false); CKm.CK.group.visible=false; document.getElementById('hud').classList.add('cine'); const V=(x,y,z)=>new THREE.Vector3(x,y,z); window.__V=V; cine.hold(V(-4300,45,5900), V(-2600,90,5500), {fov:50}); return 1})()"], ["wait", 12], ["shot", "g3.jpg"],
+ ["eval", "(()=>{__B.cine.hold(__V(-3750,140,5450), __V(-3050,70,5750), {fov:45}); return 1})()"], ["wait", 12], ["shot", "g4.jpg"]]

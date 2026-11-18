@@ -39,6 +39,7 @@ with sync_playwright() as p:
     pg=b.new_page(viewport={'width':844,'height':390}, is_mobile=True, has_touch=True, device_scale_factor=3, user_agent='Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36') if os.environ.get('MOBILE') else b.new_page(viewport={'width':1280,'height':720})
     pg.on('console', lambda m: ((m.type in ('error','warning') or '[boot]' in m.text or 'rafFPS' in m.text) and 'TGA' not in m.text and 'PropertyBinding' not in m.text) and print('[console]', m.type, m.text[:400], flush=True))
     pg.on('response', lambda r: r.status>=400 and print('[http]', r.status, r.url, flush=True))
+    pg.on('requestfailed', lambda r: print('[reqfail]', r.failure, r.url.split('?')[0], flush=True))
     pg.on('pageerror', lambda e: print('[pageerror]', str(e)[:600], (e.stack or '')[:900], flush=True))
     arg=sys.argv[3] if len(sys.argv)>3 else ''
     url=arg if arg.startswith('http') else base+arg

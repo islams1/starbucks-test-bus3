@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 19],
+ ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), CKm=await import('/js/flight/cockpit.js'), cine=await import('/js/core/cine.js'), THREE=await import('three'); window.__B={A,CKm,cine,THREE}; CKm.seat(false); CKm.CK.group.visible=false; document.getElementById('hud').classList.add('cine'); const V=(x,y,z)=>new THREE.Vector3(x,y,z); window.__V=V; cine.hold(V(-4300,45,5900), V(-2600,90,5500), {fov:50}); return 1})()"], ["wait", 5], ["shot", "d1.jpg"],
+ ["eval", "(()=>{const {cine}=__B; cine.hold(__V(-4300,45,5900), __V(-6200,40,5200), {fov:50}); return 1})()"], ["wait", 5], ["shot", "d2.jpg"],
+ ["eval", "(()=>{const {cine}=__B; cine.hold(__V(-3750,140,5450), __V(-3050,70,5750), {fov:45}); return 1})()"], ["wait", 6], ["shot", "d3.jpg"],
+ ["eval", "(()=>{const {cine}=__B; cine.hold(__V(-4300,320,6800), __V(-3200,40,4900), {fov:50}); return 1})()"], ["wait", 6], ["shot", "d4.jpg"]]

@@ -1,0 +1,1 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 3], ["shot", "o1.jpg"], ["wait", 5], ["shot", "o2.jpg"], ["wait", 5], ["shot", "o3.jpg"], ["wait", 3.5], ["shot", "o4.jpg"]]

@@ -1,0 +1,1 @@
+[["waitjs", "window.__ready === true", 60], ["eval", "__load('../assets/or_models/heart_realistic/model.gltf')"], ["wait", 1], ["eval", "__camAt(0,0,1)"], ["wait", 0.5], ["shot", "hx_front_pz.png"], ["eval", "__camAt(1,0,0)"], ["wait", 0.5], ["shot", "hx_side_px.png"], ["eval", "__camAt(0,1,0)"], ["wait", 0.5], ["shot", "hx_top_py.png"]]

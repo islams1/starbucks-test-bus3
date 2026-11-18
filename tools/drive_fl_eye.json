@@ -1,0 +1,6 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 7],
+ ["eval", "(()=>{const f=__fl,T=f.THREE; const m=f.CK.model; const out=[]; m.updateMatrixWorld(true); const inv=new T.Matrix4().copy(f.CK.group.matrixWorld).invert(); m.traverse(o=>{ if(o.isMesh&&o.visible){ const b=new T.Box3().setFromObject(o).applyMatrix4(inv); const c=b.getCenter(new T.Vector3()); if(c.length()<1.2) out.push([o.name.slice(0,22), c.toArray().map(v=>+v.toFixed(2)), b.getSize(new T.Vector3()).toArray().map(v=>+v.toFixed(2))]); }}); return JSON.stringify(out.slice(0,40))})()"],
+ ["eval", "(()=>{const f=__fl; f.CK.model.position.z -= 0.45; f.CK.model.position.y -= 0.05; f.CK.head.ty=0; f.CK.head.tp=-0.1; return 1})()"], ["wait",1], ["shot","e1.jpg"],
+ ["eval", "(()=>{const f=__fl; f.CK.model.position.z -= 0.3; return 1})()"], ["wait",1], ["shot","e2.jpg"],
+ ["eval", "(()=>{const f=__fl; f.CK.model.position.z += 0.9; return 1})()"], ["wait",1], ["shot","e3.jpg"]
+]

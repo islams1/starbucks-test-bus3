@@ -1,0 +1,94 @@
+{
+ "origin": [
+  40.82,
+  -73.955
+ ],
+ "mlat": 111132.0,
+ "mlon": 84243.29383705824,
+ "core": [
+  40.735,
+  40.905,
+  -74.075,
+  -73.835
+ ],
+ "tiles": 4,
+ "credits": [
+  "Imagery: USGS The National Map (USDA NAIP), public domain",
+  "Elevation: USGS 3DEP, public domain",
+  "Buildings: \u00a9 OpenStreetMap contributors (ODbL)"
+ ],
+ "coreXZ": [
+  -10109.195260447372,
+  -9446.220000000094,
+  10109.195260447372,
+  9446.220000000094
+ ],
+ "outerXZ": [
+  -47176.24454875281,
+  -46675.44000000019,
+  47176.24454875281,
+  46675.44000000019
+ ],
+ "terrain": {
+  "nx": 506,
+  "nz": 473
+ },
+ "buildings": [
+  {
+   "file": "bld_3_3.bin",
+   "tris": 95988
+  },
+  {
+   "file": "bld_2_3.bin",
+   "tris": 23689
+  },
+  {
+   "file": "bld_1_3.bin",
+   "tris": 169120
+  },
+  {
+   "file": "bld_0_3.bin",
+   "tris": 15096
+  },
+  {
+   "file": "bld_3_2.bin",
+   "tris": 66567
+  },
+  {
+   "file": "bld_2_2.bin",
+   "tris": 56803
+  },
+  {
+   "file": "bld_1_2.bin",
+   "tris": 129070
+  },
+  {
+   "file": "bld_0_2.bin",
+   "tris": 13375
+  },
+  {
+   "file": "bld_3_1.bin",
+   "tris": 191123
+  },
+  {
+   "file": "bld_2_1.bin",
+   "tris": 207426
+  },
+  {
+   "file": "bld_1_1.bin",
+   "tris": 27084
+  },
+  {
+   "file": "bld_3_0.bin",
+   "tris": 95736
+  },
+  {
+   "file": "bld_2_0.bin",
+   "tris": 96652
+  },
+  {
+   "file": "bld_1_0.bin",
+   "tris": 679
+  }
+ ]
+}

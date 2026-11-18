@@ -1,0 +1,6 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 2],
+ ["eval", "(()=>{const o=__or; o.TEAM.patient.holder.visible=false; o.take('scalpel',{fly:false}); o.TOOLS.tip.copy(o.CHEST).add(new o.THREE.Vector3(-0.04,0.006,0)); o.TOOLS.contact=1; o.TOOLS.steady=o.CHEST.clone().add(new o.THREE.Vector3(-0.15,0.014,-0.05)); return 1})()"],
+ ["wait", 1.2],
+ ["eval", "(()=>{const o=__or, H=o.HANDS, V=()=>new o.THREE.Vector3(); const a=H.rig.arms; const p=b=>b.getWorldPosition(V()).toArray().map(v=>+v.toFixed(3)); const meshes=H.rig.meshes.map(m=>({vis:m.visible, n:m.name})); return JSON.stringify({fp:H.fp, on:H.on, w:H.R.w, t:H.R.t.toArray().map(v=>+v.toFixed(3)), up:p(a.R.up), fore:p(a.R.fore), hand:p(a.R.hand), upL:p(a.L.up), handL:p(a.L.hand), grp:H.rig.group.visible, scale:H.rig.group.children[0].scale.x, meshes})})()"],
+ ["eval", "(()=>{const o=__or; const c=o.camera; c.position.set(0.6,1.7,1.4); c.lookAt(-0.4,1.2,0.2); c.fov=55; c.updateProjectionMatrix(); return 1})()"], ["wait", 0.8], ["shot", "rig_side.png"]
+]

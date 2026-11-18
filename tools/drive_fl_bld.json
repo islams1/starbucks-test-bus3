@@ -1,0 +1,6 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 19],
+ ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), CKm=await import('/js/flight/cockpit.js'), cine=await import('/js/core/cine.js'), THREE=await import('three'); window.__B={A,CKm,cine,THREE}; A.AC.t=150; return 1})()"],
+ ["wait", 1.5], ["eval", "(()=>{__B.CKm.lookTo(-0.9,-0.12); return 1})()"], ["wait", 4], ["shot", "c1.jpg"],
+ ["eval", "(()=>{const {A,CKm,cine,THREE}=__B; CKm.seat(false); CKm.CK.group.visible=false; A.AC.ext.visible=true; const p=A.AC.pos.clone(); cine.hold(p.clone().add(new THREE.Vector3(-260,60,300)), p.clone().add(new THREE.Vector3(700,40,-600)), {fov:50}); document.getElementById('hud').classList.add('cine'); return 1})()"], ["wait", 4], ["shot", "c2.jpg"],
+ ["eval", "(()=>{const {A,cine,THREE}=__B; const p=A.AC.pos.clone(); cine.hold(p.clone().add(new THREE.Vector3(500,25,200)), p.clone().add(new THREE.Vector3(1100,60,-100)), {fov:45}); return 1})()"], ["wait", 4], ["shot", "c3.jpg"],
+ ["eval", "(()=>{const {A,cine,THREE}=__B; const p=A.AC.pos.clone(); cine.hold(p.clone().add(new THREE.Vector3(-200,30,-200)), p.clone().add(new THREE.Vector3(-1300,40,-300)), {fov:45}); return 1})()"], ["wait", 4], ["shot", "c4.jpg"]]

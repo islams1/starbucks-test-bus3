@@ -1,0 +1,7 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 2],
+ ["eval", "(()=>{const o=__or; o.TEAM.patient.holder.visible=false; o.take('scalpel',{fly:false}); o.TOOLS.tip.copy(o.CHEST).add(new o.THREE.Vector3(-0.04,0.006,0)); o.TOOLS.contact=1; o.TOOLS.steady=o.CHEST.clone().add(new o.THREE.Vector3(-0.15,0.014,-0.05)); return 1})()"],
+ ["wait", 1.2],
+ ["eval", "(()=>{const o=__or; const h=o.TOOLS.tip.clone(); window.__h=h; o.camera.position.set(h.x+0.05,h.y+0.18,h.z+0.42); o.camera.lookAt(h.x+0.04,h.y+0.04,h.z); o.camera.fov=35; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 0.5], ["shot", "k0_front.png"],
+ ["eval", "(()=>{const o=__or, h=window.__h; o.camera.position.set(h.x+0.45,h.y+0.12,h.z+0.05); o.camera.lookAt(h.x+0.04,h.y+0.04,h.z); return 1})()"], ["wait", 0.5], ["shot", "k1_side.png"],
+ ["eval", "(()=>{const o=__or; o.camera.position.set(o.CHEST.x+0.04,1.93,0.72); o.camera.lookAt(o.CHEST); o.camera.fov=24; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 0.5], ["shot", "k2_fp.png"]
+]

@@ -1,0 +1,2 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 6],
+ ["eval", "(()=>{const f=__fl; const gl=f.renderer.getContext(); return JSON.stringify({err: gl.getError(), glass: (f.CK.glass||[]).length, info: f.renderer.info.render, progs: f.renderer.info.programs.length})})()"]]

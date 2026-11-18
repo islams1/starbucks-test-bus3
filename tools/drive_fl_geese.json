@@ -1,0 +1,1 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 19], ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), THREE=await import('three'); window.__G={A,THREE}; A.AC.t=-7; return 1})()"], ["waitjs", "__G.A.AC.t > -4.0", 20], ["shot", "g1.jpg"], ["waitjs", "__G.A.AC.t > -2.0", 20], ["shot", "g2.jpg"], ["waitjs", "__G.A.AC.t > -0.35", 20], ["shot", "g3.jpg"]]

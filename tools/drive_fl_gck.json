@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["wait", 21],
+ ["eval", "(async()=>{const A=await import('/js/flight/aircraft.js'), CKm=await import('/js/flight/cockpit.js'); window.__Q={A,CKm}; A.AC.t=150; return 1})()"],
+ ["wait", 12], ["eval", "(()=>{__Q.CKm.lookTo(0,-0.12); return 1})()"], ["wait", 1], ["shot", "k1.jpg"],
+ ["eval", "(()=>{__Q.CKm.lookTo(-0.9,-0.1); return 1})()"], ["wait", 6], ["shot", "k2.jpg"],
+ ["eval", "(()=>{__Q.CKm.lookTo(0.9,-0.1); return 1})()"], ["wait", 6], ["shot", "k3.jpg"]]

@@ -1,0 +1,25 @@
+[
+[
+"waitfor",
+"#hud:not(.hidden)",
+300000
+],
+[
+"waitfor",
+"#hud.cine",
+120000
+],
+[
+"waitfor",
+"#hud:not(.cine)",
+120000
+],
+[
+"wait",
+1.5
+],
+[
+"eval",
+"(async()=>{const Q=await import('/js/core/quality.js'), G=(await import('/js/flight/gtiles.js')).GT, Wm=await import('/js/flight/world.js'), E=await import('/js/core/engine.js'); return JSON.stringify({level:Q.quality.level, auto:Q.quality.auto, gpu:Q.quality.gpu, detail:G.detail, every:Wm.W.reflectEvery, res:Wm.W.reflectRT&&Wm.W.reflectRT.width, cap:E.frameCap.fps, hide:Wm.W.hideInReflectionNow().length})})()"
+]
+]

@@ -1,0 +1,11 @@
+[
+[
+"waitfor",
+"#hud:not(.hidden)",
+300000
+],
+[
+"eval",
+"window.__fr()"
+]
+]

@@ -1,0 +1,8 @@
+[["waitfor", "#vitals:not(.hidden)", 240000], ["wait", 3],
+ ["eval", "(()=>{const o=__or; o.take('scalpel',{fly:false}); o.TOOLS.tip.copy(o.CHEST).add(new o.THREE.Vector3(-0.06,0.004,0)); o.TOOLS.steady=o.CHEST.clone().add(new o.THREE.Vector3(-0.1,0.01,-0.05)); return 1})()"],
+ ["wait", 2], ["shot", "v1_eye.png"],
+ ["eval", "(()=>{const o=__or; const h=o.TEAM.player.bones.head.getWorldPosition(new o.THREE.Vector3()); return JSON.stringify(h)})()"],
+ ["eval", "(()=>{const o=__or; o.camera.position.set(1.2,1.8,1.6); o.camera.lookAt(-0.4,1.1,0); return 1})()"], ["wait", 1.5], ["shot", "v2_side.png"],
+ ["eval", "(()=>{const o=__or; o.camera.position.set(-0.2,1.75,2.4); o.camera.lookAt(-0.6,1.2,-0.5); o.camera.fov=55; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 1.5], ["shot", "v3_room.png"],
+ ["eval", "(()=>{const o=__or; o.camera.position.set(-0.6,1.55,0.6); o.camera.lookAt(-1.42,1.5,-0.42); o.camera.fov=40; o.camera.updateProjectionMatrix(); return 1})()"], ["wait", 1.5], ["shot", "v4_layla.png"]
+]

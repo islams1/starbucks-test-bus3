@@ -1,0 +1,9 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 5],
+ ["eval", "(()=>{const f=__fl; f.CK.head.ty=-0.1; f.CK.head.tp=0.95; return 1})()"], ["wait", 1.2], ["shot", "c1_overhead.jpg"],
+ ["eval", "(()=>{const f=__fl; f.CK.head.ty=-0.55; f.CK.head.tp=-0.65; return 1})()"], ["wait", 1.2], ["shot", "c2_pedestal.jpg"],
+ ["eval", "(()=>{const f=__fl; f.AC.t=2; f.CK.head.ty=0; f.CK.head.tp=-0.1; return 1})()"], ["wait", 2],
+ ["eval", "(()=>{dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowLeft'})); return 1})()"], ["wait", 4],
+ ["eval", "(()=>{dispatchEvent(new KeyboardEvent('keyup',{code:'ArrowLeft'})); const f=__fl; return JSON.stringify({manual: f.STATE.acts.myac, bank: f.AC.bank.toFixed(1), hdg: f.AC.hdg.toFixed(0), ias: f.AC.ias.toFixed(0), alt: f.AC.alt.toFixed(0)})})()"],
+ ["wait", 3], ["shot", "c3_bank.jpg"],
+ ["eval", "(()=>{const f=__fl; return JSON.stringify({bank: f.AC.bank.toFixed(1), hdg: f.AC.hdg.toFixed(0), ias: f.AC.ias.toFixed(0), alt: f.AC.alt.toFixed(0)})})()"]
+]

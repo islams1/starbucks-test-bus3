@@ -1,0 +1,9 @@
+[["waitfor", "#hud:not(.hidden)", 240000], ["wait", 18],
+ ["eval", "(async()=>{const C=await import('/js/flight/controls.js'), CKm=await import('/js/flight/cockpit.js'), E=await import('/js/core/engine.js'), FO=await import('/js/flight/fo.js'); window.__K={C,CKm,E,FO}; __K.pos=(id)=>{const o=C.CTL.items[id]; const v=(o.userData.cap||o).getWorldPosition(new o.position.constructor()); v.project(E.camera); return [(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight]}; CKm.CK.rumble=0; CKm.lookTo(0,-0.42); return Object.keys(C.CTL.items).join(',')})()"],
+ ["wait", 1.3], ["shot", "s_panel.jpg"],
+ ["eval", "(()=>{__K.C.focus('thrust', 30000); return 1})()"], ["wait", 1.4], ["shot", "s_ped0.jpg"],
+ ["clickjs", "__K.pos('flaps')"], ["wait", 0.3], ["clickjs", "__K.pos('flaps')"], ["wait", 0.3], ["clickjs", "__K.pos('thrust')"], ["wait", 0.3], ["clickjs", "__K.pos('engmode')"], ["wait", 0.4], ["shot", "s_ped1.jpg"],
+ ["eval", "(()=>{__K.FO.foSet('eng1',1,1.0); __K.FO.foSet('eng2',1,1.0); return JSON.stringify(['flaps','thrust','engmode'].map(i=>__K.C.CTL.items[i].userData.idx))})()"], ["wait", 2.0], ["shot", "s_ped2.jpg"], ["wait", 2.2], ["shot", "s_ped3.jpg"],
+ ["eval", "(()=>{__K.C.focus('apu_master', 30000); return 1})()"], ["wait", 1.4], ["shot", "s_ovh.jpg"],
+ ["eval", "(()=>{__K.C.focus('evac', 30000); return 1})()"], ["wait", 1.4], ["shot", "s_evac.jpg"],
+ ["eval", "(()=>{__K.C.warn(true); __K.C.focus('mwarn', 30000); return 1})()"], ["wait", 1.4], ["shot", "s_gs.jpg"]]

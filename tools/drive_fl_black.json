@@ -1,0 +1,5 @@
+[["waitfor", "#hud:not(.hidden)", 300000], ["wait", 2.5],
+ ["eval", "(async()=>{const W=(await import('/js/flight/world.js')).W, G=(await import('/js/flight/gtiles.js')).GT, E=await import('/js/core/engine.js'); window.__D={W,G,E}; E.clock.paused=true; return 1})()"], ["wait", 0.3], ["shot", "k0.jpg"],
+ ["eval", "(()=>{__D.W.water.visible=false; return 1})()"], ["wait", 0.3], ["shot", "k1_nowater.jpg"],
+ ["eval", "(()=>{__D.W.water.visible=true; __D.G.holder.visible=false; return 1})()"], ["wait", 0.3], ["shot", "k2_nogoogle.jpg"],
+ ["eval", "(()=>{__D.G.holder.visible=true; __D.W.water.material.uniforms.uDebug.value=1; return 1})()"], ["wait", 0.3], ["shot", "k3_reflonly.jpg"]]

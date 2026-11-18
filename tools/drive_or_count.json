@@ -1,0 +1,9 @@
+[["waitfor", "#choices:not(.hidden)", 240000], ["wait", 0.4], ["click", "#choicelist .choice[data-key=stop]"],
+ ["waitfor", "#hotspots .mk.search", 30000], ["wait", 0.8], ["shot", "c1_search.png"], ["click", "#hotspots .mk.search:has-text(\"الأيمن\")"], ["wait", 0.6],
+ ["click", "#hotspots .mk.search:has-text(\"الأغطية\")"], ["wait", 0.8],
+ ["waitfor", "#cmds button[data-id=xray]", 10000], ["shot", "c2_xray.png"],
+ ["click", "#hotspots .mk.search:has-text(\"الأيسر\")"],
+ ["waitfor", "#hotspots .mk.gauze", 30000], ["wait", 0.6], ["shot", "c3_gauze.png"], ["click", "#hotspots .mk.gauze"],
+ ["waitfor", "#tray:not(.hidden)", 60000], ["wait", 0.5], ["shot", "c4_wires.png"],
+ ["eval", "JSON.stringify(__orflow.SC.items.count)"]
+]

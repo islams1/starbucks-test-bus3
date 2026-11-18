@@ -1,0 +1,11 @@
+Model Information:
+* title:	Animated Swan - Rigged & Optimized Game Ready
+* source:	https://sketchfab.com/3d-models/animated-swan-rigged-optimized-game-ready-04ac4add046843ee975f6785d24c042e
+* author:	GAMICO (https://sketchfab.com/gamico)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Animated Swan - Rigged & Optimized Game Ready" (https://sketchfab.com/3d-models/animated-swan-rigged-optimized-game-ready-04ac4add046843ee975f6785d24c042e) by GAMICO (https://sketchfab.com/gamico) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
