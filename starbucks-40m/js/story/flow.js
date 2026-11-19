@@ -22,6 +22,7 @@ import {askNumber, openTablet, drawTabletScreen} from './tablet.js';
 import * as MEMO from './memo.js';
 import * as DB from './debrief.js';
 import {ROUTES, CONDS} from './score.js';
+import {captureWithoutGlass} from '../ui/glass.js';
 
 const EN = Q.get('lang') === 'en';
 const ar = (a, e) => EN ? e : a;
@@ -121,7 +122,7 @@ function gain(k) { if (S.ev[k]) return; S.ev[k] = true; log('ev', k); sfx.eviden
 const stills = {};
 /** grab the next rendered frame as an image (for the wait card's "static view") */
 function captureStill(key) {
-  return new Promise(res => { const off = onOverlay(() => { off(); try { stills[key] = renderer.domElement.toDataURL('image/jpeg', 0.7); } catch (e) {} res(); }); });
+  return new Promise(res => { const off = onOverlay(() => { off(); try { stills[key] = captureWithoutGlass(0.7) || renderer.domElement.toDataURL('image/jpeg', 0.7); } catch (e) {} res(); }); });
 }
 export function toggleTray(on = $('tray').classList.contains('hidden')) {
   if (!on) { show('tray', false); if (player.mode === 'free') { setInput(true, true); } return; }
@@ -148,7 +149,7 @@ let doorT = 0, doorOpen = 0;
 onUpdate((dt) => { if (!cafe.door) return; doorT = Math.max(0, doorT - dt); const want = doorT > 0 ? 1 : 0; doorOpen += (want - doorOpen) * (1 - Math.exp(-5 * dt)); cafe.door.rotation.y = -doorOpen * 1.25; });
 function openDoor(sec = 2.2) { if (doorT <= 0) doorBell(); doorT = sec; }
 const shelfCups = [];
-function cupOnShelf() { const x = 3.85 + (shelfCups.length % 8) * 0.24; const c = P.redCup(liveGroup, x, 1.265, 29.05); shelfCups.push(c); cupSnd(); return c; }
+function cupOnShelf() { const L = anchors.cupLine, z = L.z0 + (shelfCups.length % 7) * 0.22; const c = P.redCup(liveGroup, L.x, L.y, z); shelfCups.push(c); cupSnd(); return c; }
 function takeCup(c) { const i = shelfCups.indexOf(c); if (i >= 0) shelfCups.splice(i, 1); liveGroup.remove(c); }
 function clearShelf() { while (shelfCups.length) liveGroup.remove(shelfCups.pop()); }
 /** a paper cup in someone's right hand */
@@ -161,13 +162,28 @@ function holdCup(ch, on = true) {
 }
 
 // ---------------------------------------------------------------- people: walking routes in the café
-const PICK = [[3.9, 30.35], [4.75, 30.55], [5.55, 30.3], [4.25, 31.15], [5.15, 31.2], [3.6, 31.1]];
-const pickFace = Math.PI;
+const PICK = [[2.95, -1.45], [2.95, -0.65], [3.6, -0.25], [2.95, 0.15], [3.65, 0.6], [3.6, -1.15]];
+const pickFace = -Math.PI / 2;
 async function walk(ch, pts, speed = 1.15) { ch.seated = false; await ch.walkTo(pts, {speed, nav: false}); }
-async function leaveByDoor(ch) {
-  await walk(ch, [[3.2, 34.9], [3.2, 35.6]], 1.2); openDoor(); await walk(ch, [[3.2, 37.2], [9 + Math.random() * 4, 38.2]], 1.25); ch.hide(); holdCup(ch, false);
+/** walk on the stair: the height follows the distance along it (top at y 0, bottom at anchors.stairBottom.y) */
+function onStair(ch, on = true) {
+  if (ch._stairOff) { ch._stairOff(); ch._stairOff = null; }
+  if (!on) { ch.holder.position.y = 0; return; }
+  const T = anchors.stairTop, Bm = anchors.stairBottom, L = Bm.z - T.z;
+  ch._stairOff = onUpdate(() => { const k = Math.max(0, Math.min(1, (ch.holder.position.z - T.z) / L)); ch.holder.position.y = Bm.y * k; });
 }
-async function goSit(ch, seat) { await ch.walkTo([[seat.x + Math.sin(seat.ry) * 0.55, seat.z + Math.cos(seat.ry) * 0.55]], {speed: 1.1}); sit(ch, seat, {anim: ch.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_breathe_01'}); }
+async function leaveByDoor(ch) {
+  const T = anchors.stairTop, Bm = anchors.stairBottom;
+  await walk(ch, [[ch.holder.position.x < 4 ? 4.2 : ch.holder.position.x, 0.55], [7.3, 0.6], [T.x, T.z]], 1.15);
+  onStair(ch); await walk(ch, [[Bm.x, Bm.z]], 0.9); onStair(ch, false); ch.hide(); holdCup(ch, false);
+}
+// a seat is booked by whoever sits in it: the next customer takes a free one, or leaves when the café is full
+async function goSit(ch, seat) {
+  const busy = (st) => st.taken && st.taken !== ch.id && C[st.taken] && C[st.taken].holder.visible;   // booked from the moment someone heads for it
+  if (busy(seat)) seat = anchors.seats.find(st => !busy(st));
+  if (!seat) return leaveByDoor(ch);
+  seat.taken = ch.id;
+  await ch.walkTo([[seat.x - Math.sin(seat.ry) * 0.5, seat.z - Math.cos(seat.ry) * 0.5]], {speed: 1.1}); sit(ch, seat, {anim: ch.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_breathe_01'}); }
 
 // ================================================================= SCENE 0
 async function scene0() {
@@ -184,15 +200,15 @@ async function scene0() {
 const PEAK_QUEUE = ['salma', 'q1', 'q2', 'q3', 'q4', 's1', 's2'];
 const PICKUP_CROWD = ['q5', 'q6', 'q7', 'q8'];
 async function setupPeak() {
-  setLevel(0); buildNav(); setTimeOfDay('morning'); setDayClock(8 * 60 + 10); sceneTag(ar('سيناريو تعليمي', 'Illustrative scenario'));
+  setLevel(0); buildNav(); setTimeOfDay('morning', V3(5, 0, -1)); setDayClock(8 * 60 + 10); sceneTag(ar('سيناريو تعليمي', 'Illustrative scenario'));
   for (const c of Object.values(C)) if (c !== player.ch) c.hide();
   setTickets(9, 38); clearShelf();
   startStaff({busy: true}); setStaffPace(true);
   lineUp(PEAK_QUEUE, 0);
-  C.salma.setBase('f_idle_neutral_01'); C.salma.faceTo(-2.2, 28.5);
+  C.salma.setBase('f_idle_neutral_01'); C.salma.faceTo(1.5, -3.05);
   PICKUP_CROWD.forEach((id, i) => stand(C[id], PICK[i][0], PICK[i][1], pickFace + (i - 1.5) * 0.2, qIdle(id)));
-  stand(C.noor, 1.2, 27.75, Math.PI / 2, 'f_idle_neutral_02');
-  teleport(6.7, 30.95, 0); lookTowards(4.25, 1.5, 28.3);
+  stand(C.noor, 1.42, -1.2, Math.PI, 'f_idle_neutral_02');
+  teleport(anchors.start.x, anchors.start.z, 0); lookTowards(1.72, 1.5, 0.2);
   startCafeSound(); setCrowd(1);
 }
 async function scene1() {
@@ -200,7 +216,7 @@ async function scene1() {
   await setupPeak();
   freeControls(); await fade(false, 900);
   // Noor comes along the bar with two cups, puts them on the shelf, turns to you
-  await walk(C.noor, [[3.6, 27.95], [4.3, 28.25]], 1.45); C.noor.faceTo(4.3, 30); cupOnShelf(); cupOnShelf();
+  await walk(C.noor, [[1.5, 0.25]], 1.3); C.noor.faceTo(4, 0.25); cupOnShelf(); cupOnShelf();
   await line('noor_s1_open');
   objective(ar('شاهد بنفسك أين يتعطل الطلب', 'See for yourself where the order gets stuck'));
   const benDone = {v: false, heard: false};
@@ -215,11 +231,11 @@ async function scene1() {
   await ben;
   // after Ben: Noor cues the tracking
   await line('noor_track');
-  const track = new Promise(res => addHotspot({id: 'track', label: ar('تتبّع طلب سلمى', 'Track Salma\'s order'), icon: 'chart', kind: 'person', pos: V3(-2.2, 1.6, 29.95), range: 3.4, when: () => !S.ev.peak, use: async () => { removeHotspot('track'); await trackPeak(); res(); }}));
+  const track = new Promise(res => addHotspot({id: 'track', label: ar('تتبّع طلب سلمى', 'Track Salma\'s order'), icon: 'chart', kind: 'person', pos: V3(2.95, 1.6, -3.05), range: 3.6, when: () => !S.ev.peak, use: async () => { removeHotspot('track'); await trackPeak(); res(); }}));
   await track;
   // Salma at the pickup shelf with her cup
   await new Promise(res => addHotspot({id: 'salma', label: ar('اسأل سلمى', 'Ask Salma'), icon: 'person', kind: 'person', pos: () => C.salma.headPos().clone().add(V3(0, 0.25, 0)), range: 2.6, when: () => !S.ev.salma, use: async () => {
-    removeHotspot('salma'); C.salma.lockLook = true; turnTo(C.salma, camera.position);
+    removeHotspot('salma'); C.salma.lockLook = true; turnTo(C.salma, camera.position); faceTowards(C.salma.headPos().clone().add(V3(0, -0.1, 0)));
     await line('p_salma'); await line('salma_reply'); gain('salma'); res();
   }}));
   if (!S.ev.rail) await new Promise(res => { const t = setInterval(() => { if (S.ev.rail) { clearInterval(t); res(); } }, 300); });
@@ -231,7 +247,7 @@ async function scene1() {
 }
 async function inspectRail() {
   removeHotspot('rail'); cineControls();
-  await cine.shot(V3(2.75, 1.5, 30.15), V3(2.7, 1.47, 29.1), 1.0, {fov: 48});
+  await cine.shot(V3(3.05, 1.52, -1.05), V3(2.2, 1.47, -1.05), 1.0, {fov: 50});
   printer(); await wait(2.2);
   gain('rail');
   await line('noor_rail');
@@ -239,22 +255,24 @@ async function inspectRail() {
 }
 async function benEvent(state) {
   await sleep(10);
-  const ben = C.ben; ben.place(9.5, 38.3, -Math.PI / 2); ben.setBase('m_idle_neutral_01');
-  await walk(ben, [[3.2, 37.4]], 1.3); openDoor(); await walk(ben, [[3.2, 35.4], [1.2, 34.95]], 1.2);
+  const ben = C.ben, T = anchors.stairTop, Bm = anchors.stairBottom;
+  ben.place(Bm.x, Bm.z, Math.PI, Bm.y); ben.setBase('m_idle_neutral_01');
+  onStair(ben); await walk(ben, [[T.x, T.z]], 0.95); onStair(ben, false);
+  await walk(ben, [[7.3, 0.6]], 1.15);
   const slot = QSLOTS[7]; await walk(ben, [[slot[0], slot[1]]], 1.0); ben.faceTo(QSLOTS[6][0], QSLOTS[6][1]);
   await sleep(2.5); await watchGlance(ben, 1.7); await sleep(2.2); await watchGlance(ben, 1.5); await sleep(0.8);
   ben.setBase('m_idle_neutral_01');
-  await walk(ben, [[2.6, 35.2], [3.2, 35.45]], 1.15); ben.faceTo(3.2, 37);
+  await walk(ben, [[7.3, 0.55], [T.x, T.z - 0.15]], 1.15); ben.faceTo(T.x, Bm.z);
   // he pauses at the door for 6 s: the player can stop him
   let talked = false;
   await new Promise(res => {
     addHotspot({id: 'ben', label: ar('تحدث مع بن', 'Talk to Ben'), icon: 'person', kind: 'person', pos: () => ben.headPos().clone().add(V3(0, 0.25, 0)), range: 3.6, use: async () => {
-      talked = true; removeHotspot('ben'); turnTo(ben, camera.position); ben.lockLook = true;
+      talked = true; removeHotspot('ben'); turnTo(ben, camera.position); ben.lockLook = true; faceTowards(ben.headPos().clone().add(V3(0, -0.1, 0)));
       await line('p_ben'); await line('ben_leave'); gain('ben'); ben.lockLook = false; res();
     }});
     setTimeout(() => { if (!talked) { removeHotspot('ben'); res(); } }, 6000);
   });
-  ben.faceTo(3.2, 37); openDoor(); await walk(ben, [[3.2, 37.3], [-9, 38.4]], 1.35); ben.hide();
+  ben.faceTo(T.x, Bm.z); onStair(ben); await walk(ben, [[Bm.x, Bm.z]], 0.95); onStair(ben, false); ben.hide();
   if (!talked) {
     await line('noor_card');
     await new Promise(res => addHotspot({id: 'card', label: ar('بطاقة في صندوق الرأي', 'Card in the comment box'), icon: 'envelope', pos: anchors.commentBox, range: 2.6, use: async () => {
@@ -268,7 +286,7 @@ async function benEvent(state) {
 /** time-lapse tracking of one order (20× for the stopwatch and the clock; people move at their own pace) */
 async function trackPeak() {
   cineControls(); setHotspotsBusy(true);
-  await cine.shot(V3(7.05, 1.74, 29.8), V3(1.6, 1.32, 29.1), 1.2, {fov: 58});
+  await cine.shot(V3(2.75, 1.85, 0.95), V3(2.1, 1.3, -2.4), 1.2, {fov: 60});
   showStopwatch(true);
   // Salma orders: ticket #47 prints and goes on the rail
   C.salma.lookAt(null);
@@ -283,7 +301,7 @@ async function trackPeak() {
   const t0 = clock.t; let last = t0;
   const run = onUpdate(() => { const s = Math.min(T, clock.t - t0); gameSec = s * 20; setStopwatch(gameSec); setDayClock(8 * 60 + 13 + gameSec / 60); if (clock.t - last > 0.5) { last = clock.t; tickSnd(); } });
   // Salma goes to wait at the pickup shelf
-  order.shift(); walk(C.salma, [[-1.2, 30.4], [2.6, 30.9], [PICK[5][0], PICK[5][1]]], 1.1).then(() => { C.salma.faceTo(4.6, 29); C.salma.setBase('f_idle_neutral_01'); });
+  order.shift(); walk(C.salma, [[3.4, -2.35], [PICK[5][0], PICK[5][1]]], 1.05).then(() => { C.salma.faceTo(1.5, PICK[5][1]); C.salma.setBase('f_idle_neutral_01'); });
   let next = 48; const sched = [];
   for (let k = 0; k < 10; k++) sched.push(k * 2.1 + 1.9);
   let pulled = 0, ordered = 0;
@@ -294,25 +312,25 @@ async function trackPeak() {
     if (num === 47) break;
     // someone waiting takes a cup and goes (alternating: out of the door / to a table)
     const who = crowd.shift();
-    if (who) { const ch = C[who]; (async () => { await walk(ch, [[cup.position.x, 29.75]], 1.0); ch.faceTo(cup.position.x, 29); await wait(0.5); takeCup(cup); holdCup(ch); await wait(0.3); if (pulled % 2) await leaveByDoor(ch); else await goSit(ch, anchors.seats[(pulled / 2 | 0) % anchors.seats.length]); })(); }
+    if (who) { const ch = C[who]; (async () => { await walk(ch, [[2.85, cup.position.z]], 1.0); ch.faceTo(1.5, cup.position.z); await wait(0.5); takeCup(cup); holdCup(ch); await wait(0.3); if (pulled % 2) await leaveByDoor(ch); else await goSit(ch, anchors.seats[(pulled / 2 | 0) % anchors.seats.length]); })(); }
     // the line moves: the front person has ordered, steps over to the pickup shelf; the rest move up one slot
     if (pulled % 2 === 0 && order.length) {
       const front = order.shift(); ordered++; tickets.push(next++); draw(); printer();
       const fc = C[front]; const spot = PICK[(ordered + 1) % PICK.length];
-      walk(fc, [[-1.2, 30.4], [spot[0] - 0.3, spot[1] + 0.6], spot], 1.05).then(() => { fc.faceTo(spot[0], 29); fc.setBase(qIdle(front) || (fc.g === 'm' ? 'm_idle_neutral_01' : 'f_idle_neutral_01')); crowd.push(front); });
-      order.forEach((id, i) => { const s = QSLOTS[i]; walk(C[id], [[s[0], s[1]]], 0.9).then(() => C[id].faceTo(QSLOTS[Math.max(0, i - 1)][0], i === 0 ? 28 : QSLOTS[Math.max(0, i - 1)][1])); });
+      walk(fc, [[3.4, -2.35], spot], 1.05).then(() => { fc.faceTo(1.5, spot[1]); fc.setBase(qIdle(front) || (fc.g === 'm' ? 'm_idle_neutral_01' : 'f_idle_neutral_01')); crowd.push(front); });
+      order.forEach((id, i) => { const s = QSLOTS[i]; walk(C[id], [[s[0], s[1]]], 0.9).then(() => { if (i === 0) C[id].faceTo(1.5, s[1]); else C[id].faceTo(QSLOTS[i - 1][0], QSLOTS[i - 1][1]); }); });
     }
   }
   while (clock.t - t0 < T) await wait(0.05);
   run(); setStopwatch(420); setDayClock(8 * 60 + 20); lapse(false);
   // Salma picks up #47
   const cup = shelfCups[shelfCups.length - 1];
-  await walk(C.salma, [[cup.position.x, 29.75]], 1.0); C.salma.faceTo(cup.position.x, 29); await wait(0.4); takeCup(cup); holdCup(C.salma);
-  await walk(C.salma, [[4.9, 30.5]], 0.9); C.salma.faceTo(3, 32);
+  await walk(C.salma, [[2.85, cup.position.z]], 1.0); C.salma.faceTo(1.5, cup.position.z); await wait(0.4); takeCup(cup); holdCup(C.salma);
+  await walk(C.salma, [[3.7, 0.0]], 0.9); C.salma.faceTo(3.45, 0.85);
   await captureStill('peak');
   gain('peak');
   await wait(1.2); showStopwatch(false);
-  teleport(7.05, 29.85, 0); freeControls(); lookTowards(C.salma.headPos().x, 1.5, C.salma.headPos().z); lock();
+  teleport(3.45, 0.85, 0); freeControls(); lookTowards(C.salma.headPos().x, 1.5, C.salma.headPos().z); lock();
 }
 /** the notebook: tag both comments */
 function notebook() {
@@ -337,18 +355,18 @@ async function scene2() {
   cineControls(); await fade(true, 700);
   timeCard(ar('3:00 عصرًا', '3:00 pm'), ar('نفس اليوم · الفرع نفسه', 'Same day · same store'));
   for (const c of Object.values(C)) if (c !== player.ch) { c.hide(); holdCup(c, false); }
-  setTimeOfDay('afternoon'); setDayClock(15 * 60); setTickets(0); clearShelf(); setCrowd(0.25); setStaffPace(false);
+  setTimeOfDay('afternoon', V3(5, 0, -1)); setDayClock(15 * 60); setTickets(0); clearShelf(); setCrowd(0.25); setStaffPace(false);
   startStaff({busy: false});
   sit(C.s1, anchors.seats[0], {anim: 'f_sit_table_breathe_01'}); sit(C.s2, anchors.seats[3], {anim: 'm_sit_table_idle_neutral_01'});
   holdCup(C.s1, false);
-  stand(C.q2, -2.2, 29.95, Math.PI, 'f_idle_neutral_01');
-  stand(C.noor, 4.0, 30.55, Math.PI + 0.9, 'f_idle_neutral_02');
-  teleport(3.15, 31.6, 0); lookTowards(-1.8, 1.4, 30.0);
+  stand(C.q2, QSLOTS[0][0], QSLOTS[0][1], -Math.PI / 2, 'f_idle_neutral_01');
+  stand(C.noor, 3.7, -1.75, -2.2, 'f_idle_neutral_02');
+  teleport(5.0, -2.35, 0); lookTowards(2.4, 1.4, -3.0);
   await wait(2.4); hideTimeCard();
   freeControls(); await fade(false, 900);
   objective(ar('قِس الانتظار في الوقت الهادئ', 'Measure the wait in the quiet period'));
   setTasks([{t: ar('تتبّع طلبًا في الوقت الهادئ', 'Track one order in the quiet period'), done: () => !!S.ev.off}]);
-  await new Promise(res => addHotspot({id: 'track2', label: ar('تتبّع هذا الطلب', 'Track this order'), icon: 'chart', kind: 'person', pos: V3(-2.2, 1.6, 29.95), range: 3.6, use: async () => { removeHotspot('track2'); await trackOff(); res(); }}));
+  await new Promise(res => addHotspot({id: 'track2', label: ar('تتبّع هذا الطلب', 'Track this order'), icon: 'chart', kind: 'person', pos: V3(2.95, 1.6, -3.05), range: 3.8, use: async () => { removeHotspot('track2'); await trackOff(); res(); }}));
   await line('noor_s2');
   toggleTray(true);
   await new Promise(res => { const t = setInterval(() => { if ($('tray').classList.contains('hidden')) { clearInterval(t); res(); } }, 200); });
@@ -358,26 +376,26 @@ async function scene2() {
   await line({peak: 'noor_h_peak', acc: 'noor_h_acc', all: 'noor_h_all'}[k]);
   await line('noor_s2_up');
   objective(ar('اصعد إلى غرفة الاجتماعات', 'Go up to the meeting room'));
-  setTasks([{t: ar('اصعد إلى غرفة الاجتماعات (السلم في الركن الغربي)', 'Go up to the meeting room (stairs, west corner)'), done: () => false}]);
-  await new Promise(res => addHotspot({id: 'stairs', label: ar('اصعد إلى غرفة الاجتماعات', 'Go upstairs'), icon: 'door', pos: V3(anchors.stairs.x, 1.6, anchors.stairs.z - 0.4), range: 2.8, use: async () => { removeHotspot('stairs'); res(); }}));
+  setTasks([{t: ar('اذهب إلى غرفة الاجتماعات (الباب بجانب السلم)', 'Go to the meeting room (the door by the stair)'), done: () => false}]);
+  await new Promise(res => addHotspot({id: 'stairs', label: ar('إلى غرفة الاجتماعات', 'To the meeting room'), icon: 'door', pos: V3(anchors.staffDoor.x, 1.5, anchors.staffDoor.z), range: 3.0, use: async () => { removeHotspot('stairs'); res(); }}));
 }
 async function trackOff() {
   cineControls(); setHotspotsBusy(true);
-  await cine.shot(V3(7.45, 1.76, 30.15), V3(1.0, 1.3, 29.1), 1.2, {fov: 56});
+  await cine.shot(V3(2.75, 1.85, 0.95), V3(2.1, 1.3, -2.4), 1.2, {fov: 60});
   showStopwatch(true); await wait(0.6); printer();
   setTickets(1, 112);
   lapse(true, 20); whoosh();
   const t0 = clock.t, T = 6; let last = t0;
   const run = onUpdate(() => { const s = Math.min(T, clock.t - t0); setStopwatch(s * 20); setDayClock(15 * 60 + 1 + s * 20 / 60); if (clock.t - last > 0.5) { last = clock.t; tickSnd(); } });
-  walk(C.q2, [[-1.2, 30.4], [3.5, 30.4]], 1.1).then(() => { C.q2.faceTo(3.6, 29); C.q2.setBase('f_cell_phone_textmessage'); });
+  walk(C.q2, [[3.4, -2.35], [2.95, -1.2]], 1.05).then(() => { C.q2.faceTo(1.5, -1.2); C.q2.setBase('f_cell_phone_textmessage'); });
   await wait(T - 0.9); setTickets(0); steam(); const cup = cupOnShelf();
   while (clock.t - t0 < T) await wait(0.05);
   run(); setStopwatch(120); lapse(false);
-  await walk(C.q2, [[cup.position.x, 29.75]], 1.0); C.q2.faceTo(cup.position.x, 29); await wait(0.4); takeCup(cup); holdCup(C.q2);
+  await walk(C.q2, [[2.85, cup.position.z]], 1.0); C.q2.faceTo(1.5, cup.position.z); await wait(0.4); takeCup(cup); holdCup(C.q2);
   await captureStill('off');
   gain('off'); await wait(1.0); showStopwatch(false);
   goSit(C.q2, anchors.seats[2]);
-  teleport(7.05, 29.85, 0); freeControls(); lookTowards(C.noor.headPos().x, 1.5, C.noor.headPos().z); lock();
+  teleport(3.45, 0.85, 0); freeControls(); lookTowards(C.noor.headPos().x, 1.5, C.noor.headPos().z); lock();
 }
 function timeCard(big, small) { const el = $('card'); el.className = 'timecard'; el.innerHTML = `<div class="tc"><b>${big}</b><span>${small}</span></div>`; show('card', true); }
 function hideTimeCard() { show('card', false); }
@@ -386,13 +404,13 @@ function hideTimeCard() { show('card', false); }
 let tabletScreen = null;
 async function setupMeeting() {
   for (const c of Object.values(C)) if (c !== player.ch) { c.hide(); holdCup(c, false); }
-  setLevel(1); setTimeOfDay('dusk'); setDayClock(17 * 60 + 30); setCrowd(0.15);
+  setLevel(1); setTimeOfDay('dusk', V3(19, UP, -15)); setDayClock(17 * 60 + 30); setCrowd(0.15);
   const m = anchors.meet;
   sit(C.ellis, m.ellis, {anim: 'm_sit_table_idle_neutral_01'});
   if (!tabletScreen) {
     const c = document.createElement('canvas'); c.width = 512; c.height = 360;
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    const g = P.group(liveGroup, cafe.tabletPos.x, cafe.tabletPos.y, cafe.tabletPos.z, Math.PI);
+    const g = P.group(liveGroup, cafe.tabletPos.x, cafe.tabletPos.y, cafe.tabletPos.z, -Math.PI / 2);
     P.rbox(g, 0.26, 0.012, 0.19, 0.01, new THREE.MeshStandardMaterial({color: 0x1a1b1d, roughness: 0.4}), 0, 0, 0);
     const s = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.17), new THREE.MeshStandardMaterial({map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.7, roughness: 0.2})); s.rotation.x = -Math.PI / 2; s.position.y = 0.0125; g.add(s);
     tabletScreen = {c, t, draw: (mm) => { drawTabletScreen(c.getContext('2d'), c.width, c.height, mm); t.needsUpdate = true; }};
@@ -435,12 +453,12 @@ async function scene3() {
   await line('ellis_done');
   // Priya and Noor come in and sit down
   const m = anchors.meet, door = m.door;
-  C.priya.place(door.x, door.z, -Math.PI / 2, UP); C.priya.setBase('f_idle_neutral_01');
-  C.noor.place(door.x + 0.6, door.z, -Math.PI / 2, UP); C.noor.setBase('f_idle_neutral_02');
-  cine.shot(V3(m.player.x - 0.3, UP + 1.25, m.player.z - 0.1), V3(-1.0, UP + 1.4, 31.4), 1.2, {fov: 52});
-  const pw = C.priya.walkTo([[-1.4, 31.3], [-2.0, 32.4], [m.priya.x + 0.5, m.priya.z]], {speed: 1.1, nav: false}).then(() => sit(C.priya, m.priya, {anim: 'f_sit_table_idle_neutral_01'}));
+  C.priya.place(door.x, door.z, Math.PI / 2, UP); C.priya.setBase('f_idle_neutral_01');
+  C.noor.place(door.x - 0.6, door.z, Math.PI / 2, UP); C.noor.setBase('f_idle_neutral_02');
+  cine.shot(V3(m.player.x + 0.1, UP + 1.25, m.player.z + 0.2), V3(m.door.x, UP + 1.4, m.door.z), 1.2, {fov: 52});
+  const pw = C.priya.walkTo([[15.5, -11.6], [20.2, -11.6], [m.priya.x + 0.5, m.priya.z]], {speed: 1.1, nav: false}).then(() => sit(C.priya, m.priya, {anim: 'f_sit_table_idle_neutral_01'}));
   await wait(0.8);
-  const nw = C.noor.walkTo([[-1.4, 31.3], [-3.0, 31.5], [m.noor.x, m.noor.z - 0.5]], {speed: 1.1, nav: false}).then(() => sit(C.noor, m.noor, {anim: 'f_sit_table_breathe_01'}));
+  const nw = C.noor.walkTo([[15.5, -12.8], [16.9, -13.65]], {speed: 1.1, nav: false}).then(() => sit(C.noor, m.noor, {anim: 'f_sit_table_breathe_01'}));
   await Promise.all([pw, nw]);
 }
 async function seatPlayer() {
@@ -458,7 +476,7 @@ async function scene4({practice = false} = {}) {
   if (!practice) {
     cineControls(); await fade(true, 500);
     // you stand at the screen, clicker in hand; three-quarter view of the table
-    await cine.shot(V3(-6.85, UP + 1.64, 33.75), V3(-2.9, UP + 1.12, 32.75), 0.01, {fov: 50});
+    await cine.shot(V3(...m.presentCam), V3(...m.presentLook), 0.01, {fov: 50});
     cine.handheld(0.6);
     await fade(false, 600);
     objective(ar('أوصِ اللجنة بقرار', 'Recommend a decision to the committee'));
@@ -488,8 +506,8 @@ async function scene4({practice = false} = {}) {
   await line('priya_close');
   return memo;
 }
-const presentView = () => cine.shot(V3(-6.85, UP + 1.64, 33.75), V3(-2.9, UP + 1.12, 32.75), 0.9, {fov: 50});
-const screenView = () => cine.shot(V3(-4.9, UP + 1.55, 34.35), V3(-7.7, UP + 1.55, 33.0), 0.9, {fov: 46});
+const presentView = () => cine.shot(V3(...anchors.meet.presentCam), V3(...anchors.meet.presentLook), 0.9, {fov: 50});
+const screenView = () => cine.shot(V3(...anchors.meet.screenCam), V3(...anchors.meet.screenLook), 0.9, {fov: 50});
 async function consequence(memo) {
   const badge = EN ? ROUTES[memo.route].badgeEn : ROUTES[memo.route].badge;
   screenView();

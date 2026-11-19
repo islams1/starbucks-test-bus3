@@ -4,9 +4,11 @@ import {scene, camera, onUpdate, damp, angleDamp, clamp} from '../core/engine.js
 import {loadFBX, tex, bin, decodeAnims, gait} from '../core/assets.js';
 import {playVoice, footstep, breath} from '../core/audio.js';
 import {findPath, segmentBlocked} from '../world/nav.js';
+import {solveArms, bodyPush} from './contact.js';
+const NO_CONTACT = new URLSearchParams(location.search).has('nocontact');
 
 // ---- animation library (decoded once per gender) ----
-const animLib = {};
+export const animLib = {};
 export async function loadAnimLib() {
   const [m, f] = await Promise.all([bin('assets/baked/anims_m.bin'), bin('assets/baked/anims_f.bin')]);
   Object.assign(animLib, decodeAnims(m), decodeAnims(f));
@@ -292,6 +294,8 @@ export class Character {
         if (!tgt.detour && od < 0.95 && (ox * dx + oz * dz) / (od * L + 1e-6) > 0.3) yieldK = 0;
         // the player keeps standing in the way: after a short pause, step around them (side without an obstacle)
         this._yieldT = yieldK ? 0 : (this._yieldT || 0) + dt;
+        // first person: the player's body is invisible and may not step aside — after a while just walk on
+        if ((this._yieldTotal = (this._yieldTotal || 0) + (yieldK ? 0 : dt)) > 2.6) { tgt.detour = true; this._yieldTotal = 0; yieldK = 1; }
         if (this._yieldT > 1.2 && od > 1e-3) {
           this._yieldT = 0;
           const px = -oz / od, pz = ox / od, P = pl.holder.position;
@@ -336,6 +340,12 @@ export class Character {
     this.updateFace(dt, t);
     this.updateGaze(dt);
     if (this.postIK) this.postIK(dt);
+    // hands and arms stay out of tables, counters and chairs (people near the camera only: it costs a few ray tests)
+    if (!NO_CONTACT && this.id !== 'player' && camera.position.distanceTo(this.holder.position) < 14) {
+      solveArms(this, dt, !this.walking);       // swinging arms of a walker are left alone (railings, door frames)
+      // a standing body slides out of a counter or a table it was put into (or walked against)
+      if (!this.seated) { const pv = bodyPush(this); if (pv) this.holder.position.addScaledVector(pv, Math.min(1, dt * 12)); }
+    }
   }
   /** the talk clip's weight follows the speech envelope: quick to rise on words, slow to fall in pauses */
   _updateTalkOverlay(dt) {

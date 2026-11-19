@@ -1,0 +1,12 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["waitjs", "__hs.has('seat')", 90], ["wait", 1.5], ["shot", "b1_room.png"], ["eval", "__use('seat')"],
+ ["waitjs", "document.getElementById('panel').className==='notepad'", 90], ["wait", 0.5], ["shot", "b2_ellis.png"],
+ ["click", ".np-keys button[data-k='2']"], ["click", ".np-keys button[data-k='0']"], ["click", ".np-keys button[data-k='✓']"],
+ ["waitjs", "document.getElementById('panel').className==='tablet'", 90], ["click", "[data-o='12']"], ["wait", 2], ["click", "#tbdone"],
+ ["wait", 9], ["shot", "b3_enter.png"],
+ ["waitjs", "document.getElementById('panel').className==='memo'", 90], ["wait", 0.5], ["shot", "b4_present.png"],
+ ["click", ".mcard[data-k=pilot]"], ["waitjs", "document.getElementById('panel').className==='memo'", 60],
+ ["click", ".mcard[data-k=peak]"], ["wait", 0.6], ["click", ".mcard[data-k=be]"], ["wait", 0.6], ["click", ".mcard[data-k=pilot]"],
+ ["wait", 0.8], ["click", "#mok"], ["wait", 1.8], ["shot", "b5_screen.png"], ["wait", 3], ["shot", "b6_table.png"]
+]

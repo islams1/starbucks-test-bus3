@@ -1,0 +1,5 @@
+[
+ ["waitjs", "window.__C && __C.cashier && __C.cashier.holder.visible", 240], ["wait", 4],
+ ["eval", "document.getElementById('hud').style.display='none'; document.getElementById('subs').style.display='none'; 1"],
+ ["eval", "__cam([5.6, 7.5, -1.2], [5.6, 0, -1.25], 62)"], ["wait", 1.5], ["shot", "top.png"]
+]

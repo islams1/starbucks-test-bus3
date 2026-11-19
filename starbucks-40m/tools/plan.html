@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>scan plan</title>
+<style>html,body{margin:0;height:100%;background:#111;overflow:hidden}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Top-down plan of the photogrammetry café: unlit photo texture, 1 m grid (scaled by ?s=), labels every metre.
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const Q = new URLSearchParams(location.search), S = +(Q.get('s') || 1.5), cut = +(Q.get('cut') || 2.2);
+const r = new THREE.WebGLRenderer({antialias: true}); r.setSize(innerWidth, innerHeight); document.body.appendChild(r.domElement);
+r.localClippingEnabled = true;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111);
+const g = await new GLTFLoader().loadAsync('../assets/cafe_models/' + (Q.get('m') || 'misti') + '/scene.gltf');
+const clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), cut);          // cut away everything above `cut` metres (the ceiling)
+g.scene.traverse(o => { if (o.isMesh) { const m0 = Array.isArray(o.material) ? o.material[0] : o.material; o.material = new THREE.MeshBasicMaterial({map: m0.map, color: m0.map ? 0xffffff : m0.color.clone().multiplyScalar(0.8), side: THREE.DoubleSide, clippingPlanes: [clip]}); } });
+g.scene.scale.setScalar(S); scene.add(g.scene); g.scene.updateMatrixWorld(true);
+const bb = new THREE.Box3().setFromObject(g.scene);
+const grid = new THREE.GridHelper(40, 40 / (+(Q.get('step') || 1)), 0xff3333, 0xffff00); grid.position.y = 3; grid.material.opacity = 0.5; grid.material.transparent = true; scene.add(grid);
+const reg = (Q.get('box') || '').split(',').map(Number); if (reg.length === 4) { bb.min.x = reg[0]; bb.max.x = reg[1]; bb.min.z = reg[2]; bb.max.z = reg[3]; }
+const step = +(Q.get('step') || 1);
+const W = (bb.max.x - bb.min.x) * 0.52, H = (bb.max.z - bb.min.z) * 0.52, R = Math.max(W, H * innerWidth / innerHeight);
+const cam = new THREE.OrthographicCamera(-R, R, R * innerHeight / innerWidth, -R * innerHeight / innerWidth, 0.1, 100);
+const cx = (bb.min.x + bb.max.x) / 2, cz = (bb.min.z + bb.max.z) / 2; cam.position.set(cx, 20, cz); cam.up.set(0, 0, -1); cam.lookAt(cx, 0, cz);
+r.render(scene, cam);
+// labels
+const c2 = document.createElement('canvas'); c2.width = innerWidth; c2.height = innerHeight; Object.assign(c2.style, {position: 'fixed', left: 0, top: 0}); document.body.appendChild(c2);
+const x = c2.getContext('2d'); x.font = '12px monospace'; x.fillStyle = '#0f0';
+const v = new THREE.Vector3();
+for (let gx = Math.floor(bb.min.x); gx <= Math.ceil(bb.max.x); gx += 1) for (let gz = Math.floor(bb.min.z); gz <= Math.ceil(bb.max.z); gz += 1) { v.set(gx, 3, gz).project(cam); x.fillText(`${gx},${gz}`, (v.x + 1) / 2 * innerWidth + 2, (1 - v.y) / 2 * innerHeight - 2);
+}
+window.info = {min: bb.min.toArray().map(n => +n.toFixed(2)), max: bb.max.toArray().map(n => +n.toFixed(2))}; window.ready = true;
+</script></body></html>

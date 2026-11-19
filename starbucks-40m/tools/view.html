@@ -1,0 +1,34 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>model view</title>
+<style>html,body{margin:0;height:100%;background:#222;overflow:hidden}#i{position:fixed;left:8px;top:8px;color:#fff;font:12px monospace;white-space:pre;background:rgba(0,0,0,.5);padding:6px;max-width:60vw}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><div id="i"></div>
+<script type="module">
+// Model inspector: /tools/view.html?m=misti  — window.cam(px,py,pz,tx,ty,tz,fov) moves the camera; window.info holds the bbox.
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RGBELoader} from 'three/addons/loaders/RGBELoader.js';
+const Q = new URLSearchParams(location.search), slug = Q.get('m') || 'misti';
+const r = new THREE.WebGLRenderer({antialias: true}); r.setSize(innerWidth, innerHeight); r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0; document.body.appendChild(r.domElement);
+const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.02, 500);
+const hdr = await new RGBELoader().loadAsync('../assets/hdri/kloofendal_38d_partly_cloudy_puresky.hdr'); hdr.mapping = THREE.EquirectangularReflectionMapping; scene.environment = hdr; scene.background = new THREE.Color(0x333333);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.6)); const d = new THREE.DirectionalLight(0xffffff, 1.5); d.position.set(3, 6, 4); scene.add(d);
+const g = await new GLTFLoader().loadAsync(`../assets/cafe_models/${slug}/scene.gltf`);
+scene.add(g.scene); g.scene.updateMatrixWorld(true);
+const bb = new THREE.Box3().setFromObject(g.scene), s = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3());
+let tris = 0; const names = []; g.scene.traverse(o => { if (o.isMesh) { tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
+g.scene.children.forEach(o => names.push(o.name)); const kids = []; g.scene.traverse(o => { if (o.parent && o.parent.parent === g.scene) kids.push(o.name); });
+window.info = {min: bb.min.toArray().map(v => +v.toFixed(2)), max: bb.max.toArray().map(v => +v.toFixed(2)), size: s.toArray().map(v => +v.toFixed(2)), tris: Math.round(tris), names: names.slice(0, 20), kids: kids.slice(0, 60)};
+document.getElementById('i').textContent = JSON.stringify(window.info, null, 1);
+const R = Math.max(s.x, s.y, s.z);
+window.cam = (px, py, pz, tx, ty, tz, fov = 55) => { camera.position.set(px, py, pz); camera.fov = fov; camera.updateProjectionMatrix(); camera.lookAt(tx, ty, tz); };
+window.cam(c.x + R * 0.8, c.y + R * 0.6, c.z + R * 0.8, c.x, c.y, c.z);
+window.probe = (x0, x1, z0, z1, st = 0.25) => {   // top surface heights on a grid: '.' floor, 'c' seat, 'T' table, '#' tall
+  const rc = new THREE.Raycaster(); const rows = [];
+  for (let z = z0; z <= z1; z += st) { let row = ''; for (let x = x0; x <= x1; x += st) {
+    rc.set(new THREE.Vector3(x, 2.4, z), new THREE.Vector3(0, -1, 0)); const h = rc.intersectObject(g.scene, true).filter(q => q.point.y < 2.3)[0];
+    const y = h ? h.point.y : -9; row += y < 0.1 ? '.' : y < 0.62 ? 'c' : y < 0.9 ? 'T' : y < 1.3 ? 'k' : '#'; } rows.push(row); }
+  return rows.join('|'); };
+window.ready = true;
+(function loop() { requestAnimationFrame(loop); r.render(scene, camera); })();
+</script></body></html>

@@ -1,0 +1,8 @@
+[
+ ["waitjs", "window.__C && __C.cashier && __C.cashier.holder.visible", 240], ["wait", 6],
+ ["eval", "JSON.stringify({arm: __arm('cashier'), cash: __C.cashier.holder.position.toArray().map(v=>+v.toFixed(2)), bar: __C.barista.holder.position.toArray().map(v=>+v.toFixed(2)), noor: __C.noor.holder.position.toArray().map(v=>+v.toFixed(2))})"],
+ ["eval", "__cam([2.9, 1.45, -2.2], [1.6, 0.95, -3.05], 50)"], ["wait", 1], ["shot", "cash_front.png"],
+ ["eval", "__cam([1.5, 1.6, -0.6], [1.0, 0.95, -2.1], 55)"], ["wait", 1], ["shot", "bar_back.png"],
+ ["eval", "__cam([3.4, 1.3, -1.6], [1.4, 1.0, -2.2], 55)"], ["wait", 1], ["shot", "bar_side.png"],
+ ["eval", "JSON.stringify(__clip())"]
+]

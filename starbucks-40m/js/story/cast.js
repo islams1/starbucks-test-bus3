@@ -1,6 +1,7 @@
 // Cast: avatars, staff routines, the queue, background customers, small procedural gestures (checking a watch).
 import * as THREE from 'three';
-import {Character, characters} from '../actors/character.js';
+import {Character, characters, animLib} from '../actors/character.js';
+import {findSeat, sitPose} from '../actors/contact.js';
 import {onUpdate, camera, damp, clock} from '../core/engine.js';
 
 export const CAST = {
@@ -38,18 +39,33 @@ export async function loadCast(onEach, ids = Object.keys(CAST)) {
 }
 
 export function sit(ch, seat, {anim = null, back = 0.0} = {}) {
-  ch.seated = true; ch.walking = null;
-  ch.place(seat.x - Math.sin(seat.ry) * back, seat.z - Math.cos(seat.ry) * back, seat.ry, seat.y || 0);
-  ch.setBase(anim || (ch.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_idle_neutral_01'), {fade: 0.6});
+  ch.seated = true; ch.walking = null; seat.taken = ch.id;
+  const name = anim || (ch.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_idle_neutral_01');
+  let x = seat.x - Math.sin(seat.ry) * back, z = seat.z - Math.cos(seat.ry) * back, y = seat.y || 0;
+  // sit on the chair that is really there: the pelvis over the seat's centre (a little towards the back rest), the
+  // underside of the thighs on the cushion — the anchors were placed by eye, chairs and clips differ by centimetres
+  const chair = findSeat(seat.x, seat.z, y), clip = animLib[name];
+  if (chair && clip) {
+    const P = sitPose(ch, clip), s = Math.sin(seat.ry), c = Math.cos(seat.ry);
+    const cx = chair.x - s * 0.04, cz = chair.z - c * 0.04;                     // 4 cm back from the centre
+    x = cx - (P.px * c + P.pz * s); z = cz - (-P.px * s + P.pz * c);
+    y = y + chair.top - P.under;
+    ch._seatFit = {chair, dx: +(x - seat.x).toFixed(3), dz: +(z - seat.z).toFixed(3), dy: +(chair.top - P.under).toFixed(3)};
+  }
+  ch.place(x, z, seat.ry, y);
+  ch.setBase(name, {fade: 0.6});
 }
 export function stand(ch, x, z, ry, anim = null, y = 0) {
   ch.seated = false; ch.walking = null; ch.place(x, z, ry, y); ch.setBase(anim || ch.idle || (ch.g === 'm' ? 'm_idle_neutral_01' : 'f_idle_neutral_01'), {fade: 0.5});
 }
 
-// ---------------------------------------------------------------- the queue (register at x -2.2, line runs towards the door)
-// slot 0 is ordering at the register; the line goes south along x = -2.2, then turns east towards the door.
-export const QSLOTS = [[-2.2, 29.95], [-2.2, 30.8], [-2.2, 31.65], [-2.2, 32.5], [-2.2, 33.35], [-1.45, 34.15], [-0.6, 34.45], [0.3, 34.65], [1.2, 34.8], [2.1, 34.95]];
-export const slotFace = (i) => { const a = QSLOTS[i], b = QSLOTS[Math.max(0, i - 1)]; return i === 0 ? Math.PI : Math.atan2(b[0] - a[0], b[1] - a[1]); };
+// ---------------------------------------------------------------- the queue (register at the north end of the bar)
+// slot 0 is ordering at the register. Measured from above: the sofa's front is at z -3.06 (x 3.85–6.5), the coffee
+// table spans z -2.75..-2.0 (x 4.35–6.16) and the round table's edge is at z -1.41 — the gap between sofa and coffee
+// table (31 cm) is no place for people. The line turns past the coffee table, runs east in the 59 cm-wide band between
+// it and the round table (z -1.7), then south towards the stair, where newcomers arrive.
+export const QSLOTS = [[2.95, -3.05], [3.55, -2.95], [3.9, -2.3], [4.2, -1.7], [4.95, -1.7], [5.7, -1.7], [6.45, -1.7], [7.1, -1.25], [7.15, -0.5], [7.15, 0.25]];
+export const slotFace = (i) => { const a = QSLOTS[i], b = QSLOTS[Math.max(0, i - 1)]; return i === 0 ? -Math.PI / 2 : Math.atan2(b[0] - a[0], b[1] - a[1]); };
 const QIDLE = {q1: 'm_idle_look_around_01', q2: 'f_cell_phone_textmessage', q3: 'm_idle_neutral_03', q4: 'f_idle_neutral_02', q5: 'm_idle_neutral_02', q6: 'f_cell_phone_textmessage', q7: 'f_idle_nervous_03', q8: 'f_idle_neutral_01', s1: 'f_cell_phone_textmessage', s2: 'm_idle_look_around_01', salma: 'f_idle_neutral_01'};
 export const qIdle = (id) => QIDLE[id];
 export function lineUp(ids, startSlot = 0) {
@@ -61,20 +77,21 @@ let staffOn = false;
 export function startStaff({busy = true} = {}) {
   const C = characters; staffOn = true;
   const cash = C.cashier, bar = C.barista;
-  if (cash) stand(cash, -2.2, 28.15, 0, busy ? 'm_work_table' : 'm_idle_neutral_02');
+  if (cash) stand(cash, 1.52, -3.05, Math.PI / 2, busy ? 'm_work_table' : 'm_idle_neutral_02');
   if (bar && !bar._loop) { bar._loop = true; baristaLoop(bar, busy); }
 }
 async function baristaLoop(ch, busy) {
-  stand(ch, 1.9, 27.55, Math.PI, 'f_work_table');
+  stand(ch, 1.12, -1.95, -Math.PI / 2, 'f_work_table');
   for (;;) {
     if (!staffOn) { await sleep(1); continue; }
-    // pull shots / steam milk at the machine, then hand the cup off at the pickup shelf
-    ch.setBase('f_work_table', {fade: 0.4}); ch.faceTo(1.9, 26.6);
+    // pull shots / steam milk at the machine on the back bar, then hand the cup across the counter
+    ch.setBase('f_work_table', {fade: 0.4}); ch.faceTo(0.8, -2.0);
     await sleep(ch._busy === false ? 14 : 6 + Math.random() * 3);
-    await ch.walkTo([[4.4, 28.2]], {speed: 1.2, nav: false}); ch.faceTo(4.4, 29.4);
+    ch.setBase('f_idle_neutral_02', {fade: 0.3});
+    await ch.walkTo([[1.5, -0.9]], {speed: 1.1, nav: false}); ch.faceTo(3, -0.9);
     await sleep(1.2);
     if (onHandoff) onHandoff();
-    await ch.walkTo([[1.9, 27.55]], {speed: 1.2, nav: false});
+    await ch.walkTo([[1.12, -1.95]], {speed: 1.1, nav: false});
   }
 }
 let onHandoff = null;

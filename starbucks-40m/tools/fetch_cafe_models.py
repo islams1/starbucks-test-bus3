@@ -11,6 +11,8 @@ MODELS = {   # slug: (uid, title)
     'cupcake1': ('bd65abb34f3d4863838da371d2d9f2c1', 'Cupcake Berry 01 - Photogrammetry 3D Scan'),
     'cupcake2': ('94454f2e2662491882e709f69cfaebb0', 'Cupcake Berry 02 - Photogrammetry 3D Scan'),
     'cake_piece': ('675125a5452d48bab052732fbcca99b7', 'Cake Piece Chocolate 01 - Photogrammetry 3D Scan'),
+    'misti': ('419c3293b0e54313be4b1f02845d606a', 'Cafe-Misti'),
+    'meetroom': ('3fd65e8b05da4b9a94d287ae3f676fd1', 'Meeting room'),
 }
 
 

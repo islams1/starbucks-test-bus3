@@ -1,7 +1,7 @@
 // Navigation grid + A* so characters walk around furniture and through doors instead of through them.
 import {colliders} from './building.js';
 
-const G = {x0: -14, z0: 24, x1: 14, z1: 42, cell: 0.2, w: 0, h: 0, blocked: null};
+const G = {x0: -11, z0: -10, x1: 10, z1: 10, cell: 0.2, w: 0, h: 0, blocked: null};
 const R = 0.34;   // body radius kept clear of obstacles
 
 export function buildNav() {

@@ -1,0 +1,8 @@
+[
+ ["waitjs", "document.getElementById('card').className==='compare'", 240], ["wait", 2], ["shot", "sc_compare.png"],
+ ["waitjs", "!document.getElementById('subs').classList.contains('hidden')===false", 60], ["click", "#cmpnext"],
+ ["click", ".qz-opts button[data-k='1']"], ["wait", 0.5], ["shot", "sc_quiz.png"], ["click", "#qznext"],
+ ["click", ".qz-opts button[data-k='1']"], ["click", "#qznext"], ["click", ".qz-opts button[data-k='1']"], ["click", "#qznext"], ["wait", 1.2],
+ ["eval", "(()=>{const e=document.querySelector('#card .sc'); return JSON.stringify({sh: e.scrollHeight, ch: e.clientHeight, slot: __glass.slotOf(e)})})()"],
+ ["shot", "sc_score.png"]
+]

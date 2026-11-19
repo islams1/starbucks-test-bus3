@@ -1,0 +1,10 @@
+[
+ ["waitjs", "typeof window.__face === 'function'", 240], ["wait", 3],
+ ["eval", "__face('noor')"], ["wait", 1.2], ["shot", "f_noor.png"],
+ ["eval", "__face('noor', 0.62, 0.6)"], ["wait", 1.2], ["shot", "f_noor34.png"],
+ ["eval", "__face('ben')"], ["wait", 1.2], ["shot", "f_ben.png"],
+ ["eval", "__face('salma')"], ["wait", 1.2], ["shot", "f_salma.png"],
+ ["eval", "__face('ellis')"], ["wait", 1.2], ["shot", "f_ellis.png"],
+ ["eval", "__face('priya', 0.62, -0.5)"], ["wait", 1.2], ["shot", "f_priya.png"],
+ ["eval", "__face('salma', 2.4, 0.3)"], ["wait", 1.2], ["shot", "f_group.png"]
+]

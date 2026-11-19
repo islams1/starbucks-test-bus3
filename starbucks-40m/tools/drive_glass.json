@@ -1,0 +1,9 @@
+[
+ ["waitjs", "!document.getElementById('menu').classList.contains('hidden')", 240], ["wait", 1.5],
+ ["eval", "JSON.stringify({on: document.documentElement.className, n: __glass.count(), failed: __glass.failed(), dims: __glass.dims().slice(0,4), frames: __glass.pass.frames})"],
+ ["shot", "g_menu.png"],
+ ["click", ".mode"], ["wait", 0.8], ["shot", "g_howto.png"], ["click", "#startbtn"],
+ ["waitjs", "!document.getElementById('subs').classList.contains('hidden') && document.getElementById('subwho').textContent.length>0 && document.getElementById('card').classList.contains('hidden')", 90], ["wait", 1.5],
+ ["eval", "JSON.stringify({n: __glass.count(), dims: __glass.dims(), drops: document.querySelectorAll('[data-glass-drop]').length})"],
+ ["shot", "g_scene1.png"]
+]

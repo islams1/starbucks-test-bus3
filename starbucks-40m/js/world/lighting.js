@@ -8,12 +8,12 @@ import {mergeStatic} from './merge.js';
 // Sun positions for the three moments of the day (Cairo-like latitude, mid November). +x east, +z south.
 const sunDir = (az, el) => { const A = THREE.MathUtils.degToRad(az), E = THREE.MathUtils.degToRad(el); return new THREE.Vector3(Math.sin(A) * Math.cos(E), Math.sin(E), -Math.cos(A) * Math.cos(E)).normalize(); };
 export const TIMES = {
-  morning: {exp: [1.45, 0.82], dir: sunDir(126, 25), sun: 0xffe2c0, si: 3.0, hemi: [0xe8d6bd, 0x6a5440, 0.35], env: 0.42, bg: 1.0, fog: 0xcbd6e0, lamps: 1.0},
-  afternoon: {exp: [1.35, 0.78], dir: sunDir(222, 31), sun: 0xfff0dc, si: 3.3, hemi: [0xe8dcc8, 0x6a5440, 0.32], env: 0.45, bg: 1.0, fog: 0xd2dbe2, lamps: 0.75},
-  dusk: {exp: [1.2, 1.5], dir: sunDir(250, 1.5), sun: 0xff9a5c, si: 0.35, hemi: [0x5d6a8a, 0x2a2220, 0.22], env: 0.12, bg: 0.16, fog: 0x3a4152, lamps: 1.35},
+  morning: {exp: [1.0, 0.8], dir: sunDir(126, 25), sun: 0xffe2c0, si: 3.0, hemi: [0xe8d6bd, 0x6a5440, 0.35], env: 0.42, bg: 1.0, fog: 0xcbd6e0, lamps: 1.0},
+  afternoon: {exp: [1.05, 0.8], dir: sunDir(222, 31), sun: 0xfff0dc, si: 3.3, hemi: [0xe8dcc8, 0x6a5440, 0.32], env: 0.45, bg: 1.0, fog: 0xd2dbe2, lamps: 0.75},
+  dusk: {exp: [0.78, 1.2], dir: sunDir(250, 1.5), sun: 0xff9a5c, si: 0.35, hemi: [0x5d6a8a, 0x2a2220, 0.22], env: 0.12, bg: 0.16, fog: 0x3a4152, lamps: 1.35},
 };
 export let SUN_DIR = TIMES.morning.dir.clone();
-export const exposure = {in: 1.45, out: 0.82};
+export const exposure = {in: 1.0, out: 0.8};
 export const sun = new THREE.DirectionalLight(0xfff0dc, 3.2);
 sun.castShadow = true;
 sun.shadow.mapSize.set(4096, 4096);
@@ -65,31 +65,51 @@ export function sunFollow(target, radius = 45) {
   sun.position.copy(t).addScaledVector(SUN_DIR, 120);
 }
 
-let HDR = null;
-/** switch the light to a moment of the day: 'morning' | 'afternoon' | 'dusk' */
-export function setTimeOfDay(key) {
+// Two photographed skies (Poly Haven): a city street for the café (morning / afternoon) and a city sunset for the meeting
+// room. Each is the image-based light (HDR) and, behind the windows, the view (an 4k JPG of the same panorama), both
+// turned so that the photographed sun sits where our sun is.
+const SKIES = {
+  street: {hdr: 'assets/hdri/urban_street_04_2k.hdr', bg: 'assets/hdri/urban_street_04_bg.jpg'},
+  sunset: {hdr: 'assets/hdri/sunset_jhbcentral_2k.hdr', bg: 'assets/hdri/sunset_jhbcentral_bg.jpg'},
+};
+const skyTex = {};
+async function loadSky(key, dir) {
+  if (skyTex[key]) return skyTex[key];
+  const S = SKIES[key];
+  const hdr = await loadHDR(S.hdr);
+  const shift = rotateHDRToSun(hdr, dir);
+  if (SOFTWARE) downsampleHDR(hdr, 4);
+  hdr.mapping = THREE.EquirectangularReflectionMapping;
+  // the view: the same panorama as a JPG, its columns shifted by the same fraction as the HDR's
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = S.bg; });
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d');
+  const dx = Math.round(shift.frac * img.width); g.drawImage(img, dx, 0); g.drawImage(img, dx - img.width, 0); g.drawImage(img, dx + img.width, 0);
+  const bg = new THREE.CanvasTexture(c); bg.colorSpace = THREE.SRGBColorSpace; bg.mapping = THREE.EquirectangularReflectionMapping; bg.anisotropy = 4;
+  return skyTex[key] = {hdr, bg};
+}
+let skyKey = null, sunCenter = new THREE.Vector3(4, 0, -1), sunRadius = 13;
+/** switch the light to a moment of the day: 'morning' | 'afternoon' | 'dusk' (the sky changes with it) */
+export async function setTimeOfDay(key, center = null) {
   const T = TIMES[key]; SUN_DIR = T.dir.clone();
+  const want = key === 'dusk' ? 'sunset' : 'street';
+  if (want !== skyKey) { const sk = await loadSky(want, SUN_DIR); scene.environment = sk.hdr; scene.background = sk.bg; skyKey = want; }
   sun.color.setHex(T.sun); sun.intensity = T.si; hemi.color.setHex(T.hemi[0]); hemi.groundColor.setHex(T.hemi[1]); hemiBase = T.hemi[2]; hemi.intensity = hemiBase * hemiQ;
   scene.environmentIntensity = T.env; scene.backgroundIntensity = T.bg; if (scene.fog) scene.fog.color.setHex(T.fog);
   timeMul = T.lamps; exposure.in = T.exp[0]; exposure.out = T.exp[1];
-  sunFollow(new THREE.Vector3(0, 0, 32), 26);
+  if (center) sunCenter.copy(center);
+  sunFollow(sunCenter, sunRadius);
 }
 export async function buildLighting() {
-  const hdr = await loadHDR('assets/hdri/kloofendal_38d_partly_cloudy_puresky.hdr');
-  rotateHDRToSun(hdr, SUN_DIR);
-  if (SOFTWARE) downsampleHDR(hdr, 4);   // CPU rendering: much cheaper environment pre-filtering
-  hdr.mapping = THREE.EquirectangularReflectionMapping;
-  scene.background = hdr;
-  scene.environment = hdr;
-  scene.backgroundIntensity = 1.0;
-  scene.environmentIntensity = 0.42;
-  scene.fog = new THREE.FogExp2(0xcbd6e0, 0.0028);   // density/colour blended indoors/outdoors in flow.js
+  scene.fog = new THREE.FogExp2(0xcbd6e0, 0.0012);
   scene.add(sun, sun.target, hemi, interior);
-  sunFollow(new THREE.Vector3(0, 0, 32), 26);
+  sun.shadow.radius = 3; sun.shadow.bias = -0.0002; sun.shadow.normalBias = 0.02;
+  const sk = await loadSky('street', SUN_DIR);
+  scene.environment = sk.hdr; scene.background = sk.bg; skyKey = 'street';
+  scene.backgroundIntensity = 1.0; scene.environmentIntensity = 0.42;
+  sunFollow(sunCenter, sunRadius);
   scene.add(lamps);
-  // quality tiers: fewer interior point lights on weak GPUs (each light costs on every pixel); hemisphere fills in
   onQuality((L) => {
-    const n = L.direct ? 0 : L.lights;              // number of real lights near the camera (0 = hemisphere fill only)
+    const n = L.direct ? 0 : L.lights;
     if (n !== pool.length) setPool(n);
     hemiQ = (n >= 6 ? 0.35 : n >= 4 ? 0.45 : 0.95) / 0.35; hemi.intensity = hemiBase * hemiQ;
     poolMul = n >= 6 ? 1 : 1.15;
@@ -97,7 +117,7 @@ export async function buildLighting() {
     if (L.shadow > 0 && sun.shadow.mapSize.x !== L.shadow) { sun.shadow.mapSize.set(L.shadow, L.shadow); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
     if (L.direct) hemi.intensity = hemiBase * 3.1;
   });
-  return hdr;
+  return sk.hdr;
 }
 
 /** box-filter an equirect DataTexture down by factor f (keeps the same data type) */
@@ -131,4 +151,5 @@ function rotateHDRToSun(tex, dir) {
     out[di] = data[si]; out[di + 1] = data[si + 1]; out[di + 2] = data[si + 2]; out[di + 3] = data[si + 3];
   }
   img.data = out; tex.needsUpdate = true;
+  return {frac: ((shift % W) + W) % W / W};
 }
