@@ -1,6 +1,6 @@
 // Flight 1549 — boot: New York, the airplane, the cockpit, voices; then the menu and the flight (flow.js).
 import * as THREE from 'three';
-import {start, Q, scene, camera, renderer, renderOpts, onUpdate, bloom, grade, gtao, shadowCtl, frameCap} from '../core/engine.js';
+import {start, Q, scene, camera, renderer, renderOpts, onUpdate, bloom, grade, gtao, shadowCtl, frameCap, stats} from '../core/engine.js';
 import {resume as resumeAudio} from '../core/audio.js';
 import {detectGPU, applyQuality, savedQuality, quality, onQuality, dyn} from '../core/quality.js';
 import {$, show, fade} from '../ui/ui.js';
@@ -15,7 +15,7 @@ import {note} from './freeze.js';
 import {debrief} from './debrief.js';
 import {loadGoogleTiles, GT, boost, dropTiles} from './gtiles.js';
 
-window.__fl = {THREE, scene, camera, renderer, W, AC, CK, heightAt, sampleReal, STATE};
+window.__fl = {THREE, scene, camera, renderer, W, AC, CK, heightAt, sampleReal, STATE, quality, stats, frameCap};
 const txt = $('loadtxt'), bar = $('loadbar');
 const T0 = performance.now();
 const prog = (k, t) => { bar.style.width = Math.round(k * 100) + '%'; if (t) { if (t !== txt.textContent) console.log('[boot]', Math.round(performance.now() - T0), 'ms', t); txt.textContent = t; } };
@@ -45,7 +45,16 @@ async function boot() {
   let fq = null; try { fq = localStorage.getItem('flight_quality'); } catch (e) {}
   applyQuality(Q.get('q') || fq || quality.auto, {manual: true});
   if (quality.level !== 'high') dyn.mode = 30;
-  document.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { try { localStorage.setItem('flight_quality', b.dataset.q); } catch (e) {} }));
+  // the menu's buttons: the level takes effect at once (and is remembered for the next visit); the one that suits this
+  // device is marked
+  document.querySelectorAll('[data-q]').forEach(b => {
+    if (b.dataset.q === quality.auto) b.querySelector('small').textContent = 'تلقائي — مناسب لجهازك';
+    b.addEventListener('click', () => {
+      try { localStorage.setItem('flight_quality', b.dataset.q); } catch (e) {}
+      applyQuality(b.dataset.q, {manual: true});
+      dyn.enabled = false; dyn.scale = 1; dyn.fixed = null; dyn.mode = quality.level === 'high' ? 60 : 30;
+    });
+  });
   start();
   prog(0.02, 'جارٍ تجهيز نيويورك…');
   // what the menu needs comes first, side by side (not one after another): the city, the airplane, the cockpit, the voices.
