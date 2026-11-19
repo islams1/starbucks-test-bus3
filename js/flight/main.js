@@ -11,12 +11,14 @@ import {loadMapbox} from './mapbox.js';
 import {buildControls} from './controls.js';
 import {run, STATE} from './flow.js';
 import {preloadRescue} from './rescue.js';
+import {note} from './freeze.js';
 import {debrief} from './debrief.js';
-import {loadGoogleTiles, GT, boost} from './gtiles.js';
+import {loadGoogleTiles, GT, boost, dropTiles} from './gtiles.js';
 
 window.__fl = {THREE, scene, camera, renderer, W, AC, CK, heightAt, sampleReal, STATE};
 const txt = $('loadtxt'), bar = $('loadbar');
-const prog = (k, t) => { bar.style.width = Math.round(k * 100) + '%'; if (t) txt.textContent = t; };
+const T0 = performance.now();
+const prog = (k, t) => { bar.style.width = Math.round(k * 100) + '%'; if (t) { if (t !== txt.textContent) console.log('[boot]', Math.round(performance.now() - T0), 'ms', t); txt.textContent = t; } };
 
 async function boot() {
   quality.auto = detectGPU();
@@ -46,52 +48,16 @@ async function boot() {
   document.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { try { localStorage.setItem('flight_quality', b.dataset.q); } catch (e) {} }));
   start();
   prog(0.02, 'جارٍ تجهيز نيويورك…');
+  // what the menu needs comes first, side by side (not one after another): the city, the airplane, the cockpit, the voices.
+  // The rest (the photographed city of the opening shots, the passengers of the ending) loads behind the menu.
+  const side = Promise.all([loadExterior(), loadGeese(),
+    fetch('data/lines.flight.json').then(r => r.json()), fetch('assets/flight/atc/clips.json').then(r => r.json())]);
   await buildWorld((k) => prog(0.05 + k * 0.6, k < 0.6 ? 'الأرض والنهر…' : 'المباني…'));
-  let photoreal = null;
-  try { photoreal = await loadGoogleTiles(); if (photoreal) prog(0.66, 'نيويورك الحقيقية ثلاثية الأبعاد…'); } catch (e) { console.warn('[google tiles]', e); }
-  // satellite imagery for the open-data city only (the photographed 3D city has its own)
-  if (!photoreal) try { if (await loadMapbox()) prog(0.67, 'صور الأقمار الصناعية…'); } catch (e) { console.warn('[mapbox]', e); }
-  prog(0.68, 'الطائرة…');
-  await loadTrack();
-  // the photographed city streams in by detail: fetch the start of the flight (LaGuardia, the climb-out) behind the
-  // loading screen, so the opening shot is sharp from its first frame (at most 20 s)
-  if (photoreal && GT.tiles) {
-    prog(0.7, 'نيويورك الحقيقية… تحميل منطقة الإقلاع');
-    // the camera where the opening shot will be (out of the cockpit for now: inside it, it was somewhere else entirely)
-    const camParent = camera.parent, wasOn = CK.on; CK.on = false; scene.add(camera);   // (the seat's head motion also moves the camera)
-    // the three opening shots (behind, alongside, the airplane climbing past), as flow.js frames them
-    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
-    const poses = [
-      (f, sd) => [AC.pos.clone().addScaledVector(f, -70).addScaledVector(sd, 25).add(V3(0, 12, 0)), AC.pos.clone()],
-      (f, sd) => [AC.pos.clone().addScaledVector(sd, 55).addScaledVector(f, 8).add(V3(0, 4, 0)), AC.pos.clone().addScaledVector(f, 4)],
-      (f, sd) => [AC.pos.clone().addScaledVector(f, 300).addScaledVector(sd, -45).add(V3(0, 8, 0)), AC.pos.clone()],
-    ];
-    // each with its own lens (a narrower lens asks for finer tiles: preloading through the cockpit's wide lens fetched a
-    // quarter of what the shot needs). The first shot last, and given the most time: its slanting view to the horizon
-    // needs ~1300–2000 tiles, fetched level by level; the third shot looks up at the airplane against the sky.
-    const t0 = performance.now(), times = [-86, -80, -75], fovs = [45, 38, 34], fov0 = camera.fov, budget = [22000, 9000];
-    boost(true);                                   // behind the loading screen: fetch and prepare tiles as fast as they come
-    for (const k of [1, 0]) {
-      sampleReal(times[k]); const a = AC.hdg * Math.PI / 180, f = V3(Math.sin(a), 0, -Math.cos(a)), sd = V3(-f.z, 0, f.x);
-      // the shot's lens, and its view distance: the loading camera saw only 900 m, so the preload fetched just the ground
-      // next to the airplane and the opening had to fetch the rest (the horizon is 120 km away from up here)
-      camera.fov = fovs[k]; camera.far = 120000; camera.updateProjectionMatrix();
-      const [pp, look] = poses[k](f, sd); camera.position.copy(pp); camera.lookAt(look); camera.updateMatrixWorld();
-      const tk = performance.now(); let calm = 0;
-      while (performance.now() - tk < budget[k]) {
-        await new Promise(r => setTimeout(r, 250));
-        const st = GT.tiles.stats; calm = (st.downloading + st.parsing === 0) ? calm + 1 : 0;
-        prog(0.7 + 0.08 * (1 - k + Math.min(1, (performance.now() - tk) / budget[k])) / 2, 'نيويورك الحقيقية… تحميل مشاهد البداية');
-        if (calm >= 4 && performance.now() - tk > 1500) break;
-      }
-    }
-    sampleReal(-86); camera.fov = fov0; camera.updateProjectionMatrix(); boost(false);
-    console.log('[boot] photographed city preloaded in', Math.round(performance.now() - t0), 'ms', JSON.stringify(GT.tiles.stats));
-    if (camParent && camParent !== scene) camParent.add(camera); CK.on = wasOn;
-    GT.frozen = true;                              // hold these tiles as they are until the opening (flow.js settle())
-  }
-  await Promise.all([buildCockpit(), loadExterior(), loadGeese()]);
-  buildControls();
+  const track = loadTrack();                       // (the flight path is placed on the city's map)
+  const deck = (async () => { await track; await buildCockpit(); buildControls(); try { await loadFO(); } catch (e) { console.warn('[fo]', e); } })();
+  prog(0.75, 'الطائرة والقمرة…');
+  const [, , lines, clips] = await side;
+  await deck;
   W.hideInReflection = [CK.group];
   // the airplane's reflection only when it is low over the river (high up, its smeared image read as a dark shadow)
   W.hideInReflectionNow = () => {
@@ -102,12 +68,6 @@ async function boot() {
     if (GT.holder && GT.detail === 'flight' && quality.level !== 'high') h.push(GT.holder);
     return h;
   };
-  prog(0.8, 'الطاقم…');
-  try { await loadFO(); } catch (e) { console.warn('[fo]', e); }
-  // the people on the wings after the ditching: their models take ~1 s each to unpack, so behind the loading screen
-  prog(0.83, 'الركاب…'); try { await preloadRescue(); } catch (e) { console.warn('[rescue]', e); }
-  prog(0.86, 'الأصوات…');
-  const [lines, clips] = await Promise.all([fetch('data/lines.flight.json').then(r => r.json()), fetch('assets/flight/atc/clips.json').then(r => r.json())]);
   bloom.strength = 0.12; bloom.threshold = 0.92; renderer.toneMappingExposure = 0.95; grade.uniforms.vig.value = 0.35; grade.uniforms.warm.value = 0.04;
   AC.t = -86; sampleReal(AC.t); acUpdate(0);
   seat(true);
@@ -115,6 +75,54 @@ async function boot() {
   await new Promise(r => setTimeout(r, 200));
   renderOpts.skip = false;
   return {lines: lines.lines, speakers: lines.speakers, clips};
+}
+
+/** the photographed city of the opening shots, fetched behind the menu through a camera of its own placed where each shot
+ *  will be (the menu keeps showing the cockpit). Each shot with its own lens (a narrower lens asks for finer tiles) and
+ *  its view distance (the horizon is 120 km away from up here); the first shot last, and given the most time. */
+let openingP = null;
+function preloadOpening() {
+  if (openingP || !GT.tiles) return openingP || Promise.resolve();
+  return openingP = (async () => {
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+    const shots = [[-80, 38, (f, sd) => [AC.pos.clone().addScaledVector(sd, 55).addScaledVector(f, 8).add(V3(0, 4, 0)), AC.pos.clone().addScaledVector(f, 4)]],
+                   [-86, 45, (f, sd) => [AC.pos.clone().addScaledVector(f, -70).addScaledVector(sd, 25).add(V3(0, 12, 0)), AC.pos.clone()]]];
+    // the airplane's place at each shot, worked out and put back at once (the menu is drawn from the cockpit)
+    const poses = shots.map(([t, fov, pose]) => { sampleReal(t); const a = AC.hdg * Math.PI / 180, f = V3(Math.sin(a), 0, -Math.cos(a)), sd = V3(-f.z, 0, f.x); return [fov, ...pose(f, sd)]; });
+    sampleReal(-86); acUpdate(0);
+    const pcam = new THREE.PerspectiveCamera(45, camera.aspect, 1, 120000), t0 = performance.now(), budget = [9000, 22000];
+    GT.frozen = false; GT.viewCam = pcam; GT.tiles.deleteCamera(camera); GT.tiles.setCamera(pcam); boost(true);
+    try {
+      for (let k = 0; k < poses.length && !started; k++) {
+        const [fov, pp, look] = poses[k];
+        pcam.fov = fov; pcam.aspect = camera.aspect; pcam.updateProjectionMatrix(); pcam.position.copy(pp); pcam.lookAt(look); pcam.updateMatrixWorld();
+        const tk = performance.now(); let calm = 0;
+        while (performance.now() - tk < budget[k] && !started) {
+          await new Promise(r => setTimeout(r, 250));
+          const st = GT.tiles.stats; calm = (st.downloading + st.parsing === 0) ? calm + 1 : 0;
+          if (calm >= 4 && performance.now() - tk > 1500) break;
+        }
+      }
+    } finally {
+      boost(false); GT.tiles.deleteCamera(pcam); GT.tiles.setCamera(camera); GT.viewCam = null;
+      if (!started) GT.frozen = true;              // hold these tiles as they are until the opening (flow.js settle())
+      console.log('[boot] photographed city of the opening preloaded behind the menu in', Math.round(performance.now() - t0), 'ms');
+    }
+  })();
+}
+/** before the first shot: whatever of the opening's city is still on its way (the player was quicker than the download) */
+let cityReady = null, cityState = 'none', started = false;
+const until = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms))]);
+/** before the first shot: the player never waits long. Still connecting to the real city after a few seconds: the flight
+ *  goes ahead on the open-data city (the real one, arriving mid-flight, would swap the whole city at once). Connected and
+ *  fetching the opening's tiles: a few seconds more, then the opening fetches the rest itself. */
+async function openingReady() {
+  if (!cityReady) return;
+  const t0 = performance.now();
+  while (cityState === 'connecting' && performance.now() - t0 < 4000) await new Promise(r => setTimeout(r, 100));
+  if (cityState === 'connecting') { cityState = 'late'; console.log('[boot] the real city is late: flying over the open-data city'); }
+  else if (openingP) await until(openingP, Math.max(1500, 6000 - (performance.now() - t0)));
+  started = true; if (openingP) await openingP;          // (the preload stops within a quarter second)
 }
 
 async function showCredits() {
@@ -138,6 +146,20 @@ window.__credits = showCredits;
   try { data = await boot(); }
   catch (e) { console.error(e); window.__showErr && window.__showErr(e && (e.message || e)); return; }
   show('loading', false);
+  // behind the menu: the opening shots' photographed city, then the passengers of the ending
+  // (the real city replaces the open-data one in the cockpit windows when it arrives; without a key, or if it does not
+  // answer, the satellite imagery dresses the open-data city instead)
+  const behind = (async () => {
+    let photoreal = null; cityState = 'connecting';
+    try { photoreal = await loadGoogleTiles(); } catch (e) { console.warn('[google tiles]', e); }
+    if (cityState === 'late') { if (photoreal) dropTiles('arrived after the start'); return; }
+    cityState = photoreal ? 'preloading' : 'open';
+    if (photoreal) await preloadOpening();
+    else try { await loadMapbox(); } catch (e) { console.warn('[mapbox]', e); }
+    if (cityState !== 'late') cityState = 'ready';
+  })();
+  cityReady = behind;
+  preloadRescue().catch(e => console.warn('[rescue]', e));
   // menu background: the airplane over Queens, seen from the cockpit
   CK.head.ty = 0.35; CK.head.tp = -0.12;
   const dev = Q.get('dev');
@@ -151,7 +173,8 @@ window.__credits = showCredits;
     await new Promise(r => $('startbtn').onclick = r);
     show('howto', false);
   } else resumeAudio();
-  await fade(true, 500);
+  note('تجهيز المدينة…');                           // the live cockpit (never a still or black screen) while the city's last part arrives
+  await openingReady(); note('');
   const go = async () => {
     const S = await run(mode, data);
     await debrief(S, {onRetry: () => location.reload()});

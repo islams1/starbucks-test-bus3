@@ -14,6 +14,7 @@ import {startSound, thumps, masterWarning, ditch, chime} from './sound.js';
 import {preloadRescue, showRescue} from './rescue.js';
 import {FLY, takeControl, setLaw, anyInput} from './fly.js';
 import {setDetail, settle, addViewpoint} from './gtiles.js';
+import {freeze, thaw} from './freeze.js';
 import {CTL, onControl, setButton, setLever, warn, hint, showStick, focus, nudge} from './controls.js';
 import {setupFO, foSet} from './fo.js';
 import {startGuide} from './guide.js';
@@ -397,15 +398,15 @@ export async function run(mode, {lines, clips, speakers}) {
     if (AC.t >= 148 && !S.end && CTL.items.flaps && CTL.items.flaps.userData.idx < 2) k.push('F');
     return k;
   }});
+  await freeze();                                   // the cockpit's last frame, for the moment the first shot takes to appear
   show('hud', true);
   AC.t = -86;
   // opening shot: outside, climbing away from LaGuardia
   seat(false); CK.group.visible = false; if (AC.ext) AC.ext.visible = true;
   const chase = () => { const {fwd, side} = chaseFrame(); return AC.pos.clone().addScaledVector(fwd, -70).addScaledVector(side, 25).add(V(0, 12, 0)); };
   cine.hold(chase, () => AC.pos.clone(), {fov: 45});
-  // the first frame shows the real city, not the coarse stand-in: wait in the dark (the airplane held where the loading
-  // screen fetched this view) until the tiles in view have arrived
-  await settle(9000, 600);
+  // the first frame shows the real city, not the coarse stand-in: a moment (under the held frame) for the tiles in view
+  await settle(2500, 400);
   const off = onUpdate((dt) => {
     if (S.end) return;
     if (AC.t > 0 && !FLY.on && !S.branch && anyInput()) { takeControl(); S.acts.myac = AC.t; say('cp_myac'); setTimeout(() => say('fo_yourac'), 900); objective('أنت تقود الآن. حافظ على السرعة، واتجه نحو المكان الذي اخترته.'); renderActs(); }
@@ -426,20 +427,22 @@ export async function run(mode, {lines, clips, speakers}) {
     next.position.copy(p).addScaledVector(sd, 55).addScaledVector(f, 8).add(V(0, 4, 0)); next.lookAt(p.addScaledVector(f, 4)); next.updateMatrixWorld();
   });
   $('hud').classList.add('cine');
-  await fade(false, 1600);
+  await thaw(900);                                  // the cockpit dissolves into the first shot
   await wait(4.2);
   // cuts go through a short dip to black: the new view's first frame (hundreds of photographed tiles coming into view
   // at once) is the heavy one, and it falls in the dark
-  const cut = async (fn) => { await fade(true, 160); fn(); await wait(0.3); await settle(2500, 300); await fade(false, 240); };
+  // cuts hold the last frame on screen (never black) while the new view's tiles arrive behind it, then dissolve into it
+  const cut = async (fn) => { await freeze(); fn(); await wait(0.15); await settle(1000, 250); await thaw(450); };
   await cut(() => { offNext(); dropNext(); cine.hold(() => AC.pos.clone().addScaledVector(side(), -55).addScaledVector(fwd(), 8).add(V(0, 4, 0)), () => AC.pos.clone().addScaledVector(fwd(), 4), {fov: 38}); });
   await wait(4.4);
   await cut(() => { const at = AC.pos.clone().addScaledVector(fwd(), 300).addScaledVector(side(), 45).add(V(0, 8, 0)); cine.hold(at, () => AC.pos.clone(), {fov: 34}); });
   await wait(4.6);
-  await fade(true, 450);
+  await freeze();
   $('hud').classList.remove('cine');
   cine.stop(); if (AC.ext) AC.ext.visible = false; CK.group.visible = true; seat(true);
   setDetail('flight');                              // into the cockpit: the flight's level of detail
-  await fade(false, 600);
+  await wait(0.15); await settle(800, 250);
+  await thaw(600);
   objective('صعود عادي من لاGuardia.'.replace('لاGuardia', 'لاغوارديا'));
   FLY.onTouch = (t) => { if (t.kind === 'water') touchdown(t); else if (t.kind === 'runway') runwayEnd(t); else crashEnd(); };
   FLY.onCrash = () => crashEnd();

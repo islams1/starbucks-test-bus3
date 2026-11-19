@@ -323,7 +323,8 @@ export async function buildWorld(onProgress = () => {}) {
   // ---- buildings
   const bm = buildingMaterial(); let bd = 0;
   await Promise.all((meta.buildings || []).map(async (b) => {
-    const B = await readBin(BASE + b.file);
+    // one block of the city that fails to arrive (or arrives broken) is left out; it never stops the game
+    let B; try { B = await readBin(BASE + b.file); if (!B.p || !B.i) throw new Error('incomplete'); } catch (e) { console.warn('[city] skipped', b.file, e.message); onProgress(0.6 + 0.3 * (++bd / meta.buildings.length)); return; }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.BufferAttribute(B.n, 3));
     g.setAttribute('uv', new THREE.BufferAttribute(B.uv, 2)); g.setAttribute('color', new THREE.BufferAttribute(B.c, 3, true));

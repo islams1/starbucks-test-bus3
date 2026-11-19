@@ -157,7 +157,7 @@ export async function loadGoogleTiles() {
     if (detailKind === 'flight' && !boosted && (++frameN & 1)) return;
     // (frozen: between the preload and the opening — the rest of the loading and the menu look from the cockpit, and
     // updating then dropped the opening's tiles from the cache to make room for that view)
-    if (!GT.on || GT.frozen) return; camera.updateMatrixWorld(); tiles.setResolutionFromRenderer(camera, renderer); tiles.update();
+    if (!GT.on || GT.frozen) return; const cam = GT.viewCam || camera; cam.updateMatrixWorld(); tiles.setResolutionFromRenderer(cam, renderer); tiles.update();
     // a kilometres-coarse tile still standing in close to the camera (its children not here yet) is a dark smear over
     // the water: hide only those; coarser-than-ideal tiles stay (buildings, even soft, beat bare ground)
     // Likewise any tile far coarser than its distance allows (its error in pixels many times the target: a whole
@@ -180,6 +180,8 @@ export async function loadGoogleTiles() {
   setTimeout(() => { if (tiles.stats.failed > 0 && !tiles.group.children.length) disable('tiles failed to load (check the key / Map Tiles API)'); }, 15000);
   return tiles;
 }
+/** leave the photographed city out (it came too late: the flight is under way on the open-data city) */
+export function dropTiles(why) { if (GT.on || GT.holder) disable(why); }
 function disable(why) {
   console.warn('[google tiles]', why); GT.on = false; if (GT.holder) GT.holder.visible = false;
   for (const m of W.ground || []) { m.visible = true; m.position.y = 0; } for (const m of W.buildingMeshes || []) m.visible = true; if (W.gwb) W.gwb.visible = true;
