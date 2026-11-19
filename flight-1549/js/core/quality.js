@@ -13,10 +13,10 @@ export const TOUCH = MOBILE || matchMedia('(pointer: coarse)').matches;
 // medium → low changes only passes / buffer sizes (same light count, same shadow filter) so the automatic step
 // down never recompiles shaders (that was a visible freeze while walking)
 export const LEVELS = {
-  high:   {name: 'عالية',  pr: Math.min(DPR, 1.5),  aa: 'msaa4', ao: 'always', bloom: true,  shadow: 4096, soft: true,  lights: 8, treeShadow: true,  shadowEvery: 1},
-  medium: {name: 'متوسطة', pr: Math.min(DPR, 1.25), aa: 'fxaa',  ao: 'indoor', bloom: true,  shadow: 2048, soft: true,  lights: 6, treeShadow: true,  shadowEvery: 1},
-  low:    {name: 'منخفضة', pr: Math.min(DPR, 1),    aa: 'fxaa',  ao: 'off',    bloom: true,  shadow: 1024, soft: true,  lights: 6, treeShadow: false, shadowEvery: 1},
-  cpu:    {name: 'بدون كارت شاشة', pr: 0.5, aa: 'off', ao: 'off', bloom: false, shadow: 0, soft: false, lights: 0, treeShadow: false, shadowEvery: 1, direct: true, noTrees: true, noCrowd: true},
+  high:   {name: 'High',  pr: Math.min(DPR, 1.5),  aa: 'msaa4', ao: 'always', bloom: true,  shadow: 4096, soft: true,  lights: 8, treeShadow: true,  shadowEvery: 1},
+  medium: {name: 'Medium', pr: Math.min(DPR, 1.25), aa: 'fxaa',  ao: 'indoor', bloom: true,  shadow: 2048, soft: true,  lights: 6, treeShadow: true,  shadowEvery: 1},
+  low:    {name: 'Low', pr: Math.min(DPR, 1),    aa: 'fxaa',  ao: 'off',    bloom: true,  shadow: 1024, soft: true,  lights: 6, treeShadow: false, shadowEvery: 1},
+  cpu:    {name: 'No graphics card', pr: 0.5, aa: 'off', ao: 'off', bloom: false, shadow: 0, soft: false, lights: 0, treeShadow: false, shadowEvery: 1, direct: true, noTrees: true, noCrowd: true},
 };
 const MSAA = {msaa4: 4, msaa2: 2, fxaa: 0, off: 0};
 export const quality = {level: 'high', auto: 'high', gpu: '', software: false, hooks: [], custom: null};

@@ -23,10 +23,10 @@ export async function loadTrack() {
   AC.track = await (await fetch('assets/flight/track.json')).json();
   scene.add(AC.group);
   // runway thresholds offered by the controller (measured on the USGS photo; for the reach estimate, the glides and landing)
-  AIRPORTS.LGA13 = {name: 'لاغوارديا — المدرج ١٣', p: ll(40.7828, -73.8797), hdg: 131};
-  AIRPORTS.LGA4 = {name: 'لاغوارديا — المدرج ٤', p: ll(40.7684, -73.8849), hdg: 40};
-  AIRPORTS.TEB1 = {name: 'تيتربورو — المدرج ١', p: ll(40.8373, -74.0603), hdg: 3};
-  AIRPORTS.HUDSON = {name: 'نهر الهدسون', p: V(AC.track.x[AC.track.x.length - 1], 0, AC.track.z[AC.track.z.length - 1]), hdg: 205};
+  AIRPORTS.LGA13 = {name: 'LaGuardia — runway 13', p: ll(40.7828, -73.8797), hdg: 131};
+  AIRPORTS.LGA4 = {name: 'LaGuardia — runway 4', p: ll(40.7684, -73.8849), hdg: 40};
+  AIRPORTS.TEB1 = {name: 'Teterboro — runway 1', p: ll(40.8373, -74.0603), hdg: 3};
+  AIRPORTS.HUDSON = {name: 'the Hudson River', p: V(AC.track.x[AC.track.x.length - 1], 0, AC.track.z[AC.track.z.length - 1]), hdg: 205};
   for (const k of ['LGA13', 'LGA4', 'TEB1']) RUNWAYS.push({key: k, p: AIRPORTS[k].p, hdg: AIRPORTS[k].hdg, len: 2130});
   sampleReal(AC.t);
 }

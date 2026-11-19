@@ -28,9 +28,14 @@ const now0 = (fn) => setTimeout(fn, 0);
 function pace() {
   const q = GT.tiles && GT.tiles.parseQueue; if (!q) return;
   if (boosted > 0) { q.maxJobs = 16; q.schedulingCallback = now0; GT.tiles.downloadQueue.maxJobs = 24; }
-  else { q.maxJobs = detailKind === 'cinema' ? 4 : 5; q.schedulingCallback = idle; GT.tiles.downloadQueue.maxJobs = detailKind === 'cinema' ? 20 : 18; }
+  // while the menu shows: many at once too, but between frames (the page stays responsive to the mouse)
+  else if (GT.soft) { q.maxJobs = 10; q.schedulingCallback = now0; GT.tiles.downloadQueue.maxJobs = 24; }
+  // (in flight, few at a time: each tile that arrives costs the main thread its setup and the upload of its picture, and
+  //  dozens a second made the frame rate dip in the first seconds in the cockpit)
+  else { q.maxJobs = detailKind === 'cinema' ? 4 : 3; q.schedulingCallback = idle; GT.tiles.downloadQueue.maxJobs = detailKind === 'cinema' ? 20 : 12; }
   q.scheduleJobRun && q.scheduleJobRun();
 }
+export function softBoost(on) { GT.soft = on; pace(); }
 export function boost(on) { boosted = Math.max(0, boosted + (on ? 1 : -1)); pace(); }
 /** a second viewpoint for the tiles, never drawn: the next shot of a cinematic, so its tiles arrive before the cut.
  *  Returns the function that removes it. */
@@ -53,7 +58,7 @@ export function coarseNear() {
   for (const t of T.visibleTiles) { const d = t.__distanceFromCamera || 0; if (t.children && t.children.length && d > 0 && d < 5000 && t.__error > lim && t.__error < 1e7) coarse++; }
   return coarse;
 }
-export function sharpen(max = 20000) {
+export function sharpen(max = 20000, quiet = 300, first = 400) {
   if (!GT.on || !GT.tiles) return Promise.resolve(true);
   const t0 = performance.now(); let okSince = null;
   GT.frozen = false; boost(true);
@@ -62,10 +67,10 @@ export function sharpen(max = 20000) {
       const coarse = coarseNear();
       const now = performance.now();
       if (coarse === 0) { if (okSince == null) okSince = now; } else okSince = null;
-      if ((okSince != null && now - okSince > 300) || now - t0 > max) { boost(false); console.log('[city] sharp in', Math.round(now - t0), 'ms', coarse ? `(${coarse} still coarse)` : ''); return res(coarse === 0); }
+      if ((okSince != null && now - okSince > quiet) || now - t0 > max) { boost(false); console.log('[city] sharp in', Math.round(now - t0), 'ms', coarse ? `(${coarse} still coarse)` : ''); return res(coarse === 0); }
       setTimeout(step, 100);
     };
-    setTimeout(step, 400);                          // (a few frames first: the camera's own choice of tiles)
+    setTimeout(step, first);                        // (a few frames first: the camera's own choice of tiles)
   });
 }
 /** resolves once the tiles in view have all arrived (nothing downloading or being prepared for `quiet` ms), or after

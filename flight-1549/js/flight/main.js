@@ -9,11 +9,11 @@ import {AC, loadTrack, loadExterior, loadGeese, update as acUpdate, sampleReal, 
 import {buildCockpit, CK, seat, loadFO} from './cockpit.js';
 import {buildGlass} from './glass.js';
 import {buildControls} from './controls.js';
-import {run, STATE} from './flow.js';
+import {run, STATE, T_START, ORBIT} from './flow.js';
 import {preloadRescue} from './rescue.js';
 import {showTitle, titleStatus} from './titlecard.js';
 import {debrief} from './debrief.js';
-import {connectCity, loadGoogleTiles, GT, boost, CITY, addViewpoint, coarseNear} from './gtiles.js';
+import {connectCity, loadGoogleTiles, GT, softBoost, CITY, addViewpoint, coarseNear} from './gtiles.js';
 
 window.__fl = {THREE, scene, camera, renderer, W, AC, CK, GT, heightAt, sampleReal, STATE, quality, stats, frameCap};
 const txt = $('loadtxt'), bar = $('loadbar');
@@ -35,6 +35,9 @@ async function boot() {
     // the shared cap to "free", and the frame rate then swung between 30 and 60 — the motion looked jerky)
     frameCap.fps = light ? 30 : 0;
     shadowCtl.every = light ? 3 : 1;
+    // the glow around bright things (barely seen here: strength 0.12) costs integrated graphics more than anything else
+    // in the cockpit — its passes over the full screen held the first seconds at 25–35 frames a second
+    bloom.enabled = !light;
     W.reflectEvery = light ? 2 : 1;
     W.reflectRes = light ? 512 : 1024;                    // (used when the river is built, after this first call)
     if (W.reflectRT) { const R = light ? 512 : 1024; if (W.reflectRT.width !== R) W.reflectRT.setSize(R, R / 2); }
@@ -48,7 +51,7 @@ async function boot() {
   // the menu's buttons: the level takes effect at once (and is remembered for the next visit); the one that suits this
   // device is marked
   document.querySelectorAll('[data-q]').forEach(b => {
-    if (b.dataset.q === quality.auto) b.querySelector('small').textContent = 'تلقائي — مناسب لجهازك';
+    if (b.dataset.q === quality.auto) b.querySelector('small').textContent = 'Auto — suits this device';
     b.addEventListener('click', () => {
       try { localStorage.setItem('flight_quality', b.dataset.q); } catch (e) {}
       applyQuality(b.dataset.q, {manual: true});
@@ -57,20 +60,20 @@ async function boot() {
   });
   start();
   connectCity();                                   // Google's city: its connection starts the moment the page opens
-  prog(0.02, 'جارٍ تجهيز نيويورك…');
+  prog(0.02, 'Preparing New York…');
   // what the menu needs comes first, side by side (not one after another): the airplane, the cockpit, the voices.
   // The rest loads behind the menu: the first officer (in the right seat, out of the menu's view), the geese (needed six
   // seconds before the strike), the passengers of the ending.
   const side = Promise.all([loadExterior(),
     fetch('data/lines.flight.json').then(r => r.json()), fetch('assets/flight/atc/clips.json').then(r => r.json())]);
-  await buildWorld((k) => prog(0.05 + k * 0.4, 'النهر والسماء…'));
+  await buildWorld((k) => prog(0.05 + k * 0.4, 'River and sky…'));
   // the photographed city (the only city): its connection starts now, while the airplane and the cockpit load
   cityP = loadGoogleTiles();
   const track = loadTrack();                       // (the flight path is placed on the city's map)
   // the opening's shots know where they will be as soon as the flight path is here: their city starts loading now
   Promise.all([cityP, track]).then(preloadViews).catch(e => console.warn('[google tiles]', e));
   const deck = (async () => { await track; await buildCockpit(); buildGlass(); buildControls(); })();
-  prog(0.75, 'الطائرة والقمرة…');
+  prog(0.75, 'Airplane and cockpit…');
   const [, lines, clips] = await side;
   await deck;
   W.hideInReflection = [CK.group];
@@ -84,9 +87,9 @@ async function boot() {
     return h;
   };
   bloom.strength = 0.12; bloom.threshold = 0.92; renderer.toneMappingExposure = 0.95; grade.uniforms.vig.value = 0.35; grade.uniforms.warm.value = 0.04;
-  AC.t = -86; sampleReal(AC.t); acUpdate(0);
+  AC.t = T_START; sampleReal(AC.t); acUpdate(0);
   seat(true);
-  prog(1, 'جاهز');
+  prog(1, 'Ready');
   await new Promise(r => setTimeout(r, 200));
   renderOpts.skip = false;
   return {lines: lines.lines, speakers: lines.speakers, clips};
@@ -99,8 +102,10 @@ async function boot() {
 function preloadViews() {
   if (GT.opening) return;                          // (the flight has already started: its camera fetches for itself)
   const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
-  const shots = [[-86, 45, (f, sd) => [AC.pos.clone().addScaledVector(f, -70).addScaledVector(sd, 25).add(V3(0, 12, 0)), AC.pos.clone()]],
-                 [-83, 38, (f, sd) => [AC.pos.clone().addScaledVector(sd, 55).addScaledVector(f, 8).add(V3(0, 4, 0)), AC.pos.clone().addScaledVector(f, 4)]]];
+  const shots = [[T_START, 45, (f, sd) => [AC.pos.clone().addScaledVector(f, -70).addScaledVector(sd, 25).add(V3(0, 12, 0)), AC.pos.clone()]],
+                 [T_START + 5.5, 38, (f, sd) => [AC.pos.clone().addScaledVector(sd, 55).addScaledVector(f, 8).add(V3(0, 4, 0)), AC.pos.clone().addScaledVector(f, 4)]],
+                 // and where the camera move ends, ahead of the airplane on its left, looking back at it (flow.js orbit)
+                 [T_START + ORBIT + 0.5, 42, (f, sd) => [AC.pos.clone().addScaledVector(f, 95 * Math.cos(25 * Math.PI / 180)).addScaledVector(sd, 95 * Math.sin(25 * Math.PI / 180)).add(V3(0, 9, 0)), AC.pos.clone()]]];
   // the airplane's place at each shot, worked out and put back at once (the menu is drawn from the cockpit)
   // the shots' cameras, worked out where the airplane will be for each
   const cams = shots.map(([t, fov, pose]) => {
@@ -116,17 +121,17 @@ function preloadViews() {
   (async () => {
     const t0 = performance.now(); let ok = 0;
     while (!GT.opening && performance.now() - t0 < 30000 && ok < 3) { await new Promise(r => setTimeout(r, 250)); ok = coarseNear() === 0 && performance.now() - t0 > 1500 ? ok + 1 : 0; }
-    if (!GT.opening) { drops.push(addViewpoint(cams[1], 1)); console.log('[boot] first shot ready behind the menu in', Math.round(performance.now() - t0), 'ms'); }
+    if (!GT.opening) { drops.push(addViewpoint(cams[1], 1), addViewpoint(cams[2], 1)); console.log('[boot] first shot ready behind the menu in', Math.round(performance.now() - t0), 'ms'); }
   })();
-  sampleReal(-86); acUpdate(0);
+  sampleReal(T_START); acUpdate(0);
   // the cockpit's own view behind the menu fetches nothing: the menu covers it, and every tile the machine prepares
   // goes to the opening's shots, so they are ready sooner after "start" (the camera joins again at the first shot)
   GT.tiles.deleteCamera(camera);
-  // at full pace for as long as the menu shows (the menu is still: the work costs it nothing that can be seen)
-  GT.frozen = false; boost(true);
+  // at a brisk pace for as long as the menu shows, the work fitted between frames (the menu answers the mouse at once)
+  GT.frozen = false; softBoost(true);
   // they go when the first shot is on screen (flow.js): from then on only what the camera sees is chosen and drawn (the
   // tiles chosen for any viewpoint are drawn too — another shot's coarse tiles stood in this one as blurred slabs)
-  GT.shotShown = () => { drops.forEach(d => d && d()); drops.length = 0; GT.tiles.setCamera(camera); boost(false); };
+  GT.shotShown = () => { drops.forEach(d => d && d()); drops.length = 0; GT.tiles.setCamera(camera); softBoost(false); };
   console.log('[boot] the city loads for the menu and the opening from', Math.round(performance.now() - T0), 'ms');
 }
 /** before the first shot: the photographed city must be connected (there is no other city: the flight waits for it,
@@ -134,7 +139,7 @@ function preloadViews() {
 let cityP = null, foP = null;
 async function openingReady() {
   while (CITY.state !== 'on') {
-    if (CITY.tries > 2) titleStatus('في انتظار الاتصال بالإنترنت…');
+    if (CITY.tries > 2) titleStatus('Waiting for an internet connection…');
     await new Promise(r => setTimeout(r, 250));
   }
   titleStatus('');
@@ -145,17 +150,36 @@ async function openingReady() {
 async function showCredits() {
   const fl = await fetch('assets/flight_models/CREDITS.json').then(r => r.json()).catch(() => ({}));
   const esc = (t) => String(t).replace(/[&<>"]/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[ch]));
-  $('docbody').innerHTML = `<div class="credits-card" dir="ltr"><h3 dir="rtl">المصادر والتراخيص</h3><ul>
+  $('docbody').innerHTML = `<div class="credits-card" dir="ltr"><h3>Sources and licenses</h3><ul>
     <li>Flight path, times, heights and cockpit lines: <a href="https://www.ntsb.gov/investigations/AccidentReports/Reports/AAR1003.pdf" target="_blank" rel="noopener">NTSB Aircraft Accident Report AAR-10/03</a> <small>(US Government work, public domain)</small></li>
     <li>Air traffic control audio and transcript: <a href="https://www.faa.gov/data_research/accident_incident/2009-01-15/" target="_blank" rel="noopener">FAA release, February 5, 2009</a> <small>(public domain)</small></li>
     <li>New York: Google Photorealistic 3D Tiles <small>(© Google, via Cesium ion; attribution shown on screen)</small> · Ground heights and the rivers' outline: USGS 3DEP <small>(public domain)</small> · Aerial photographs under the city: USGS The National Map / USDA NAIP <small>(public domain)</small></li>
     ${Object.values(fl).map(([t, a, u, l]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a> — ${esc(a)} <small>(${esc(l)})</small></li>`).join('')}
     <li>Voices of the crew, cabin and warnings: synthesized (Microsoft neural voices)</li></ul>
-    <p dir="rtl"><small>الأشخاص الحقيقيون يُذكرون في الختام فقط. الكلام في القمرة مأخوذ من نص مسجّل قمرة القيادة في تقرير التحقيق، بأصوات مُركّبة.</small></p></div>`;
+    <p><small>Real people are named only at the end. The cockpit dialogue is taken from the cockpit voice recorder transcript in the investigation report, in synthesized voices.</small></p></div>`;
   show('doc', true);
   $('docclose').onclick = () => { show('doc', false); $('docbody').innerHTML = ''; };
 }
 window.__credits = showCredits;
+
+/** ?info=1: a small badge with what this device gives the game (to find out why a picture looks worse on a device) */
+function infoBadge() {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:95;font:11px/1.45 ui-monospace,Consolas,monospace;color:#dfe7ec;background:rgba(5,8,11,.82);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 10px;direction:ltr;text-align:left;pointer-events:none;max-width:46vw;white-space:pre-wrap';
+  document.body.appendChild(el);
+  const upd = () => {
+    const T = GT.tiles, gl = renderer.getContext();
+    el.textContent = [
+      'GPU: ' + (quality.gpu || '?'),
+      'screen: ' + innerWidth + '×' + innerHeight + ' @' + (devicePixelRatio || 1).toFixed(2) + 'x  →  drawn @' + renderer.getPixelRatio().toFixed(2) + 'x',
+      'level: ' + quality.level + ' (auto ' + quality.auto + ')  webgl2: ' + (gl instanceof WebGL2RenderingContext) + '  fps: ' + Math.round(stats.fps || 0),
+      'city: ' + CITY.state + (CITY.why ? ' (' + CITY.why + ')' : '') + '  tiles: ' + (T ? T.lruCache.itemSet.size + ' cached, ' + T.visibleTiles.size + ' shown, ' + T.stats.downloading + ' downloading' : '—') + (T ? '  target ' + T.errorTarget : ''),
+      'ua: ' + navigator.userAgent.replace(/^Mozilla\/5\.0 /, '').slice(0, 110),
+    ].join(String.fromCharCode(10));
+  };
+  upd(); setInterval(upd, 1000);
+}
+if (Q.has('info')) addEventListener('load', () => setTimeout(infoBadge, 500));
 
 (async () => {
   let data;

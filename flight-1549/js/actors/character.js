@@ -81,6 +81,8 @@ function rotBoneWorld(bone, axis, ang) {
 }
 
 export const characters = {};
+/** a clip of the shared library by name (the flight's extras play them on clones) */
+export const animClip = (n) => animLib[n];
 
 // ---- emotions: face targets + body language ----
 export const EMO_FACE = {

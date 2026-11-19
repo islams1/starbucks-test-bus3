@@ -7,8 +7,8 @@ import {AC, sampleReal, AIRPORTS} from './aircraft.js';
 import {FLY} from './fly.js';
 
 const KEYS = [
-  ['W', 'المقدمة لتحت', 'تزيد السرعة'], ['A', 'ميل يسار', ''], ['S', 'المقدمة لفوق', 'تقل السرعة'], ['D', 'ميل يمين', ''],
-  ['T', 'الراديو', ''], ['P', 'الركاب', ''], ['F', 'القلابات', ''],
+  ['W', 'Nose down', 'faster'], ['A', 'Bank left', ''], ['S', 'Nose up', 'slower'], ['D', 'Bank right', ''],
+  ['T', 'Radio', ''], ['P', 'Cabin', ''], ['F', 'Flaps', ''],
 ];
 const CODE = {KeyW: 'W', ArrowUp: 'W', KeyS: 'S', ArrowDown: 'S', KeyA: 'A', ArrowLeft: 'A', KeyD: 'D', ArrowRight: 'D', KeyT: 'T', KeyP: 'P', KeyF: 'F'};
 const held = new Set(), flash = {};
@@ -17,9 +17,9 @@ let el = null, S = null;
 function build() {
   el = document.createElement('div'); el.id = 'keys'; el.className = 'hidden';
   const k = (c) => { const [key, a, b] = KEYS.find(x => x[0] === c); return `<div class="key" data-k="${key}"><b>${key}</b><small>${a}${b ? `<br><i>${b}</i>` : ''}</small></div>`; };
-  el.innerHTML = `<div class="kt">التحكم بالطيارة</div>
+  el.innerHTML = `<div class="kt">Flight controls</div>
     <div class="krow">${k('W')}</div><div class="krow">${k('A')}${k('S')}${k('D')}</div>
-    <div class="kt kt2">أوامر</div><div class="krow">${k('T')}${k('P')}${k('F')}</div>`;
+    <div class="kt kt2">Commands</div><div class="krow">${k('T')}${k('P')}${k('F')}</div>`;
   document.body.appendChild(el);
   addEventListener('keydown', (e) => { const c = CODE[e.code]; if (!c) return; held.add(c); if ('TPF'.includes(c)) flash[c] = performance.now() + 700; });
   addEventListener('keyup', (e) => { const c = CODE[e.code]; if (c) held.delete(c); });

@@ -9,7 +9,7 @@ const bar = document.getElementById('loadbar'), txt = document.getElementById('l
 let total = 0, done = 0, shown = 0;
 export function track(p, label) {
   total++;
-  return p.then(v => { done++; shown = Math.max(shown, Math.round(done / Math.max(total, 60) * 100)); bar.style.width = shown + '%'; txt.textContent = `جارٍ التحميل… ${shown}%`; return v; },
+  return p.then(v => { done++; shown = Math.max(shown, Math.round(done / Math.max(total, 60) * 100)); bar.style.width = shown + '%'; txt.textContent = `Loading… ${shown}%`; return v; },
                 e => { done++; console.error('asset failed', label, e); throw e; });
 }
 

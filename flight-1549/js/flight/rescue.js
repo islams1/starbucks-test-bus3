@@ -3,7 +3,8 @@
 // ferries and the rescue boats close in (the first ferry arrived in under four minutes). The people are loaded in the
 // background during the flight so the ending does not wait.
 import * as THREE from 'three';
-import {Character, loadAnimLib} from '../actors/character.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import {Character, loadAnimLib, animClip} from '../actors/character.js';
 import {scene, onUpdate} from '../core/engine.js';
 import {AC} from './aircraft.js';
 import {hiss} from './sound.js';
@@ -11,7 +12,7 @@ import {hiss} from './sound.js';
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const ease = (k) => k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k);
 const backOut = (k) => { k = Math.min(1, Math.max(0, k)); const s = 1.4; return 1 + (s + 1) * (k - 1) ** 3 + s * (k - 1) ** 2; };
-const R = {people: [], boats: [], loading: null, offs: [], parts: []};
+const R = {people: [], boats: [], loading: null, offs: [], parts: [], mixers: []};
 const AVATARS = [['Male_Adult_02', 'm'], ['Female_Adult_01', 'f'], ['Male_Adult_05', 'm'], ['Female_Adult_04', 'f'], ['Male_Adult_07', 'm'],
   ['Female_Adult_09', 'f'], ['Male_Adult_12', 'm'], ['Female_Adult_13', 'f']];
 
@@ -94,46 +95,136 @@ function openDoor(D) {
 }
 
 // ---------------------------------------------------------------- the slide-raft
+// One piece, as on the A320: two thick side beams that leave the door sill, run down to the water and bend level along
+// it into the raft, a sagging fabric floor between them, a second (upper) buoyancy tube and a lifeline along the raft's
+// sides, a cross tube at its end; rubberised fabric with panel seams, wrinkles and a little grime. It comes out of the
+// door as a pack and unrolls along its length while each part, once out, fills up (the hiss of the gas bottle).
+// Frame: the door sill at the origin, x out from the fuselage along the slide, y up, z across.
 const RAMP = 2.0, RAFT = {L: 4.4, W: 1.9, r: 0.23};
-function capsule(r, len, mat) { return new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2 * r), 6, 16), mat); }
-function buildRaft() {
-  const yel = new THREE.MeshStandardMaterial({color: 0xe0b52e, roughness: 0.5}), grey = new THREE.MeshStandardMaterial({color: 0x9c9888, roughness: 0.75});
-  const dark = new THREE.MeshStandardMaterial({color: 0x2b2a27, roughness: 0.9});
-  // the ramp: from the door sill down to the water (two tubes and the sliding surface between)
-  const ramp = new THREE.Group();
-  for (const s of [-1, 1]) { const t = capsule(0.2, RAMP + 0.4, yel); t.rotation.z = Math.PI / 2; t.position.set(RAMP / 2, 0.2, s * 0.72); ramp.add(t); }
-  const bed = new THREE.Mesh(new THREE.BoxGeometry(RAMP + 0.3, 0.05, 1.3), grey); bed.position.set(RAMP / 2, 0.06, 0); ramp.add(bed);
-  // the raft floating on the river: tubes all round, the floor, a lifeline along the sides
-  const raft = new THREE.Group(), {L, W, r} = RAFT;
-  for (const s of [-1, 1]) {
-    const t = capsule(r, L, yel); t.rotation.z = Math.PI / 2; t.position.set(L / 2, r, s * (W / 2 - r)); raft.add(t);
-    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, L - 0.6, 5), dark); line.rotation.z = Math.PI / 2; line.position.set(L / 2, r * 1.55, s * (W / 2 - r + 0.12)); raft.add(line);
+let FAB = null;
+/** the fabric: colour (weave, seams across every ~0.6 m, grime) and wrinkles (a normal map) */
+function fabric() {
+  if (FAB) return FAB;
+  const S = 256, c = document.createElement('canvas'); c.width = S; c.height = S; const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 2200; i++) { g.fillStyle = `rgba(${Math.random() < 0.5 ? '0,0,0' : '255,255,255'},${0.03 + Math.random() * 0.05})`; g.fillRect(Math.random() * S, Math.random() * S, 2 + Math.random() * 6, 1 + Math.random() * 2); }
+  g.fillStyle = 'rgba(60,45,20,0.28)'; g.fillRect(0, 0, 5, S); g.fillRect(S - 3, 0, 3, S);           // a seam across (u wraps)
+  g.fillStyle = 'rgba(255,255,255,0.18)'; g.fillRect(6, 0, 2, S);
+  const grime = g.createLinearGradient(0, 0, 0, S); grime.addColorStop(0, 'rgba(70,60,40,0.0)'); grime.addColorStop(0.75, 'rgba(70,60,40,0.0)'); grime.addColorStop(1, 'rgba(70,60,40,0.22)');
+  g.fillStyle = grime; g.fillRect(0, 0, S, S);
+  const col = new THREE.CanvasTexture(c); col.colorSpace = THREE.SRGBColorSpace; col.wrapS = col.wrapT = THREE.RepeatWrapping;
+  // wrinkles: soft ridges mostly around the tube, broken up, plus the seam's ridge
+  const h = new Float32Array(S * S);
+  const waves = []; for (let k = 0; k < 16; k++) waves.push([Math.floor(Math.random() * 3), 2 + Math.floor(Math.random() * 9), Math.random() * 6.28, 0.5 + Math.random()]);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    let v = 0; for (const [kx, ky, ph, a] of waves) v += Math.sin((kx * x + ky * y) / S * Math.PI * 2 + ph + Math.sin(x / S * 6.28 * 2 + ph) * 0.8) * a / ky;
+    v += x < 7 ? 1.2 : 0; h[y * S + x] = v;
   }
-  const end = capsule(r, W, yel); end.rotation.x = Math.PI / 2; end.position.set(L - r, r, 0); raft.add(end);
-  const floor = new THREE.Mesh(new THREE.BoxGeometry(L - r, 0.05, W - 2 * r), grey); floor.position.set((L - r) / 2, 0.07, 0); raft.add(floor);
-  for (const o of [...ramp.children, ...raft.children]) o.castShadow = o.receiveShadow = true;
-  // at the sill of the doorway, the raft's ramp heading straight out from the fuselage
-  const base = new THREE.Group(); base.position.set(skinX(DOOR.y0) + 0.02, DOOR.y0, DOOR.z); base.add(ramp, raft); AC.group.add(base);
-  ramp.visible = raft.visible = false;
-  return {base, ramp, raft};
+  const n = document.createElement('canvas'); n.width = n.height = S; const ng = n.getContext('2d'), im = ng.createImageData(S, S);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const dx = h[y * S + (x + 1) % S] - h[y * S + (x + S - 1) % S], dy = h[((y + 1) % S) * S + x] - h[((y + S - 1) % S) * S + x];
+    const v = new THREE.Vector3(-dx * 1.2, -dy * 1.2, 1).normalize(), i = (y * S + x) * 4;
+    im.data[i] = (v.x * 0.5 + 0.5) * 255; im.data[i + 1] = (v.y * 0.5 + 0.5) * 255; im.data[i + 2] = (v.z * 0.5 + 0.5) * 255; im.data[i + 3] = 255;
+  }
+  ng.putImageData(im, 0, 0);
+  const nor = new THREE.CanvasTexture(n); nor.wrapS = nor.wrapT = THREE.RepeatWrapping;
+  return FAB = {col, nor};
+}
+/** a material that the unrolling and the filling drive (shared uniforms): beyond the unrolled length nothing is drawn,
+ *  and each part is fuller the longer it has been out */
+function raftMaterial(U, color, rough, repeat) {
+  const {col, nor} = fabric();
+  const map = col.clone(), nmap = nor.clone(); map.repeat.set(repeat, 1); nmap.repeat.set(repeat, 1); map.needsUpdate = nmap.needsUpdate = true;
+  const m = new THREE.MeshStandardMaterial({color, roughness: rough, metalness: 0, map, normalMap: nmap, normalScale: new THREE.Vector2(0.35, 0.35), side: THREE.DoubleSide});
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uProg = U.prog; sh.uniforms.uInfl = U.infl;
+    sh.vertexShader = 'attribute float aU; attribute vec3 aC; uniform float uProg; uniform float uInfl; varying float vU;\n' + sh.vertexShader.replace('#include <begin_vertex>',
+      '#include <begin_vertex>\nfloat fill = uInfl * clamp((uProg - aU) / 0.22 + 0.3, 0.3, 1.0);\ntransformed = aC + (transformed - aC) * fill;\nvU = aU;');
+    sh.fragmentShader = 'uniform float uProg; varying float vU;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\nif (vU > uProg) discard;');
+  };
+  m.customProgramCacheKey = () => 'raftFabric';
+  return m;
+}
+/** per vertex: how far along the slide it is (0 at the sill, 1 at the raft's end) and the centre it fills out from */
+function along(g, xS, xE, centres) {
+  const P = g.attributes.position, aU = new Float32Array(P.count), aC = new Float32Array(P.count * 3);
+  for (let i = 0; i < P.count; i++) {
+    aU[i] = Math.min(1, Math.max(0, (P.getX(i) - xS) / (xE - xS)));
+    const c = centres ? centres(i) : null;
+    aC.set(c ? [c.x, c.y, c.z] : [P.getX(i), P.getY(i), P.getZ(i)], i * 3);
+  }
+  g.setAttribute('aU', new THREE.BufferAttribute(aU, 1)); g.setAttribute('aC', new THREE.BufferAttribute(aC, 3));
+  return g;
+}
+/** a tube along a curve whose rings fill out from the curve */
+function tube(curve, r, segs, radial, xS, xE, mat) {
+  const g = new THREE.TubeGeometry(curve, segs, r, radial, false), C = [];
+  for (let i = 0; i <= segs; i++) C.push(curve.getPointAt(i / segs));
+  along(g, xS, xE, (k) => C[Math.floor(k / (radial + 1))]);
+  const m = new THREE.Mesh(g, mat); m.castShadow = m.receiveShadow = true; m.frustumCulled = false; return m;
+}
+function buildRaft() {
+  // at the sill of the doorway, heading straight out from the fuselage; the rest is made once the water's height is known
+  const base = new THREE.Group(); base.position.set(skinX(DOOR.y0) + 0.02, DOOR.y0, DOOR.z); AC.group.add(base);
+  return {base};
 }
 /** where the water is under the raft, in the airplane's frame (the airplane floats nose-up and rolls a little) */
 function waterAt(x, z) { const p = AC.group.localToWorld(V(x, 0, z)); p.y = 0; return AC.group.worldToLocal(p).y; }
 function inflate(F) {
   const dy = Math.min(-0.15, waterAt(F.base.position.x + RAMP + 1, DOOR.z) - 0.05 - F.base.position.y);
   F.dy = dy; F.slope = Math.atan2(dy, RAMP);
-  F.ramp.rotation.z = F.slope; F.ramp.scale.set(1 / Math.cos(F.slope), 1, 1);
-  F.raft.position.set(RAMP, dy, 0);
-  F.ramp.visible = F.raft.visible = true; hiss();
-  const t0 = performance.now();
+  const {L, W, r} = RAFT, fy = dy + 0.1, xS = -0.05, xE = RAMP + L;
+  const U = {prog: {value: 0}, infl: {value: 0.3}};
+  const yel = raftMaterial(U, 0xd9a42c, 0.62, 5), floorM = raftMaterial(U, 0x8a877c, 0.85, 6), dark = raftMaterial(U, 0x5d6268, 0.8, 1);
+  const G = new THREE.Group(); F.base.add(G); F.group = G;
+  // the floor's height along the slide: down the ramp, a rounded bend, level on the water
+  const floorAt = (x) => x <= RAMP - 0.35 ? dy * (x / RAMP) : x >= RAMP + 0.35 ? fy : (() => { const u = (x - (RAMP - 0.35)) / 0.7, a = dy * ((RAMP - 0.35) / RAMP); return a + (fy - a) * (u * u * (3 - 2 * u)); })();
+  const xs = []; for (let x = xS; x <= RAMP + L - r + 1e-6; x += 0.2) xs.push(x);
+  for (const s of [-1, 1]) {
+    const z = s * (W / 2 - r);
+    // the side beam: from beside the doorway, down, bending level along the raft
+    G.add(tube(new THREE.CatmullRomCurve3(xs.map(x => V(x, floorAt(x) + r * 0.85, z))), r, 90, 18, xS, xE, yel));
+    // the upper buoyancy tube along the raft part, and the lifeline sagging between its points along the outside
+    const up = []; for (let x = RAMP + 0.25; x <= RAMP + L - r + 1e-6; x += 0.25) up.push(V(x, fy + r * 1.7 + 0.13, z));
+    G.add(tube(new THREE.CatmullRomCurve3(up), 0.15, 40, 14, xS, xE, yel));
+    // (closed ends: the tubes are sealed, round chambers)
+    for (const e of [up[0], up[up.length - 1], V(xS, floorAt(xS) + r * 0.85, z)]) { const cap = new THREE.Mesh(along(new THREE.SphereGeometry(e === up[0] || e === up[up.length - 1] ? 0.15 : r, 16, 10).translate(e.x, e.y, e.z), xS, xE, () => e), yel); cap.castShadow = true; cap.frustumCulled = false; G.add(cap); }
+    // the lifeline: a grey rope hanging in gentle curves between its attachment points along the outside
+    const ll = []; for (let x = RAMP + 0.3; x <= RAMP + L - 0.4 + 1e-6; x += 0.1) ll.push(V(x, fy + r * 1.3 - 0.045 * Math.sin(((x - RAMP - 0.3) / 0.6 % 1) * Math.PI), s * (W / 2 + 0.03)));
+    G.add(tube(new THREE.CatmullRomCurve3(ll), 0.009, 120, 5, xS, xE, dark));
+  }
+  // the cross tube closing the raft's end
+  G.add(tube(new THREE.LineCurve3(V(RAMP + L - r, fy + r * 0.85, -(W / 2 - r)), V(RAMP + L - r, fy + r * 0.85, W / 2 - r)), r, 12, 18, xS, xE, yel));
+  // the floor: fabric between the beams, sagging a little in the middle (it fills out from nothing: aC = itself)
+  const nx = xs.length, nz = 9, pos = [], uv = [], idx = [];
+  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+    const x = xs[i], t = j / (nz - 1), z = (t - 0.5) * (W - 2 * r * 0.9);
+    pos.push(x, floorAt(x) + 0.05 - 0.05 * Math.sin(Math.PI * t), z); uv.push(x / 1.2, t);
+  }
+  for (let i = 0; i < nx - 1; i++) for (let j = 0; j < nz - 1; j++) { const a = i * nz + j, b = a + nz; idx.push(a, b, a + 1, a + 1, b, b + 1); }
+  const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); fg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); fg.setIndex(idx); fg.computeVertexNormals();
+  along(fg, xS, xE);
+  const floor = new THREE.Mesh(fg, floorM); floor.receiveShadow = true; floor.frustumCulled = false; G.add(floor);
+  // the pack at the unrolling front: a rolled bundle across the width, emptying as it goes
+  const pack = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, W * 0.92, 18), new THREE.MeshStandardMaterial({color: 0xc99630, roughness: 0.7, map: fabric().col}));
+  pack.rotation.x = Math.PI / 2; pack.castShadow = true; F.base.add(pack);
+  hiss();
+  const t0 = performance.now(), y0 = F.base.position.y;
   return new Promise(res => {
+    let done = false;
     const off = onUpdate(() => {
       const k = (performance.now() - t0) / 1000;
-      const a = backOut(k / 0.7), b = backOut((k - 0.45) / 1.5), g = ease((k - 0.45) / 1.2);
-      F.ramp.scale.set(Math.max(0.02, a) / Math.cos(F.slope), 0.3 + 0.7 * ease(k / 0.7), 0.5 + 0.5 * ease(k / 0.7));
-      F.raft.scale.set(Math.max(0.02, b), 0.3 + 0.7 * g, 0.45 + 0.55 * g);
-      F.raft.visible = k > 0.4;
-      if (k > 2.2) { off(); res(); }
+      if (k < 0.3) { pack.position.set(0.2, 0.55 - 0.35 * (k / 0.3), 0); U.prog.value = 0; }
+      else {
+        const p = Math.min(1, ((k - 0.3) / 1.5) ** 1.25), x = xS + p * (xE - xS);
+        U.prog.value = p;
+        const sc = 1 - p * 0.75; pack.visible = p < 0.995; pack.scale.set(sc, 1, sc); pack.position.set(Math.min(x, RAMP + L - 0.2), floorAt(Math.min(x, RAMP + L - 0.2)) + 0.25 * sc, 0);
+      }
+      // filling: quick at first, a slight overshoot as the relief valves open, then settled
+      const fk = (k - 0.3) / 2.1; U.infl.value = fk <= 0 ? 0.3 : fk < 1 ? 0.3 + 0.74 * (1 - (1 - fk) ** 3) : 1.04 - 0.04 * Math.min(1, (fk - 1) * 3);
+      // once full, it rides the chop with the airplane, rocking a little on its own
+      if (k > 2.4) { F.base.rotation.x = Math.sin(k * 1.1) * 0.012; F.base.position.y = y0 + Math.sin(k * 0.9) * 0.02; }
+      if (!done && k > 2.5) { done = true; F.base.remove(pack); res(); }
     });
     R.offs.push(off);
   });
@@ -142,26 +233,96 @@ function inflate(F) {
 // ---------------------------------------------------------------- the people
 const sitAnim = (c) => c.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_breathe_01';
 const standAnim = (c, i) => i % 3 ? (c.g === 'f' ? 'f_idle_neutral_01' : 'm_idle_nervous_01') : (c.g === 'f' ? 'f_idle_breathe_01' : 'm_idle_breathe_01');
-/** one passenger: out of the doorway, sat down at the top of the slide, down it, and across to a place on a side tube */
+/** a sitting person's legs laid out straight along a direction (world space): each thigh turned to it at the hip, each
+ *  shin lined up with its thigh at the knee, by w (0..1). The only sitting pose in the library is on a chair (knees at a
+ *  right angle); on a slide people sit with their legs out along it, leaning back a little */
+const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3(), _q = new THREE.Quaternion(), _qw = new THREE.Quaternion(), _qp = new THREE.Quaternion(), _qi = new THREE.Quaternion();
+function aim(bone, from, to, dir, w) {               // turn bone (in world space) so that from→to points along dir
+  const cur = to.clone().sub(from).normalize();
+  _q.setFromUnitVectors(cur, dir); _q.slerp(_qi.identity(), 1 - w);
+  bone.getWorldQuaternion(_qw); bone.parent.getWorldQuaternion(_qp);
+  bone.quaternion.copy(_qp.invert().multiply(_q.multiply(_qw)));
+  bone.updateMatrixWorld(true);
+}
+function legsOut(c, w, dir) {
+  if (w <= 0) return;
+  const sk = c.mesh.skeleton;
+  c._legs = c._legs || ['L', 'R'].map(s => ['Thigh', 'Calf', 'Foot'].map(n => sk.getBoneByName('Bip01_' + s + '_' + n)));
+  c.holder.updateMatrixWorld(true);
+  for (const [th, ca, ft] of c._legs) {
+    if (!th || !ca || !ft) continue;
+    th.getWorldPosition(_a); ca.getWorldPosition(_b); aim(th, _a, _b, dir, w);
+    ca.getWorldPosition(_b); ft.getWorldPosition(_c); aim(ca, _b, _c, dir, w);
+  }
+}
+/** one passenger, the way people leave by a slide: sat on the sill with the legs out, a push, faster and faster down the
+ *  ramp, sliding on across the raft's floor until friction stops them; then up on their feet, a few steps to a place on
+ *  a side tube, and down to sit on it. All in the raft's frame (x out from the sill, along the ramp) */
 function deplaneOne(c, F, seat, i) {
-  const {L, W, r} = RAFT, zs = seat[1] * (W / 2 - r);
-  // (the doorway is a dark picture on the skin, not a hole: they come out of it already sitting at the top of the slide)
+  const {W, r} = RAFT, zs = seat[1] * (W / 2 - r), ryIn = seat[1] > 0 ? Math.PI : 0;
   F.base.add(c.holder); c.seated = true; c.lookAt(null);
-  const sit = -0.4, ry = seat[1] > 0 ? Math.PI : 0;              // sitting, the hips are ~0.45 m above the character's origin
-  c.place(-0.25, 0, Math.PI / 2, sit + 0.05); c.setBase(sitAnim(c), {fade: 0});
-  // key points in the raft's frame: [time, x, y, z, facing]
-  const K = [[0, -0.25, sit + 0.05, 0, Math.PI / 2], [0.4, 0.15, sit + 0.05, 0, Math.PI / 2], [1.1, RAMP, F.dy + sit + 0.1, 0, Math.PI / 2],
-    [2.4, RAMP + seat[0], F.dy + sit + 0.1, zs * 0.6, ry], [2.9, RAMP + seat[0], F.dy, zs, ry]];
-  const t0 = performance.now();
+  const SIT = -0.4;                                   // sitting, the hips are ~0.4 m above the character's origin
+  const slope = F.slope, Lr = RAMP / Math.cos(slope), A = 3.0, FR = 5.0;
+  const tSlide = Math.sqrt(2 * Lr / A), v0 = A * tSlide, dStop = v0 * v0 / (2 * FR), tStop = v0 / FR;
+  const floorY = F.dy + 0.1;                          // the raft's floor
+  const T1 = 0.35, T2 = T1 + tSlide, T3 = T2 + tStop, T4 = T3 + 0.45, T5 = T4 + 0.6;
+  const stopX = RAMP + dStop, sx = RAMP + seat[0], sz = zs * 0.55;
+  const walkD = Math.hypot(sx - stopX, sz), T6 = T5 + walkD / 1.25, T7 = T6 + 0.7;
+  const walkYaw = Math.atan2(sx - stopX, sz);         // (a character faces its +z: yaw from +z toward +x)
+  c.place(-0.12, 0, Math.PI / 2, SIT); c.setBase(sitAnim(c), {fade: 0}); c.holder.rotation.order = 'YXZ';
+  // the two directions the legs lie along: down the ramp, and level across the floor (raft frame → world)
+  const downR = new THREE.Vector3(Math.cos(slope), Math.sin(slope), 0), level = new THREE.Vector3(1, 0, 0), dirW = new THREE.Vector3();
+  const t0 = performance.now(); let stage = 0;
   const off = onUpdate(() => {
-    const k = (performance.now() - t0) / 1000;
-    let j = 0; while (j < K.length - 2 && k > K[j + 1][0]) j++;
-    const A = K[j], B = K[j + 1], u = j === 1 ? Math.min(1, Math.max(0, (k - A[0]) / (B[0] - A[0])) ** 1.6) : ease((k - A[0]) / (B[0] - A[0]));
-    c.holder.position.set(A[1] + (B[1] - A[1]) * u, A[2] + (B[2] - A[2]) * u, A[3] + (B[3] - A[3]) * u);
-    let d = B[4] - A[4]; c.holder.rotation.y = A[4] + d * ease((k - A[0]) / Math.max(0.3, B[0] - A[0]));
-    if (k > K[K.length - 1][0]) off();
+    const k = (performance.now() - t0) / 1000, h = c.holder;
+    let legs = 1, along = k < T2 ? downR : level;
+    if (k < T1) {                                     // shuffle to the edge of the sill
+      h.position.set(-0.12 + 0.27 * ease(k / T1), SIT, 0); h.rotation.set(-0.12, Math.PI / 2, 0);
+    } else if (k < T2) {                              // down the ramp, accelerating
+      const tt = k - T1, sR = 0.5 * A * tt * tt;
+      h.position.set(0.15 + sR * Math.cos(slope), SIT + sR * Math.sin(slope), 0); h.rotation.set(-0.2, Math.PI / 2, 0);
+    } else if (k < T3) {                              // across the floor, slowing down
+      const tt = k - T2, s = v0 * tt - 0.5 * FR * tt * tt;
+      h.position.set(RAMP + s, floorY + SIT, 0); h.rotation.set(-0.2 * (1 - tt / tStop) - 0.08, Math.PI / 2, 0);
+    } else if (k < T4) {                              // a moment, still sitting
+      h.position.set(stopX, floorY + SIT, 0); h.rotation.set(0, Math.PI / 2, 0);
+    } else if (k < T5) {                              // up on the feet
+      if (stage < 1) { stage = 1; c.seated = false; c.setBase(standAnim(c, i), {fade: 0.45}); }
+      const u = ease((k - T4) / (T5 - T4)); legs = 1 - u;
+      h.position.set(stopX, floorY + SIT * (1 - u), 0); h.rotation.set(0, Math.PI / 2 + (walkYaw - Math.PI / 2) * u, 0);
+    } else if (k < T6) {                              // a few steps to a place on the side tube
+      if (stage < 2) { stage = 2; c.setBase(c.g === 'm' ? 'm_walk_neutral_01' : 'f_walk_neutral_01', {fade: 0.3}); }
+      const u = (k - T5) / (T6 - T5); legs = 0;
+      h.position.set(stopX + (sx - stopX) * u, floorY, sz * u); h.rotation.set(0, walkYaw, 0);
+    } else {                                          // turn, and sit down on the tube
+      if (stage < 3) { stage = 3; c.seated = true; c.setBase(sitAnim(c), {fade: 0.5}); }
+      const u = ease((k - T6) / (T7 - T6)); legs = 0;
+      const d = ((ryIn - walkYaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+      h.position.set(sx, floorY + (F.dy - floorY) * u, sz + (zs - sz) * u); h.rotation.set(0, walkYaw + d * u, 0);
+      if (k > T7) { off(); return; }
+    }
+    legsOut(c, legs, dirW.copy(along).transformDirection(F.base.matrixWorld));
   });
   R.offs.push(off);
+}
+
+/** people who are only seen, not followed: copies of the passengers' figures standing on the wings (the overwing exits
+ *  emptied most of the cabin out there), each with its own idle movement */
+function extras(src) {
+  if (!src.length) return;
+  const anims = ['m_idle_nervous_01', 'f_idle_neutral_01', 'm_idle_breathe_01', 'f_idle_breathe_01'];
+  let n = 0;
+  for (const side of [1, -1]) for (const [ax, dz] of [[3.6, 0.5], [4.5, -0.6], [5.5, 0.3], [6.3, -0.8], [7.3, 0.2], [8.3, -0.5], [9.2, 0.4]]) {
+    const c = src[n++ % src.length], x = side * (ax + (Math.random() - 0.5) * 0.3);
+    const o = SkeletonUtils.clone(c.fbx); o.traverse(m => { if (m.isMesh) { m.frustumCulled = false; m.castShadow = false; } });
+    const g = new THREE.Group(); g.add(o); AC.group.add(g); R.parts.push(g);
+    g.position.set(x, -0.35 + Math.abs(x) * 0.05, -3.2 - 0.37 * (Math.abs(x) - 3.2) + dz);
+    g.rotation.y = (side > 0 ? 1.4 : -1.4) + (Math.random() - 0.5) * 0.9;
+    const mx = new THREE.AnimationMixer(o), clip = animClip(c.g === 'f' ? anims[1 + (n % 2) * 2] : anims[(n % 2) * 2]);
+    if (clip) { const a = mx.clipAction(clip); a.time = Math.random() * clip.duration; a.timeScale = 0.85 + Math.random() * 0.3; a.play(); }
+    R.mixers.push(mx);
+  }
+  R.offs.push(onUpdate((dt) => { for (const m of R.mixers) m.update(dt); }));
 }
 
 // ---------------------------------------------------------------- the boats
@@ -263,6 +424,7 @@ export function showRescue() {
     c.setBase(standAnim(c, i), {fade: 0});
     c.holder.visible = true; c.lookAt(null);
   });
+  extras(R.people);
   const D = buildDoor(), F = buildRaft(); R.parts.push(D.g, F.base);
   // a ferry to the left wing and one to the right, two rescue boats to just behind the raft, bows to the fuselage
   // (positions in the airplane's frame; clear of the cameras of the ending)
@@ -276,7 +438,7 @@ export function showRescue() {
     inflate: () => inflate(F),
     /** the people come down the slide one after another */
     deplane: async (gap = 1.25) => {
-      const seats = [[3.4, 1], [3.3, -1], [2.4, 1], [2.3, -1], [1.4, 1], [1.4, -1]];
+      const seats = [[3.7, 1], [3.6, -1], [2.8, 1], [2.7, -1], [1.9, 1], [1.9, -1]];
       for (let i = 0; i < viaDoor.length; i++) { deplaneOne(viaDoor[i], F, seats[i], i); await new Promise(r => setTimeout(r, gap * 1000)); }
     },
     stop: () => {

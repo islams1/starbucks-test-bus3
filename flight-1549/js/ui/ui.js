@@ -75,7 +75,7 @@ export function objective(text) {
 
 // ---------- calendar strip ----------
 const DAY_START = 8 * 60 + 45, DAY_END = 14 * 60;
-export function setClock(min, day = 'الاثنين') {
+export function setClock(min, day = 'Monday') {
   const h = Math.floor(min / 60), m = Math.round(min % 60);
   $('calendar').querySelector('.time').textContent = `${h}:${String(m).padStart(2, '0')}`;
   $('calendar').querySelector('.day').textContent = day;

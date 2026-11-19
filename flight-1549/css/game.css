@@ -188,7 +188,7 @@ button{font-family:var(--ar);cursor:pointer}
 #tasklist{list-style:none;padding:0;margin:0;display:grid;gap:8px}
 #tasklist li{padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:.95rem}
 #tasklist li.done{color:var(--mute);text-decoration:line-through}
-#tasklist li.opt:before{content:"اختياري · ";color:var(--accent2);font-size:.8rem}
+#tasklist li.opt:before{content:"optional · ";color:var(--accent2);font-size:.8rem}
 #evlist{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .ev{border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:.88rem;line-height:1.7;background:rgba(255,255,255,.03)}
 .ev .cat{font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:6px;margin-left:6px}

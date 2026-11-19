@@ -1,43 +1,43 @@
 {
  "speakers": {
   "player": {
-   "name": "أنت",
-   "role": "الكابتن",
+   "name": "You",
+   "role": "Captain",
    "voice": "en-US-GuyNeural",
    "rate": "-4%",
    "pitch": "-2Hz"
   },
   "fo": {
-   "name": "مساعد الطيار",
-   "role": "الضابط الأول",
+   "name": "First Officer",
+   "role": "co-pilot",
    "voice": "en-US-ChristopherNeural",
    "rate": "+2%",
    "pitch": "+0Hz"
   },
   "fa1": {
-   "name": "المضيفة",
-   "role": "طاقم الكابينة — الأمام",
+   "name": "Flight attendant",
+   "role": "forward cabin",
    "voice": "en-US-JennyNeural",
    "rate": "+6%",
    "pitch": "+0Hz"
   },
   "fa2": {
-   "name": "المضيفة",
-   "role": "طاقم الكابينة — الخلف",
+   "name": "Flight attendant",
+   "role": "aft cabin",
    "voice": "en-US-AriaNeural",
    "rate": "+8%",
    "pitch": "+0Hz"
   },
   "gpws": {
-   "name": "نظام التحذير",
-   "role": "صوت آلي",
+   "name": "GPWS",
+   "role": "automated warning",
    "voice": "en-US-EricNeural",
    "rate": "-4%",
    "pitch": "-6Hz"
   },
   "atc": {
-   "name": "مراقب الإقلاع — نيويورك",
-   "role": "تسجيل حقيقي من هيئة الطيران الأمريكية",
+   "name": "Departure Control — New York",
+   "role": "real FAA recording",
    "voice": "",
    "rate": "+0%",
    "pitch": "+0Hz"

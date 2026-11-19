@@ -15,51 +15,51 @@ export function score(S) {
   const a = S.acts, items = [];
   const timed = (key, label, real, full, half, pts) => { const t = a[key]; const p = t == null ? 0 : t <= full ? pts : t <= half ? Math.round(pts / 2) : Math.round(pts / 4); items.push({label, you: t, real, p, max: pts}); return p; };
   let sc = 0;
-  sc += timed('myac', 'استلام القيادة («الطائرة معي»)', 12, 15, 30, 10);
-  sc += timed('apu', 'تشغيل وحدة الطاقة المساعدة (تُبقي حماية التحكم)', 10, 20, 40, 10);
-  sc += timed('qrh', 'طلب قائمة الطوارئ من المساعد', 17, 25, 45, 5);
-  { const t = S.maydayT; const p = t == null ? 0 : (t <= 30 ? 10 : t <= 50 ? 6 : 3) - Math.min(3, (S.vague || 0) * 2); items.push({label: 'نداء الاستغاثة: واضح ومع النية', you: t, real: 22, p: Math.max(0, p), max: 10}); sc += Math.max(0, p); }
+  sc += timed('myac', 'Taking control (“my aircraft”)', 12, 15, 30, 10);
+  sc += timed('apu', 'Starting the APU (keeps the flight-control protections)', 10, 20, 40, 10);
+  sc += timed('qrh', 'Asking the first officer for the QRH', 17, 25, 45, 5);
+  { const t = S.maydayT; const p = t == null ? 0 : (t <= 30 ? 10 : t <= 50 ? 6 : 3) - Math.min(3, (S.vague || 0) * 2); items.push({label: 'Mayday call: clear, with your intentions', you: t, real: 22, p: Math.max(0, p), max: 10}); sc += Math.max(0, p); }
   { const ans = S.answers, ok = (k, good) => ans[k] && good.includes(ans[k].k) && ans[k].delay <= 9;
     const p = (ok('rwy13', ['unable']) ? 5 : 0) + ((ok('rwy4', ['teb', 'hudson']) || ok('teb280', ['cant'])) ? 5 : 0);
-    items.push({label: 'الرد على عروض المراقب بسرعة ووضوح', you: ans.rwy13 ? ans.rwy13.t : null, real: 60, p, max: 10}); sc += p; }
+    items.push({label: 'Answering the controller’s offers quickly and clearly', you: ans.rwy13 ? ans.rwy13.t : null, real: 60, p, max: 10}); sc += p; }
   { const water = S.end === 'ditched' || S.end === 'broken', rw = S.end === 'reached';
     const p = water ? 20 : rw ? 8 : 0, when = S.hudsonT != null ? S.hudsonT : S.intent ? S.intent.t : S.branch ? S.branch.t : null;
-    const label = water ? 'القرار: الهبوط على الهدسون' : rw ? 'القرار: العودة إلى مطار (نجحت هنا — والتحقيق يقول إنها كانت مقامرة)' : 'القرار: لم تصل الطائرة إلى ماء أو مدرج';
+    const label = water ? 'Decision: ditch in the Hudson' : rw ? 'Decision: back to an airport (it worked here — the investigation calls it a gamble)' : 'Decision: the airplane reached neither water nor a runway';
     items.push({label, you: when, real: 137, p, max: 20, bad: !water}); sc += p; }
-  sc += timed('pa', 'الإعلان للركاب: «استعدوا للارتطام»', 120, 170, 200, 10);
-  sc += timed('flaps', 'إنزال القلابات للهبوط على الماء', 153, 175, 200, 5);
+  sc += timed('pa', 'Telling the passengers: “Brace for impact”', 120, 170, 200, 10);
+  sc += timed('flaps', 'Flaps down for the ditching', 153, 175, 200, 5);
   const onWater = S.end === 'ditched' || S.end === 'broken';
-  if (onWater) { const t = a.ditching; const p = t != null ? 5 : 0; items.push({label: 'زر الهبوط على الماء (الطاقم الحقيقي لم يجد وقتًا له)', you: t, real: null, p, max: 5}); sc += p; }
+  if (onWater) { const t = a.ditching; const p = t != null ? 5 : 0; items.push({label: 'DITCHING button (the real crew had no time for it)', you: t, real: null, p, max: 5}); sc += p; }
   { const L = S.landing, water = S.end === 'ditched' || S.end === 'broken';
     const g = !water && S.end !== 'reached' ? null : !L ? 'real' : L.grade;
     const p = {smooth: 10, hard: 6, broken: 2, landed: 8, real: 4}[g] || 0;
-    const lbl = {smooth: 'لمسة الماء: ناعمة', hard: 'لمسة الماء: قاسية (مثل الحقيقية)', broken: 'لمسة الماء: ارتطام قوي', landed: 'الهبوط على المدرج', real: 'لمسة الماء: هبط بها مساعدك'}[g] || 'لمسة الماء';
-    items.push({label: lbl + (L && L.sink != null ? ` — ${Math.round(L.sink)} قدم/د · ميل ${L.bank.toFixed(0)}°` : ''), you: null, real: null, p, max: 10, bad: !g || g === 'broken'}); sc += p; }
+    const lbl = {smooth: 'Touchdown on the water: smooth', hard: 'Touchdown on the water: hard (like the real one)', broken: 'Touchdown on the water: violent impact', landed: 'Landing on the runway', real: 'Touchdown on the water: flown by your first officer'}[g] || 'Touchdown on the water';
+    items.push({label: lbl + (L && L.sink != null ? ` — ${Math.round(L.sink)} ft/min · bank ${L.bank.toFixed(0)}°` : ''), you: null, real: null, p, max: 10, bad: !g || g === 'broken'}); sc += p; }
   if (onWater) { const t = a.evac; const p = t == null ? 0 : t <= 10 ? 5 : 3;
-    items.push({label: 'أمر الإخلاء بعد توقف الطائرة', you: null, youTxt: t == null ? (S.evacWait === false && (S.end === 'ditched' || S.end === 'broken') ? 'المضيفون بدأوه' : '—') : `بعد ${Math.round(t)} ث`, real: null, realTxt: 'فورًا', p, max: 5}); sc += p; }
+    items.push({label: 'Evacuation order once the airplane stopped', you: null, youTxt: t == null ? (S.evacWait === false && (S.end === 'ditched' || S.end === 'broken') ? 'the cabin crew started it' : '—') : `after ${Math.round(t)} s`, real: null, realTxt: 'at once', p, max: 5}); sc += p; }
   return {score: Math.min(100, sc), items};
 }
 
 export async function debrief(S, {onRetry}) {
   const {score: sc, items} = score(S);
-  const title = S.end === 'ditched' ? (sc >= 85 ? 'هبوط على الماء — والجميع نجوا' : 'هبوط على الماء — مع ثغرات') : S.end === 'broken' ? 'على الماء — لكن الجسم تشقّق' : S.end === 'reached' ? 'وصلت المطار — في المحاكاة فقط' : 'لم تصل الطائرة';
+  const title = S.end === 'ditched' ? (sc >= 85 ? 'Ditched — and everyone survived' : 'Ditched — with gaps') : S.end === 'broken' ? 'On the water — but the fuselage broke open' : S.end === 'reached' ? 'Reached the airport — in the simulation only' : 'The airplane did not make it';
   const box = $('debrief');
   box.innerHTML = `<div class="db-card">
     <div class="db-head"><div class="db-score">${sc}</div><div><h2>${title}</h2>
-      <div class="lead">من الاصطدام إلى الماء: ٢٠٨ ثوانٍ. الكابتن الحقيقي استلم القيادة بعد ١٢ ثانية، وشغّل وحدة الطاقة المساعدة بعد ١٠، وأعلن الاستغاثة بعد ٢٢، وقال «سنكون في الهدسون» بعد ١٣٧ ثانية.</div></div></div>
+      <div class="lead">From the strike to the water: 208 seconds. The real captain took control after 12 seconds, started the APU after 10, declared the emergency after 22, and said “We’re gonna be in the Hudson” after 137 seconds.</div></div></div>
     <div class="db-grid">
-      <div class="db-box"><h3><span>أنت مقابل الطاقم الحقيقي</span><span style="font-size:.75rem;color:#8fa3b0">أنت · الحقيقي · النقاط</span></h3>
-        ${items.map(i => `<div class="db-row"><span class="${i.bad ? 'bad' : ''}">${i.label}</span><span class="you"${i.youTxt ? ' style="font-family:inherit;direction:rtl"' : ''}>${i.youTxt || (i.you == null ? '—' : fmt(i.you))}</span><span class="real">${i.realTxt ? `<span style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;unicode-bidi:isolate">${i.realTxt}</span>` : (i.real == null ? '' : fmt(i.real))} · ${i.p}/${i.max}</span></div>`).join('')}
+      <div class="db-box"><h3><span>You vs. the real crew</span><span style="font-size:.75rem;color:#8fa3b0">you · real · points</span></h3>
+        ${items.map(i => `<div class="db-row"><span class="${i.bad ? 'bad' : ''}">${i.label}</span><span class="you"${i.youTxt ? ' style="font-family:inherit"' : ''}>${i.youTxt || (i.you == null ? '—' : fmt(i.you))}</span><span class="real">${i.realTxt ? `<span>${i.realTxt}</span>` : (i.real == null ? '' : fmt(i.real))} · ${i.p}/${i.max}</span></div>`).join('')}
       </div>
-      <div class="db-box db-facts"><h3><span>ما قاله التحقيق</span></h3>
-        • المحركان امتصّا إوزًا كنديًا كبيرًا (نحو ٤ كغ للطائر) على ارتفاع ٢٨١٨ قدمًا.<br>
-        • في اختبارات المحاكي، نجحت العودة إلى لاغوارديا فقط حين بدأ الدوران فور الاصطدام. مع تأخير ٣٥ ثانية — زمن واقعي لفهم ما حدث — فشلت.<br>
-        • قال التحقيق إن قرار الهبوط على الهدسون أعطى أعلى احتمال للنجاة.<br>
-        • من أسباب النجاة: قرارات الطاقم وتعاونهم، أداء طاقم الكابينة في الإخلاء، وقرب العبّارات وفرق الإنقاذ.<br>
-        <small style="color:#8a979e">المصدر: تقرير NTSB AAR-10/03 · صوت المراقب: تسجيل هيئة الطيران الأمريكية (FAA) المنشور في ٥ فبراير ٢٠٠٩.</small>
+      <div class="db-box db-facts"><h3><span>What the investigation found</span></h3>
+        • Both engines ingested large Canada geese (about 4 kg each) at 2,818 ft.<br>
+        • In the simulator tests, a return to LaGuardia worked only when the turn began at the moment of the strike. With a 35-second delay — a realistic time to understand what happened — it failed.<br>
+        • The investigation found that the decision to ditch in the Hudson gave the highest chance of survival.<br>
+        • Everyone survived thanks to the crew’s decisions and teamwork, the cabin crew’s evacuation, and the nearby ferries and rescue teams.<br>
+        <small style="color:#8a979e">Source: NTSB report AAR-10/03 · controller audio: the FAA recording released on February 5, 2009.</small>
       </div>
     </div>
-    <div class="db-actions"><button class="primary" id="dbreplay">اسمع التسجيل الحقيقي وشاهد المسار الحقيقي</button><button id="dbretry">أعد المحاولة</button><button id="dbcredits">المصادر والتراخيص</button></div>
+    <div class="db-actions"><button class="primary" id="dbreplay">Hear the real recording and see the real track</button><button id="dbretry">Try again</button><button id="dbcredits">Sources and licenses</button></div>
   </div>`;
   show('debrief', true);
   fade(false, 600);                        // every ending fades out; the debrief comes up from black
@@ -88,7 +88,7 @@ async function replay() {
   await fade(false, 700);
   for (const c of meta._transcript || []) setTimeout(() => {
     const el = document.createElement('div'); el.className = 'sub';
-    el.innerHTML = `<div class="who ${c.who === 'L116' ? 'atc' : ''}">📻 ${c.who === 'L116' ? 'مراقب الإقلاع (نيويورك)' : 'كاكتس ١٥٤٩ — الكابتن الحقيقي'} · ${'15:' + c.utc.slice(2)} EST</div><div class="en">${c.text}</div>`;
+    el.innerHTML = `<div class="who ${c.who === 'L116' ? 'atc' : ''}">📻 ${c.who === 'L116' ? 'Departure Control (New York)' : 'Cactus 1549 — the real captain'} · ${'15:' + c.utc.slice(2)} EST</div><div class="en">${c.text}</div>`;
     const box = $('subs'); box.appendChild(el); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => el.remove(), 6000);
   }, c.at * 1000);
   await v.done; off(); cine.stop();

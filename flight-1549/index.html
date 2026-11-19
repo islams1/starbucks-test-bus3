@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Cpath d=%22M6 36l22-4 10-22h6l-6 22 18-2 4-8h4l-2 12 2 12h-4l-4-8-18-2 6 22h-6l-10-22-22-4z%22 fill=%22%232f80c8%22/%3E%3C/svg%3E">
-<title>٢٠٨ ثانية — الرحلة ١٥٤٩</title>
+<title>208 Seconds — Flight 1549</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -16,62 +16,62 @@
 
 <div id="loading" class="screen">
   <div class="load-inner">
-    <div class="load-title">٢٠٨ ثانية</div>
-    <div class="load-sub">الرحلة ١٥٤٩ — نيويورك، ١٥ يناير ٢٠٠٩</div>
+    <div class="load-title">208 Seconds</div>
+    <div class="load-sub">Flight 1549 — New York, January 15, 2009</div>
     <div class="bar"><i id="loadbar"></i></div>
-    <div id="loadtxt" class="load-txt">جارٍ تجهيز نيويورك…</div>
+    <div id="loadtxt" class="load-txt">Preparing New York…</div>
     <div id="loaderr" class="load-err hidden"></div>
   </div>
 </div>
 
 <div id="menu" class="screen hidden">
   <div class="menu-card">
-    <div class="tag">تمثيل تعليمي لحادثة حقيقية · مبني على تقرير التحقيق الأمريكي (NTSB AAR-10/03)</div>
-    <h1>٢٠٨ ثانية</h1>
-    <p class="lead">١٥ يناير ٢٠٠٩، الساعة ٣:٢٥ عصرًا. أنت كابتن الرحلة ١٥٤٩ المتجهة من لاغوارديا في نيويورك إلى شارلوت، وعلى متنها ١٥٠ راكبًا و٥ من الطاقم. بعد دقيقة ونصف من الإقلاع، ستصطدم الطائرة بسرب من الإوز ويتوقف المحركان. من تلك اللحظة، كل قرار لك: من يقود، ماذا تقول للمراقبة، أين تذهب، ومتى تُعِدّ الركاب.</p>
+    <div class="tag">An educational re-creation of a real accident · based on the US investigation report (NTSB AAR-10/03)</div>
+    <h1>208 Seconds</h1>
+    <p class="lead">January 15, 2009, 3:25 pm. You are the captain of Flight 1549 from LaGuardia, New York, to Charlotte, with 150 passengers and 5 crew on board. A minute and a half after takeoff the airplane will fly into a flock of geese and both engines will stop. From that moment every decision is yours: who flies, what you tell the controller, where you go, and when you prepare the passengers.</p>
     <div class="modes">
-      <button class="mode" data-mode="real"><b>الوقت الحقيقي</b><span>كما حدث: ٢٠٨ ثوانٍ لا تتوقف · تقود بيدك · صوت المراقب الحقيقي</span></button>
-      <button class="mode" data-mode="learn"><b>وضع التعلّم</b><span>يتوقف الوقت عند كل سؤال، والأزرار المطلوبة تضيء، مع شرح</span></button>
+      <button class="mode" data-mode="real"><b>Real time</b><span>As it happened: 208 seconds that never stop · you fly by hand · the real controller’s voice</span></button>
+      <button class="mode" data-mode="learn"><b>Learning mode</b><span>Time stops at every question, the controls you need light up, with explanations</span></button>
     </div>
-    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>&nbsp;</small></button><button data-q="medium"><b>متوسطة</b><small>&nbsp;</small></button><button data-q="high"><b>عالية</b><small>&nbsp;</small></button></div>
-    <div class="menu-foot">الكلام في القمرة وفي الراديو بالإنجليزية مع ترجمة عربية · صوت مراقب الإقلاع من التسجيل الحقيقي لهيئة الطيران الأمريكية · يُفضَّل استخدام سماعات · <a href="#" id="creditsbtn">المصادر والتراخيص</a></div>
+    <div class="qsel"><span>Graphics:</span><button data-q="low"><b>Low</b><small>&nbsp;</small></button><button data-q="medium"><b>Medium</b><small>&nbsp;</small></button><button data-q="high"><b>High</b><small>&nbsp;</small></button></div>
+    <div class="menu-foot">Cockpit and radio voices with subtitles · the departure controller’s voice is the real FAA recording · headphones recommended · <a href="#" id="creditsbtn">Sources and licenses</a></div>
   </div>
 </div>
 
 <div id="howto" class="screen hidden">
   <div class="howto-card">
-    <h2>قبل الإقلاع</h2>
+    <h2>Before takeoff</h2>
     <div class="or-howto">
-      <div><b>مكانك:</b> المقعد الأيسر — الكابتن. اسحب بالماوس لتلفت رأسك، ونقرتان لتعود للأمام.</div>
-      <div><b>القيادة بيدك:</b> بعد الاصطدام حرّك العصا (الأسهم أو <b>WASD</b> أو العصا أسفل الشاشة أو يد ألعاب) فتصبح الطائرة معك. سحب = المقدمة لأعلى والسرعة تقل، دفع = السرعة تزيد. بلا محركات: كل متر ارتفاع ثمين.</div>
-      <div><b>أزرار القمرة:</b> اضغط عليها بنفسك — وحدة الطاقة (APU) في السقف، أذرع المحركات والقلابات (<b>F</b>) في المنتصف، زر الهبوط على الماء، والإخلاء. مرّر الماوس على أي زر لتعرف ما هو. القائمة الجانبية تذكّرك بالمطلوب — اضغط أي بند لترى مكانه.</div>
-      <div><b>الراديو والركاب:</b> <b>T</b> أو زر VHF1 للكلام مع المراقبة، و<b>P</b> للإعلان للركاب.</div>
-      <div><b>الشاشة أمامك:</b> الدائرة الخضراء المتقطعة على شاشة الملاحة هي المسافة التي ما زال الانزلاق يصل إليها. المطار خارجها = لن تصله.</div>
-      <div class="warn"><b>تنبيه:</b> تمثيل لحادثة حقيقية نجا فيها كل من على الطائرة. لا مشاهد عنيفة.</div>
+      <div><b>Your seat:</b> the left seat — the captain. Drag with the mouse to turn your head; double-click to look ahead again.</div>
+      <div><b>Flying by hand:</b> after the strike, move the stick (arrow keys, <b>WASD</b>, the on-screen stick or a gamepad) and the airplane is yours. Pull = nose up and slower; push = faster. With no engines, every metre of height counts.</div>
+      <div><b>Cockpit controls:</b> press them yourself — the APU on the overhead panel, the thrust levers and the flaps (<b>F</b>) on the pedestal, the DITCHING button and the evacuation. Hover over any control to see what it is. The list on the side reminds you what is needed — click an item to see where it is.</div>
+      <div><b>Radio and cabin:</b> <b>T</b> or the VHF1 key to talk to the controller, <b>P</b> to speak to the passengers.</div>
+      <div><b>The display in front of you:</b> the dashed green circle on the navigation display is how far you can still glide. An airport outside it = you will not reach it.</div>
+      <div class="warn"><b>Note:</b> a re-creation of a real accident in which everyone on board survived.</div>
     </div>
-    <button id="startbtn" class="primary">أقلِع</button>
+    <button id="startbtn" class="primary">Go</button>
   </div>
 </div>
 
 <div id="hud" class="hidden">
   <div id="clock"><b id="clk">15:25:46</b><span id="tplus"></span></div>
-  <div id="objective"><div class="obj-label">الآن</div><div id="objtext"></div></div>
+  <div id="objective"><div class="obj-label">Now</div><div id="objtext"></div></div>
   <div id="actions"></div>
   <div id="ask" class="hidden"><div id="askq"></div><div id="asklist"></div><div class="askbar"><i id="askbar"></i></div></div>
   <div id="subs"></div>
-  <div id="radiohint" class="hidden">📻 المراقب يكلّمك — اضغط <b>T</b> أو زر <b>VHF1</b> في الكابينة للرد</div>
+  <div id="radiohint" class="hidden">📻 The controller is calling you — press <b>T</b> or the <b>VHF1</b> key in the cockpit to answer</div>
   <div id="toasts"></div>
 </div>
 <div id="caption"></div>
 <div id="debrief" class="hidden"></div>
-<div id="doc" class="hidden"><div id="docbody"></div><button id="docclose" aria-label="إغلاق">✕</button></div>
+<div id="doc" class="hidden"><div id="docbody"></div><button id="docclose" aria-label="Close">✕</button></div>
 <div id="fade"></div>
 <div id="letterbox"><i></i><i></i></div>
 
 <script>
 (function(){
   function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
-    e.innerHTML='<b>تعذّر تشغيل المحاكاة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge مع تفعيل «تسريع الأجهزة».</small>'; }
+    e.innerHTML='<b>The simulation could not start on this device or browser</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>Try Google Chrome or Microsoft Edge with hardware acceleration turned on.</small>'; }
   window.__showErr=showErr;
   addEventListener('error',function(ev){ if(!document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||'error'); });
   addEventListener('unhandledrejection',function(ev){ if(!document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });

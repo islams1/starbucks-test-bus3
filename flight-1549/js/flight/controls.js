@@ -140,6 +140,9 @@ export function buildControls() {
   // the APU panel and CABIN PRESS (DITCHING) on the forward overhead; EVAC COMMAND on its real red-guarded button
   onSurface(pushbutton('apu_master', 'APU MASTER SW', 'ON', 'FAULT', undefined, undefined, 0.028), V(-0.458, 0.2265, 0.3285), ovN);
   onSurface(pushbutton('apu_start', 'APU START', 'ON', 'AVAIL', '#2fb3ff', '#3dff7a', 0.028), V(-0.503, 0.2265, 0.3285), ovN);
+  // one target for the two APU switches (4.5 cm apart: their two rings overlapped and a click was easily lost): a click
+  // anywhere in its one big ring presses MASTER SW, then START (flow.js)
+  { const apu = new THREE.Group(); apu.userData = {id: 'apu', title: 'APU', ringR: 0.072}; onSurface(apu, V(-0.4805, 0.2265, 0.3285), ovN); }
   onSurface(pushbutton('ditching', 'DITCHING', 'ON', '', '#f2f2f2', undefined, 0.028), V(-0.61, 0.2265, 0.3285), ovN);
   onSurface(pushbutton('evac', 'EVAC COMMAND', 'EVAC', 'ON', '#ff3b30', '#ffffff', 0.026), V(-0.27, 0.236, 0.252), V(-0.12, -0.92, -0.36));
   // the glareshield in front of the captain: MASTER WARN over MASTER CAUT
@@ -159,10 +162,10 @@ export function buildControls() {
 }
 /** tooltips in Arabic */
 const TIPS = {
-  apu_master: 'مفتاح وحدة الطاقة المساعدة — الخطوة الأولى لتشغيلها', apu_start: 'تشغيل وحدة الطاقة المساعدة — تُبقي الكهرباء وحماية التحكم',
-  ditching: 'زر الهبوط على الماء — يغلق فتحات جسم الطائرة', evac: 'أمر الإخلاء — إنذار للكابينة',
-  eng1: 'مفتاح المحرك ١ (محاولة إعادة الإشعال: إطفاء ثم تشغيل)', eng2: 'مفتاح المحرك ٢', engmode: 'محدد وضع المحركات — الإشعال',
-  thrust: 'أذرع الدفع — اضغط للخلف (Shift أو زر الفأرة الأيمن للأمام)', flaps: 'ذراع القلابات — اضغط لإنزالها (أو F) · Shift للرفع', vhf1: 'التحدث على الراديو مع المراقبة', pa: 'التحدث للركاب', mwarn: 'إنذار رئيسي — اضغط لإسكاته',
+  apu: 'APU — click to start it (MASTER SW, then START)', apu_master: 'APU master switch — the first step to start it', apu_start: 'APU start — keeps electrical power and the flight-control protections',
+  ditching: 'DITCHING — closes the openings in the fuselage', evac: 'EVAC — orders the evacuation, alerts the cabin',
+  eng1: 'Engine 1 master (relight attempt: off, then on)', eng2: 'Engine 2 master', engmode: 'Engine mode selector — ignition',
+  thrust: 'Thrust levers — click to pull back (Shift or right-click to push forward)', flaps: 'Flaps lever — click to extend (or F) · Shift to retract', vhf1: 'Talk to the controller on the radio', pa: 'Talk to the passengers', mwarn: 'Master warning — click to silence',
 };
 function bindPointer() {
   const el = document.getElementById('gl'), ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -265,7 +268,7 @@ onUpdate(() => { const k = 0.35 + 1.4 * Math.abs(Math.sin(performance.now() / 30
 // ---------------------------------------------------------------- on-screen sidestick (mouse / touch)
 function sidestickWidget() {
   const w = document.createElement('div'); w.id = 'stick'; w.className = 'hidden';
-  w.innerHTML = '<div class="ring"><i></i></div><span>عصا التحكم — اسحب · أو الأسهم / WASD</span>';
+  w.innerHTML = '<div class="ring"><i></i></div><span>Sidestick — drag · or arrows / WASD</span>';
   document.body.appendChild(w);
   const knob = w.querySelector('i'), ring = w.querySelector('.ring');
   let id = null;
