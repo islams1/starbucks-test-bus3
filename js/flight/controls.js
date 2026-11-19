@@ -226,7 +226,7 @@ export function focus(id, ms = 3800) {
   if (id === 'stick') { const s = document.getElementById('stick'); if (s) { s.classList.add('flash'); setTimeout(() => s.classList.remove('flash'), ms); } return; }
   const b = CTL.items[id]; if (!b || !CK.on) return;
   CK.group.updateMatrixWorld(true); const p = CK.group.worldToLocal((b.userData.cap || b).getWorldPosition(V()));
-  lookTo(Math.atan2(p.x, p.z), Math.atan2(p.y, Math.hypot(p.x, p.z)) * 0.9);
+  lookTo(Math.atan2(p.x, p.z), Math.atan2(p.y, Math.hypot(p.x, p.z)) * 0.9, ms);   // (then back to the windscreen)
   b.userData.focusOn = true; hint(id, true, 'focus');
   CK.fovT = 44; clearTimeout(CTL.zoomT); CTL.zoomT = setTimeout(() => { CK.fovT = null; }, ms);
   clearTimeout(b.userData.focusT); b.userData.focusT = setTimeout(() => hint(id, false, 'focus'), ms);

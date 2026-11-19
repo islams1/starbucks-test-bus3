@@ -8,7 +8,7 @@ import {playVoice} from '../core/audio.js';
 import * as cine from '../core/cine.js';
 import {$, show, fade} from '../ui/ui.js';
 import {AC, update as acUpdate, startBranch, reach, AIRPORTS, placeFlock, sampleReal, chaseFrame} from './aircraft.js';
-import {CK, seat, lookTo} from './cockpit.js';
+import {CK, seat, lookTo, lookHome} from './cockpit.js';
 import {W} from './world.js';
 import {startSound, thumps, masterWarning, ditch, chime} from './sound.js';
 import {preloadRescue, showRescue} from './rescue.js';
@@ -138,11 +138,11 @@ function renderActs() {
 function guideActs() {
   if (S.end || AC.t <= 0) return;
   if (S.guided && S.acts[S.guided.id] != null) {
-    const was = S.guided; S.guided = null; S.guideBack = performance.now() + 700;
-    if (was.phys && was.phys !== 'stick') { CK.fovT = null; setTimeout(() => { if (!S.guided) lookTo(0, -0.08); }, 700); }
+    const was = S.guided; S.guided = null; S.guideBack = performance.now() + 2500;
+    if (was.phys && was.phys !== 'stick') { CK.fovT = null; setTimeout(() => { if (!S.guided) lookHome(); }, 350); }
   }
   // not done after 12 s: leave it marked in the list and move on to the next one
-  if (S.guided && performance.now() - S.guidedAt > 12000) { (S.skipGuide = S.skipGuide || new Set()).add(S.guided.id); S.guided = null; CK.fovT = null; lookTo(0, -0.08); S.guideBack = performance.now() + 1500; }
+  if (S.guided && performance.now() - S.guidedAt > 12000) { (S.skipGuide = S.skipGuide || new Set()).add(S.guided.id); S.guided = null; CK.fovT = null; lookHome(); S.guideBack = performance.now() + 1500; }
   if (S.guided || performance.now() < (S.guideBack || 0)) return;
   const due = ACTS.find(a => S.acts[a.id] == null && AC.t >= a.turn && AC.t >= a.from && !(S.skipGuide && S.skipGuide.has(a.id)));
   if (!due) return;
@@ -344,10 +344,10 @@ export function buildScript(mode) {
   at(-73, () => atc('atc_radar'));
   at(-66, () => say('cp_maint', {radio: true}));
   at(-60, () => { objective('الصعود إلى ٥٠٠٠ قدم. الطقس صافٍ، والهدسون على يسارك.'); });   // (the rescue people load with the game: loading them here froze the climb)
-  at(-34, () => { say('cp_view'); setTimeout(() => say('fo_yeah'), 2200); lookTo(0.55, -0.12); });
-  at(-24, () => lookTo(0.05, -0.08));
+  at(-34, () => { say('cp_view'); setTimeout(() => say('fo_yeah'), 2200); lookTo(0.55, -0.12, 5000); });
+  at(-24, () => lookHome());
   at(-9, () => { atc('bg_jl1'); atc('bg_jl2'); });
-  at(-6, () => { placeFlock(0); lookTo(0, 0); });
+  at(-6, () => { placeFlock(0); lookTo(0, 0, 6000); });
   at(-1.2, () => say('cp_birds'));
   // the strike
   at(0, () => strike());
@@ -440,6 +440,7 @@ export async function run(mode, {lines, clips, speakers}) {
   await freeze();
   $('hud').classList.remove('cine');
   cine.stop(); if (AC.ext) AC.ext.visible = false; CK.group.visible = true; seat(true);
+  lookHome(); CK.autoHome = true;                   // from now on the view always finds its way back to the windscreen
   setDetail('flight');                              // into the cockpit: the flight's level of detail
   await wait(0.15); await settle(800, 250);
   await thaw(600);

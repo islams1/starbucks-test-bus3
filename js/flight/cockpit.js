@@ -51,14 +51,19 @@ export async function buildCockpit() {
     // keep the sun's shadow box on the cockpit
     CK.group.getWorldPosition(sun.target.position); sun.position.copy(sun.target.position).addScaledVector(W.sunDir, 6);
     sun.target.updateMatrixWorld();
-    const h = CK.head; h.yaw += (h.ty - h.yaw) * Math.min(1, dt * 8); h.pitch += (h.tp - h.pitch) * Math.min(1, dt * 8);
+    const h = CK.head;
+    // the view always comes home to the windscreen: after a look at a control (or the river), once its time is up, and a
+    // little while after the player stops dragging; never left pointing somewhere else
+    if (CK.autoHome && !CK.dragging && performance.now() > (CK.lookUntil || 0)) { h.ty = HOME[0]; h.tp = HOME[1]; }
+    // an unhurried turn of the head (it snapped across before), easing in and out
+    const k = Math.min(1, dt * 3.2); h.yaw += (h.ty - h.yaw) * k; h.pitch += (h.tp - h.pitch) * k;
     if (CK.on) {
       // small vibration (stronger with the damaged engine rumbling), and the head leaning a little in turns
       const rumble = CK.rumble || 0, t = performance.now() / 1000;
       // a gentle buzz in normal flight, a firmer one with the damaged engine or the impact (lower, smoother frequencies)
       const shake = 0.00015 + Math.min(rumble, 2.5) * 0.0011;
       camera.position.set((Math.sin(t * 13) + 0.5 * Math.sin(t * 7.3)) * shake, (Math.sin(t * 11 + 1) + 0.5 * Math.sin(t * 5.9)) * shake, 0);
-      camera.rotation.set(h.pitch + Math.sin(t * 9) * shake * 0.25, Math.PI + h.yaw, -AC.bank * D2R * 0.08, 'YXZ');   // the camera looks down its −z; the cockpit faces +z
+      camera.rotation.set(h.pitch + Math.sin(t * 9) * shake * 0.25, Math.PI + h.yaw, -AC.bank * D2R * 0.035, 'YXZ');   // the camera looks down its −z; the cockpit faces +z
       const fv = CK.fovT || 62; if (Math.abs(camera.fov - fv) > 0.05) { camera.fov += (fv - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix(); }
     }
   });
@@ -71,20 +76,29 @@ export function seat(on = true) {
   if (on) { CK.group.add(camera); camera.fov = 62; camera.updateProjectionMatrix(); }
   else if (camera.parent === CK.group) { scene.add(camera); }
 }
+const HOME = [0, -0.08];
 function bindLook() {
+  // drag to look around: only a real drag turns the head (a click on a control that moves a few pixels does not), at a
+  // gentle rate; on release the view stays a moment, then returns to the windscreen
   let drag = null;
   const el = document.getElementById('gl');
-  el.addEventListener('pointerdown', (e) => { drag = {x: e.clientX, y: e.clientY, yaw: CK.head.ty, pitch: CK.head.tp}; });
-  addEventListener('pointerup', () => drag = null);
+  el.addEventListener('pointerdown', (e) => { drag = {x: e.clientX, y: e.clientY, yaw: CK.head.ty, pitch: CK.head.tp, live: false}; });
+  addEventListener('pointerup', () => { if (drag && drag.live) CK.lookUntil = performance.now() + 2500; drag = null; CK.dragging = false; });
   addEventListener('pointermove', (e) => {
     if (!drag || !CK.on) return;
-    CK.head.ty = Math.max(-1.9, Math.min(1.6, drag.yaw - (e.clientX - drag.x) * 0.004));
-    CK.head.tp = Math.max(-0.9, Math.min(0.6, drag.pitch - (e.clientY - drag.y) * 0.004));
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.live && Math.hypot(dx, dy) < 12) return;
+    drag.live = true; CK.dragging = true;
+    CK.head.ty = Math.max(-1.6, Math.min(1.3, drag.yaw - dx * 0.0025));
+    CK.head.tp = Math.max(-0.8, Math.min(0.5, drag.pitch - dy * 0.0025));
   });
-  el.addEventListener('dblclick', () => { CK.head.ty = 0; CK.head.tp = -0.08; });
+  el.addEventListener('dblclick', () => { CK.head.ty = HOME[0]; CK.head.tp = HOME[1]; CK.lookUntil = 0; });
 }
-/** look at something in the cockpit or outside (yaw: + left, pitch: + up), e.g. the river on the left */
-export function lookTo(yaw, pitch) { CK.head.ty = yaw; CK.head.tp = pitch; }
+/** look at something in the cockpit or outside (yaw: + left, pitch: + up), e.g. the river on the left, for `hold` ms;
+ *  then the view goes back to the windscreen by itself */
+export function lookTo(yaw, pitch, hold = 4000) { CK.head.ty = yaw; CK.head.tp = pitch; CK.lookUntil = performance.now() + hold; }
+/** straight back to the windscreen */
+export function lookHome() { CK.lookUntil = 0; CK.head.ty = HOME[0]; CK.head.tp = HOME[1]; }
 
 // ---------------------------------------------------------------- displays
 function screen(name, w, h, px = 512) {

@@ -81,6 +81,9 @@ async function boot() {
  *  will be (the menu keeps showing the cockpit). Each shot with its own lens (a narrower lens asks for finer tiles) and
  *  its view distance (the horizon is 120 km away from up here); the first shot last, and given the most time. */
 let openingP = null;
+// everything about the city is done 10 s after the page opened, whatever the connection: what is not here by then
+// streams in during the flight
+const late = () => performance.now() - T0 > 10000;
 function preloadOpening() {
   if (openingP || !GT.tiles) return openingP || Promise.resolve();
   return openingP = (async () => {
@@ -90,14 +93,14 @@ function preloadOpening() {
     // the airplane's place at each shot, worked out and put back at once (the menu is drawn from the cockpit)
     const poses = shots.map(([t, fov, pose]) => { sampleReal(t); const a = AC.hdg * Math.PI / 180, f = V3(Math.sin(a), 0, -Math.cos(a)), sd = V3(-f.z, 0, f.x); return [fov, ...pose(f, sd)]; });
     sampleReal(-86); acUpdate(0);
-    const pcam = new THREE.PerspectiveCamera(45, camera.aspect, 1, 120000), t0 = performance.now(), budget = [9000, 22000];
+    const pcam = new THREE.PerspectiveCamera(45, camera.aspect, 1, 120000), t0 = performance.now(), budget = [3000, 7000];
     GT.frozen = false; GT.viewCam = pcam; GT.tiles.deleteCamera(camera); GT.tiles.setCamera(pcam); boost(true);
     try {
-      for (let k = 0; k < poses.length && !started; k++) {
+      for (let k = 0; k < poses.length && !started && !late(); k++) {
         const [fov, pp, look] = poses[k];
         pcam.fov = fov; pcam.aspect = camera.aspect; pcam.updateProjectionMatrix(); pcam.position.copy(pp); pcam.lookAt(look); pcam.updateMatrixWorld();
         const tk = performance.now(); let calm = 0;
-        while (performance.now() - tk < budget[k] && !started) {
+        while (performance.now() - tk < budget[k] && !started && !late()) {
           await new Promise(r => setTimeout(r, 250));
           const st = GT.tiles.stats; calm = (st.downloading + st.parsing === 0) ? calm + 1 : 0;
           if (calm >= 4 && performance.now() - tk > 1500) break;
