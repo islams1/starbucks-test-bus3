@@ -1,0 +1,6 @@
+[
+ ["waitjs", "!document.getElementById('menu').classList.contains('hidden')", 240], ["wait", 1.5], ["shot", "m_menu.png"],
+ ["click", ".mode"], ["wait", 0.6], ["shot", "m_howto.png"], ["click", "#startbtn"],
+ ["wait", 3], ["shot", "m_source.png"],
+ ["waitjs", "!document.getElementById('subs').classList.contains('hidden') && document.getElementById('subwho').textContent.length>0 && document.getElementById('card').classList.contains('hidden')", 90], ["wait", 1.5], ["shot", "m_scene1.png"]
+]

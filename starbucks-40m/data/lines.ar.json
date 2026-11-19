@@ -1,0 +1,62 @@
+{
+ "_note": "t = what the voice says (numbers written as words so the lips follow them); sub = what the subtitle shows when it differs; en = English subtitle. Source: Starbucks_Scenario_AR.md / _EN.md.",
+ "speakers": {
+  "player": {"name": "أنت", "role": "مسؤول عمليات الخدمة", "en": ["You", "Service operations lead"], "voice": "ar-SA-HamedNeural", "rate": "+0%", "pitch": "+0Hz"},
+  "noor": {"name": "نور", "role": "مشرفة الوردية", "en": ["Noor", "Shift lead"], "voice": "ar-LB-LaylaNeural", "rate": "+4%", "pitch": "+0Hz"},
+  "ben": {"name": "بن", "role": "زبون", "en": ["Ben", "Customer"], "voice": "ar-AE-HamdanNeural", "rate": "-2%", "pitch": "-2Hz"},
+  "salma": {"name": "سلمى", "role": "زبونة", "en": ["Salma", "Customer"], "voice": "ar-AE-FatimaNeural", "rate": "+0%", "pitch": "+2Hz"},
+  "ellis": {"name": "إليس", "role": "الشريك المالي", "en": ["Ellis", "Finance partner"], "voice": "ar-JO-TaimNeural", "rate": "-6%", "pitch": "-3Hz"},
+  "priya": {"name": "بريا", "role": "رئيسة لجنة الاستثمار", "en": ["Priya", "Investment committee chair"], "voice": "ar-SA-ZariyahNeural", "rate": "-2%", "pitch": "-1Hz"},
+  "narrator": {"name": "الراوي", "role": "", "en": ["Narrator", ""], "voice": "ar-QA-MoazNeural", "rate": "-6%", "pitch": "-2Hz"}
+ },
+ "lines": {
+  "nar_open": {"s": "narrator", "e": "news", "t": "تشير أبحاث الشركة إلى فجوة في الخدمة. المقترح: ساعات عمل إضافية في الفروع، بتكلفة نحو أربعين مليون دولار في السنة. هل ستعود هذه الأموال؟ لا أحد يعرف بعد.", "en": "The company's research points to a service gap. The proposal: extra labor hours in the stores, at a cost of about forty million dollars a year. Will that money come back? Nobody knows yet."},
+
+  "noor_s1_open": {"s": "noor", "e": "tense", "t": "صباح الخير. الطابور وصل إلى الباب، والتذاكر تتكدس عند البار. قبل أن نغيّر أي شيء، شاهد بنفسك أين يتعطل الطلب.", "en": "Morning. The line's at the door and tickets are piling up at the bar. Before we change anything, see for yourself where the order gets stuck."},
+  "p_ben": {"s": "player", "e": "curious", "t": "لحظة، هل كل شيء على ما يرام؟", "en": "Sorry — is everything all right?"},
+  "ben_leave": {"s": "ben", "e": "tired", "t": "كنت سأتأخر عن موعدي، فخرجت. ربما غدًا.", "en": "I was going to be late for my meeting, so I'm leaving. Maybe tomorrow."},
+  "noor_card": {"s": "noor", "e": "casual", "t": "الرجل الذي خرج ترك بطاقة في صندوق الرأي.", "en": "The man who left dropped a card in the comment box."},
+  "noor_rail": {"s": "noor", "e": "tense", "t": "الكاشير ليس المشكلة. المشروب هو الذي يتأخر.", "en": "The register isn't the problem. It's the drink that's slow."},
+  "noor_track": {"s": "noor", "e": "tense", "t": "اختر تذكرة، وتابعها حتى يصل المشروب إلى يد صاحبه.", "en": "Pick a ticket and follow it until the drink is in the customer's hand."},
+  "p_salma": {"s": "player", "e": "warm", "t": "كيف كانت تجربتك اليوم؟", "en": "How was your visit today?"},
+  "salma_reply": {"s": "salma", "e": "pleased", "t": "مشروبي يخرج صحيحًا في العادة.", "en": "My drink usually comes out right."},
+  "noor_s1_end": {"s": "noor", "e": "calm", "t": "الآن رأيت الذروة. لكننا لا نقرر من ساعة واحدة. عد عصرًا وقِس في الوقت الهادئ.", "en": "Now you've seen the peak. But we don't decide from one hour. Come back this afternoon and measure the quiet period."},
+
+  "noor_s2": {"s": "noor", "e": "calm", "t": "نفس الفرع ونفس العاملين. الفرق في الساعة فقط.", "en": "Same store, same staff. Only the hour is different."},
+  "noor_q": {"s": "noor", "e": "curious", "t": "ما مشكلة الخدمة التي ستحقق فيها أولًا؟", "en": "Which service problem would you investigate first?"},
+  "p_h_peak": {"s": "player", "e": "confident", "t": "انتظار الاستلام في وقت الذروة.", "en": "The pickup wait at peak."},
+  "p_h_acc": {"s": "player", "e": "unsure", "t": "دقة الطلبات.", "en": "Order accuracy."},
+  "p_h_all": {"s": "player", "e": "unsure", "t": "مشكلة خدمة عامة في الفرع كله.", "en": "A storewide service problem."},
+  "noor_h_peak": {"s": "noor", "e": "pleased", "t": "هذا ما تقوله أرقامك. لنرَ كم يكلف إصلاحه.", "en": "That's what your numbers say. Let's see what fixing it costs."},
+  "noor_h_acc": {"s": "noor", "e": "skeptical", "t": "التعليق وصف الدقة بشكل إيجابي. ما الدليل الآخر على الدقة الذي تريده؟", "en": "The comment described accuracy positively. What other accuracy evidence would you want?"},
+  "noor_h_all": {"s": "noor", "e": "skeptical", "t": "الذروة والهدوء مختلفان. أي فترة ستقيسها مرة أخرى؟", "en": "Peak and off-peak are different. Which period would you measure again?"},
+  "noor_s2_up": {"s": "noor", "e": "warm", "t": "إليس ينتظرك في غرفة الاجتماعات فوق، الساعة الخامسة والنصف.", "sub": "إليس ينتظرك في غرفة الاجتماعات فوق، الساعة 5:30.", "en": "Ellis is waiting for you in the meeting room upstairs at 5:30."},
+
+  "ellis_open": {"s": "ellis", "e": "calm", "t": "الطابور الأقصر يفيد الزبون. لكن سؤالي: كم طلبًا إضافيًا مكتملًا نحتاج كل يوم لنغطي العمالة الجديدة؟", "en": "A shorter line helps the customer. But my question is: how many extra completed orders do we need each day to cover the new labor?"},
+  "ellis_ask": {"s": "ellis", "e": "curious", "t": "العمالة الإضافية واحد وعشرون ألفًا وستمئة دولار في السنة، والفرع يعمل ثلاثمئة وستين يومًا، وكل طلب يضيف ثلاثة دولارات. كم طلبًا في اليوم؟", "sub": "العمالة الإضافية 21,600 دولار في السنة، والفرع يعمل 360 يومًا، وكل طلب يضيف 3 دولارات. كم طلبًا في اليوم؟", "en": "The added labor is $21,600 a year, the store is open 360 days, and each order adds $3. How many orders a day?"},
+  "ellis_right": {"s": "ellis", "e": "pleased", "t": "صحيح. عشرون طلبًا في اليوم.", "sub": "صحيح. 20 طلبًا في اليوم.", "en": "Right. Twenty orders a day."},
+  "ellis_hint": {"s": "ellis", "e": "calm", "t": "اقسم التكلفة السنوية على أيام العمل، ثم على ربح الطلب.", "en": "Divide the yearly cost by the operating days, then by the profit per order."},
+  "ellis_wrong2": {"s": "ellis", "e": "calm", "t": "الجواب عشرون. لنرَ ذلك على اللوح.", "sub": "الجواب 20. لنرَ ذلك على اللوح.", "en": "The answer is twenty. Let's see it on the tablet."},
+  "ellis_play": {"s": "ellis", "e": "calm", "t": "جرّب الافتراضات بنفسك. حرّك الأرقام وقارن.", "en": "Try the assumptions yourself. Move the numbers and compare."},
+  "ellis_12": {"s": "ellis", "e": "worried", "t": "عند اثني عشر طلبًا نخسر ثمانية آلاف وستمئة وأربعين دولارًا في السنة في هذا الفرع.", "sub": "عند 12 طلبًا نخسر 8,640 دولارًا في السنة في هذا الفرع.", "en": "At 12 orders we lose $8,640 a year at this store."},
+  "ellis_26": {"s": "ellis", "e": "pleased", "t": "عند ستة وعشرين نربح ستة آلاف وأربعمئة وثمانين. الفرق بين الخسارة والربح أربعة عشر طلبًا فقط في اليوم.", "sub": "عند 26 نربح 6,480. الفرق بين الخسارة والربح 14 طلبًا فقط في اليوم.", "en": "We make $6,480. Fourteen orders a day is all that separates a loss from a profit."},
+  "ellis_25": {"s": "ellis", "e": "curious", "t": "لاحظ أن نقطة التعادل صارت أربعة وعشرين طلبًا. افتراض صغير يغير القرار.", "sub": "لاحظ أن نقطة التعادل صارت 24 طلبًا. افتراض صغير يغير القرار.", "en": "Notice the break-even moved to 24 orders. A small assumption changes the decision."},
+  "ellis_contrib": {"s": "ellis", "e": "curious", "t": "لاحظ كيف تحركت نقطة التعادل حين تغير ربح الطلب. افتراض صغير يغير القرار.", "en": "Notice how the break-even moved when the profit per order changed. A small assumption changes the decision."},
+  "ellis_done": {"s": "ellis", "e": "calm", "t": "حسنًا. بريا وصلت.", "en": "All right. Priya's here."},
+
+  "priya_open": {"s": "priya", "e": "firm", "t": "نحتاج توصية اليوم. ما الذي يجعلك تستمر فيها، أو تتراجع عنها؟", "en": "We need a recommendation today. What would make you keep it — or reverse it?"},
+  "p_rec_all": {"s": "player", "e": "confident", "t": "أوصي بزيادة العمالة في كل الفروع الآن.", "en": "I recommend adding staff across all stores now."},
+  "p_rec_pilot": {"s": "player", "e": "confident", "t": "أوصي بتجربة في فروع متشابهة أولًا.", "en": "I recommend a matched-store pilot first."},
+  "p_rec_handoff": {"s": "player", "e": "calm", "t": "أوصي بتثبيت العمالة، وتجربة خطوة الاستلام أولًا.", "en": "I recommend keeping staffing steady and testing the pickup step first."},
+  "noor_c_all": {"s": "noor", "e": "excited", "t": "أستطيع وضع جداول الفروع كلها من الأسبوع القادم.", "en": "I can have every store's schedule ready from next week."},
+  "ellis_c_all": {"s": "ellis", "e": "worried", "t": "إن جاءت الزيادة أقل مما نتمنى، نخسر في كل فرع.", "en": "If the lift comes in lower than we hope, we lose money in every store."},
+  "ellis_c_pilot": {"s": "ellis", "e": "confident", "t": "نفس الأسابيع ونفس ساعات الذروة. هكذا نعرف أن الفرق جاء من العمالة.", "en": "Same weeks, same peak hours. That's how we know the difference came from the labor."},
+  "noor_c_handoff": {"s": "noor", "e": "calm", "t": "سأجرب تسليمًا أبسط عند الرف في فرع واحد، قبل أي توظيف.", "en": "I'll try a simpler handoff at the shelf in one store, before any hiring."},
+  "priya_match": {"s": "priya", "e": "pleased", "t": "هذا شرط أستطيع مراجعته بعد شهرين.", "en": "That's a condition I can review in two months."},
+  "priya_other": {"s": "priya", "e": "skeptical", "t": "الشرط جيد، لكنه لا يقيس القرار الذي اتخذته.", "en": "It's a good condition, but it doesn't test the decision you made."},
+  "priya_feel": {"s": "priya", "e": "firm", "t": "الشعور ليس قياسًا. ماذا ستقيس بالضبط؟", "en": "A feeling isn't a measurement. What exactly will you measure?"},
+  "priya_close": {"s": "priya", "e": "warm", "t": "شكرًا. المذكرة عندي.", "en": "Thank you. I have the memo."},
+
+  "nar_end": {"s": "narrator", "e": "news", "t": "تطلب الحالة المنشورة من المديرين أن يوازنوا بين تحسين الخدمة والتزام عمالة بأربعين مليون دولار في السنة. نموذج الفرع الذي جربته أراك كيف يتغير القرار كله حين يتغير عدد الطلبات.", "en": "The published case asks managers to weigh service improvement against a forty-million-dollar yearly labor commitment. The store model you explored showed how the whole decision shifts when the order volume shifts."}
+ }
+}

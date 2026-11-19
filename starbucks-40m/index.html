@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ccircle cx=%2232%22 cy=%2234%22 r=%2222%22 fill=%22none%22 stroke=%22%23d9b26f%22 stroke-width=%225%22/%3E%3Cpath d=%22M32 34V20M32 34l9 6%22 stroke=%22%23d9b26f%22 stroke-width=%225%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
+<title>سبع دقائق — قرار الـ 40 مليون دولار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/s40.css">
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<!-- loading -->
+<div id="loading" class="screen">
+  <div class="load-inner">
+    <div class="brandmark"><svg viewBox="0 0 64 64"><circle cx="32" cy="35" r="21" fill="none" stroke="currentColor" stroke-width="3"/><path d="M32 35V21M32 35l9 6M26 8h12M32 8v6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+    <div class="load-title">سبع دقائق</div>
+    <div class="load-sub">قرار الـ 40 مليون دولار · سيناريو تعليمي</div>
+    <div class="bar"><i id="loadbar"></i></div>
+    <div id="loadtxt" class="load-txt">جارٍ التحميل…</div>
+    <div id="loadhint" class="load-hint">أول تحميل قد يستغرق دقيقة حسب سرعة الإنترنت</div>
+    <div id="loaderr" class="load-err hidden"></div>
+  </div>
+</div>
+
+<!-- main menu -->
+<div id="menu" class="screen hidden">
+  <div class="menu-card">
+    <div class="tag">CASE STUDIES · BUSINESS &amp; STRATEGY</div>
+    <h1>سبع دقائق</h1>
+    <p class="lead">أنت مسؤول عمليات الخدمة في سلسلة مقاهٍ. ستقضي يومًا في فرع «الميدان»: تقيس الانتظار بنفسك، وتحسب كم طلبًا يغطي تكلفة عمالة إضافية، ثم توصي لجنة الاستثمار بقرار.</p>
+    <div class="modes one"><button class="mode" data-mode="play"><b>ابدأ اليوم</b><span>12–15 دقيقة · منظور الشخص الأول · تقييم من 100</span></button></div>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div>
+    <div class="gpuinfo" id="gpuinfo"></div>
+    <div class="menu-foot" id="menufoot">يُفضَّل استخدام سماعات · <a href="#" id="creditslink">المصادر والحقوق</a></div>
+  </div>
+</div>
+
+<!-- instructions -->
+<div id="howto" class="screen hidden">
+  <div class="howto-card">
+    <h2>تعليمات اللعب</h2>
+    <div class="keys">
+      <div class="k"><span class="kbd-grid"><kbd class="w">W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><b>المشي</b></div>
+      <div class="k"><span class="kbd-mouse"></span><b>الماوس: النظر</b></div>
+      <div class="k"><kbd>E</kbd><b>تفاعل</b><small>أو انقر على الأيقونة</small></div>
+      <div class="k"><kbd class="wide">Tab</kbd><b>درج الأدلة</b></div>
+      <div class="k"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><b>اختيار الرد</b></div>
+      <div class="k"><kbd class="wide">Esc</kbd><b>إيقاف مؤقت</b></div>
+    </div>
+    <div class="task-card">
+      <b>مهمتك اليوم:</b> افهم أين يتعطل الطلب في الفرع، واحسب كم تكلف زيادة العمالة، ثم أوصِ لجنة الاستثمار بقرار ومعه الدليل الذي يجعلك تستمر فيه أو تتراجع عنه.<br>
+      <span class="ok">النقاط (من 100):</span> على الدليل الذي تجمعه، وعلى الحساب، وعلى شرط المراجعة. القرار نفسه لا يأخذ نقاطًا.
+    </div>
+    <button id="startbtn" class="primary">ابدأ</button>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="calendar"><span class="day">الثلاثاء</span><span class="sep"></span><span class="time">8:10</span><div class="cal-strip" id="calstrip"></div></div>
+  <div id="scenetag">سيناريو تعليمي</div>
+  <div id="objective"><div class="obj-label">الهدف</div><div id="objtext"></div></div>
+  <ul id="tasks"></ul>
+  <div id="timelapse"></div>
+  <div id="prompt"></div>
+  <div id="toasts"></div>
+  <div id="crosshair"></div>
+</div>
+<div id="hotspots"></div>
+
+<!-- dialogue -->
+<div id="subs" class="hidden"><div class="who"><b id="subwho"></b><span id="subrole"></span></div><div id="subtext"></div></div>
+<div id="choices" class="hidden"><div id="choiceq"></div><div id="choicelist"></div></div>
+
+<!-- panels: notebook, evidence tray, tablet, memo, results, debrief -->
+<div id="doc" class="hidden"><div id="docbody"></div><button id="docclose" aria-label="إغلاق">✕</button></div>
+<div id="panel" class="hidden"></div>
+<div id="tray" class="hidden"></div>
+<div id="card" class="hidden"></div>
+
+<div id="fade"></div>
+<div id="letterbox"><i></i><i></i></div>
+<div id="pause" class="screen hidden"><div class="menu-card small"><h2>إيقاف مؤقت</h2><button class="primary" id="resume">متابعة</button><button id="tohowto" class="ghost">التعليمات</button><div class="qsel small"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div></div></div>
+<div id="clicktolock" class="hidden">انقر للتحكم بالنظر</div>
+
+<script>
+(function(){
+  function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
+    e.innerHTML='<b>تعذّر تشغيل اللعبة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge (أحدث إصدار) مع تفعيل «تسريع الأجهزة / Hardware acceleration»، ثم أعد تحميل الصفحة.</small>'; }
+  window.__showErr=showErr;
+  addEventListener('error',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||ev.error||'error'); });
+  addEventListener('unhandledrejection',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });
+  try { var c=document.createElement('canvas'); if(!c.getContext('webgl2')) showErr('WebGL2 غير مدعوم أو تسريع الرسوميات معطّل في المتصفح.'); } catch(e){ showErr(e.message); }
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["wait", 3], ["shot", "s1_a_noor.png"],
+ ["waitjs", "__hs.has('rail')", 60], ["wait", 1], ["shot", "s1_b_tasks.png"],
+ ["eval", "__use('rail')"], ["wait", 2.5], ["shot", "s1_c_rail.png"],
+ ["waitjs", "__C.ben.holder.visible", 60], ["wait", 4], ["shot", "s1_d_benin.png"],
+ ["wait", 7], ["shot", "s1_e_benwatch.png"],
+ ["waitjs", "__hs.has('ben')", 60], ["eval", "__use('ben')"], ["wait", 3], ["shot", "s1_f_bentalk.png"],
+ ["waitjs", "__hs.has('track')", 90], ["eval", "__use('track')"], ["wait", 4], ["shot", "s1_g_track1.png"],
+ ["wait", 9], ["shot", "s1_h_track2.png"], ["wait", 10], ["shot", "s1_i_track3.png"],
+ ["waitjs", "__hs.has('salma')", 60], ["wait", 1], ["shot", "s1_j_salma.png"], ["eval", "__use('salma')"], ["wait", 5],
+ ["waitjs", "document.getElementById('panel').className==='notebook'", 60], ["shot", "s1_k_notebook.png"],
+ ["click", ".nb-item[data-k=ben] button[data-t=speed]"], ["click", ".nb-item[data-k=salma] button[data-t=accuracy]"], ["click", "#nbdone"],
+ ["wait", 9], ["shot", "s1_l_end.png"],
+ ["eval", "JSON.stringify({ev: __S.ev, tags: __S.tags, fps: __stats.fps})"]
+]

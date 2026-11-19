@@ -1,0 +1,17 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["wait", 3],
+ ["eval", "(__teleport(3.2, 31.2, 0), __lookTowards(-1.5, 1.4, 33.5), 1)"],
+ ["wait", 1.5], ["shot", "w1_queue.png"],
+ ["eval", "(__teleport(1.5, 32.5, 0), __lookTowards(1.5, 1.4, 27), 1)"],
+ ["wait", 1.5], ["shot", "w2_bar.png"],
+ ["eval", "(__teleport(-5.5, 33.5, 0), __lookTowards(3, 1.5, 28.5), 1)"],
+ ["wait", 1.5], ["shot", "w3_room.png"],
+ ["eval", "(__teleport(0, 31.5, 0), __lookTowards(2, 1.4, 40), 1)"],
+ ["wait", 1.5], ["shot", "w4_street.png"],
+ ["eval", "(__teleport(2.6, 30.0, 0), __lookTowards(2.2, 1.5, 29.1), 1)"],
+ ["wait", 1.5], ["shot", "w5_rail.png"],
+ ["eval", "(__teleport(0, 44, 0), __lookTowards(0, 3, 32), 1)"],
+ ["wait", 2.5], ["shot", "w6_front.png"],
+ ["eval", "JSON.stringify(__stats && __stats.fps)"]
+]

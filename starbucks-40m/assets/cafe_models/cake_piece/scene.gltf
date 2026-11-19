@@ -1,0 +1,333 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.06605615466833115,
+        0.016178840771317482,
+        0.047397393733263016
+      ],
+      "min": [
+        -0.044961072504520416,
+        -0.013477793894708157,
+        -0.05353507027029991
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 6888,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.996615469455719,
+        0.999815821647644,
+        0.9924278855323792
+      ],
+      "min": [
+        -0.9946383237838745,
+        -0.999990701675415,
+        -0.965475857257843
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.9812227487564087,
+        0.37255117297172546,
+        0.9993427991867065,
+        -1.0
+      ],
+      "min": [
+        -0.9914318919181824,
+        -0.5876559019088745,
+        -0.5714735984802246,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.9898848533630371,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.00040268898010253906
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 4592,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.9898848533630371,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.00040268898010253906
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 9184,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.9898848533630371,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.00040268898010253906
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 13776,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.9898848533630371,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.00040268898010253906
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 18368,
+      "componentType": 5126,
+      "count": 574,
+      "max": [
+        0.9898848533630371,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.00040268898010253906
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 2772,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "ScanWOW.com - Free 3D Scans (https://sketchfab.com/scanwow)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/cake-piece-chocolate-01-photogrammetry-3d-scan-675125a5452d48bab052732fbcca99b7",
+      "title": "Cake Piece Chocolate 01 — Photogrammetry 3D Scan"
+    },
+    "generator": "Sketchfab-0.24.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 11088,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 22960,
+      "byteOffset": 11088,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 13776,
+      "byteOffset": 34048,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 9184,
+      "byteOffset": 47824,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 57008,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/M_Cake_piece_chocolate_01_69E5DE28_Mid_baseColor.png"
+    },
+    {
+      "uri": "textures/M_Cake_piece_chocolate_01_69E5DE28_Mid_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/M_Cake_piece_chocolate_01_69E5DE28_Mid_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "M_Cake_piece_chocolate_01_69E5DE28_Mid",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Object_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3,
+            "TEXCOORD_1": 4,
+            "TEXCOORD_2": 5,
+            "TEXCOORD_3": 6,
+            "TEXCOORD_4": 7
+          },
+          "indices": 8,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "root"
+    },
+    {
+      "children": [
+        3
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "GLTF_SceneRootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "name": "Cake_piece_chocolate_01_69E5DE28_Mid_0"
+    },
+    {
+      "mesh": 0,
+      "name": "Object_4"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["waitjs", "__hs.has('seat')", 60], ["eval", "__use('seat')"],
+ ["waitjs", "document.getElementById('panel').className==='notepad'", 90],
+ ["click", ".np-keys button[data-k='2']"], ["click", ".np-keys button[data-k='0']"], ["click", ".np-keys button[data-k='✓']"],
+ ["waitjs", "document.getElementById('panel').className==='tablet'", 90],
+ ["click", "[data-o='12']"], ["wait", 2],
+ ["eval", "JSON.stringify({dis: document.getElementById('tbdone').disabled, cls: document.getElementById('panel').className, hid: document.getElementById('panel').classList.contains('hidden')})"],
+ ["click", "#tbdone"], ["wait", 1],
+ ["eval", "JSON.stringify({cls: document.getElementById('panel').className, hid: document.getElementById('panel').classList.contains('hidden'), card: document.getElementById('card').className})"],
+ ["wait", 14],
+ ["eval", "JSON.stringify({cls: document.getElementById('panel').className, hid: document.getElementById('panel').classList.contains('hidden'), pr: __C.priya.holder.position, walking: !!__C.priya.walking, pl: __player.ch.holder.position})"],
+ ["shot", "dbg.png"]
+]

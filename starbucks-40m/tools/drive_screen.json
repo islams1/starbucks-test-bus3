@@ -1,0 +1,6 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["waitjs", "document.getElementById('panel').className==='memo'", 120],
+ ["eval", "(()=>{ __camera.position.set(-5.0, 5.55, 34.2); __camera.lookAt(-7.7, 5.5, 33.0); window.__freeze = true; return 1; })()"],
+ ["eval", "(()=>{ const s=[]; __scene.traverse(o=>{ if(o.isMesh && o.material && o.material.map && o.material.map.isCanvasTexture && o.geometry.type==='PlaneGeometry') s.push(o.position.toArray().map(v=>+v.toFixed(2)).join(',')+' '+o.parent.name); }); return s.slice(0,30).join(' | '); })()"]
+]

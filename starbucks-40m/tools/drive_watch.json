@@ -1,0 +1,7 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["waitjs", "__hs.has('rail')", 60], ["eval", "__use('rail')"],
+ ["waitjs", "__C.ben.holder.visible && Math.hypot(__C.ben.holder.position.x-0.3, __C.ben.holder.position.z-34.65) < 0.2", 90],
+ ["eval", "(__teleport(-0.1, 33.4, 0), __lookTowards(0.3, 1.45, 34.65), 1)"],
+ ["wait", 2.3], ["shot", "w_1.png"], ["wait", 0.5], ["shot", "w_2.png"], ["wait", 0.5], ["shot", "w_3.png"], ["wait", 0.5], ["shot", "w_4.png"]
+]

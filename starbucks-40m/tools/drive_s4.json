@@ -1,0 +1,7 @@
+[
+ ["waitjs", "document.getElementById('loading').classList.contains('hidden')", 240],
+ ["waitjs", "document.getElementById('panel').className==='memo'", 120], ["wait", 0.5], ["shot", "p_a_route.png"],
+ ["click", ".mcard[data-k=pilot]"], ["waitjs", "document.getElementById('panel').className==='memo'", 60],
+ ["click", ".mcard[data-k=peak]"], ["wait", 0.6], ["click", ".mcard[data-k=be]"], ["wait", 0.6], ["click", ".mcard[data-k=pilot]"],
+ ["wait", 0.8], ["click", "#mok"], ["wait", 1.6], ["shot", "p_b_screen.png"], ["wait", 3], ["shot", "p_c_back.png"]
+]
