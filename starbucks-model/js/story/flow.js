@@ -19,6 +19,7 @@ import {addHotspot, markDone, setHotspotsBusy} from '../ui/hotspots.js';
 import {VIEW, backToSeat, leanIn, focusModel, cineMode, seatLookAt, reducedMotion} from '../ui/view.js';
 import {S, log, saveCommit, loadCommit, clearCommit} from './state.js';
 import {sit, sleep} from './cast.js';
+import {speaking, silent} from './gaze.js';
 import {setPeriod, benMoment, periodState, RP} from './replay.js';
 import {startSound, muteAmbience, coin, slide, whoosh} from './sound.js';
 import {openTablet, tabletRect, drawTabletScreen} from './tablet.js';
@@ -51,12 +52,12 @@ function caption(text, sec = 4) { const el = $('caption'); el.textContent = text
 // ---------------------------------------------------------------- dialogue
 const REACTION = {shocked: 'surprise', worried: 'worry', tense: 'worry', excited: 'smile', pleased: 'smile', warm: 'smile', confident: 'nod', firm: 'nod', skeptical: 'skeptical', unsure: 'skeptical', calm: 'nod'};
 const COMMITTEE = ['noor', 'ellis', 'priya'];
+// (where they look is story/gaze.js; here only the faces: a nod, a smile, a worried look)
 function listenersReact(speaker, emo) {
   const r = REACTION[emo];
   for (const id of COMMITTEE) {
     const c = C[id]; if (!c || c === speaker || !c.holder.visible) continue;
-    c.lookAt(speaker || 'camera');
-    if (r) setTimeout(() => c.react(Math.random() < 0.4 && r !== 'surprise' ? 'nod' : r), 500 + Math.random() * 900);
+    if (r) setTimeout(() => c.react(Math.random() < 0.4 && r !== 'surprise' ? 'nod' : r), 700 + Math.random() * 1100);
   }
 }
 /** from the seat, turn the eyes towards someone who speaks (only if they are out of view) */
@@ -80,20 +81,22 @@ async function lineImpl(id, {look = true} = {}) {
   const words = await fetch(url + '.json').then(r => r.ok ? r.json() : []).catch(() => []);
   const who = L.s === 'player' || L.s === 'narrator' ? null : C[L.s];
   if (who && who.holder.visible) {
-    who.lookAt('camera'); who.lockLook = true;
+    speaking(L.s, L.to || 'player', L.glance || null);
     if (look && VIEW.mode === 'seat') { const hp = who.headPos().clone(); hp.y -= 0.08; if (!inView(hp)) glanceAt(hp); }
     listenersReact(who, L.e);
     let timeFn = () => 0;
-    const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: !!who.seated, pointTarget: anchor('center')});
+    const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: !!who.seated, pointTarget: L.glance === 'balance' ? balanceAnchor() : anchor('center')});
     const p = who.say(url, {emotion: L.e, perf});
     await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); });
     subtitle(name, role, text, EN ? null : words, () => timeFn());
-    await p; who.lockLook = false;
+    await p;
   } else {
+    speaking(L.s === 'player' ? 'player' : 'narrator');
     if (L.s === 'player') listenersReact(null, L.e);
     const v = await playVoice(url + '.mp3', null, {});
     subtitle(name, role, text, EN ? null : words, v.time); await v.done;
   }
+  silent();
   await wait(0.15); hideSubtitle();
 }
 /** player reply: choose a line, then say it. opts [{id, key, text?}] */
@@ -439,6 +442,7 @@ export async function run(dev) {
     setModelTime(Q.get('t') === 'off' ? 'afternoon' : 'morning'); setPeriod(Q.get('t') === 'off' ? 'off' : 'peak'); stateList(Q.get('t') === 'off' ? 'off' : 'peak');
     seatLookAt(anchor('center')); VIEW.mode = 'seat'; document.body.dataset.view = 'seat'; hud(true); await fade(false, 300);
     window.__lean = (f, o) => leanIn(f, o); window.__seat = () => backToSeat(); window.__ben = () => benMoment(); window.__period = (k) => setPeriod(k);
+    window.__line = (id) => line(id, {look: false});
     return;
   }
   if (dev === 'debrief' || dev === 'review') {

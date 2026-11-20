@@ -391,7 +391,7 @@ export class Character {
       const hp = this.headPos();
       const local = this.holder.worldToLocal(tp.clone()); const hl = this.holder.worldToLocal(hp.clone());
       const d = local.sub(hl);
-      yaw = clamp(Math.atan2(d.x, d.z), -1.15, 1.15);
+      yaw = clamp(Math.atan2(d.x, d.z), -1.4, 1.4);          // (to the person beside you: the chest turns a little too)
       pitch = clamp(Math.atan2(-d.y, Math.hypot(d.x, d.z)), -0.45, 0.45);
       if (Math.abs(Math.atan2(d.x, d.z)) > 1.9) { yaw = 0; pitch = 0; }  // target behind: don't break the neck
     }
@@ -413,9 +413,9 @@ export class Character {
     const up = new THREE.Vector3(0, 1, 0).applyQuaternion(this.holder.quaternion);
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.holder.getWorldQuaternion(new THREE.Quaternion()));
     const wgt = this.look.weight;
-    if (b.spine2) rotBoneWorld(b.spine2, up, this.look.yaw * 0.15 * wgt);
-    if (b.neck) { rotBoneWorld(b.neck, up, this.look.yaw * 0.35 * wgt); rotBoneWorld(b.neck, right, this.look.pitch * 0.4 * wgt); }
-    rotBoneWorld(b.head, up, this.look.yaw * 0.4 * wgt); rotBoneWorld(b.head, right, this.look.pitch * 0.5 * wgt);
+    if (b.spine2) rotBoneWorld(b.spine2, up, this.look.yaw * 0.2 * wgt);
+    if (b.neck) { rotBoneWorld(b.neck, up, this.look.yaw * 0.33 * wgt); rotBoneWorld(b.neck, right, this.look.pitch * 0.4 * wgt); }
+    rotBoneWorld(b.head, up, this.look.yaw * 0.37 * wgt); rotBoneWorld(b.head, right, this.look.pitch * 0.5 * wgt);
     const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(this.holder.quaternion); rotBoneWorld(b.head, fwd, this._roll);
     // breathing: slow chest rise (deeper on the inhale before a line)
     const ex = this.exertion || 0;

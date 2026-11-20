@@ -1,5 +1,5 @@
 {
- "_note": "t = what the voice says (numbers written as words so the lips follow them); sub = what the subtitle shows when it differs; en = English subtitle. Source: docs/Starbucks_Service_Investment_Simulation.md.",
+ "_note": "t = what the voice says (numbers written as words so the lips follow them); sub = what the subtitle shows when it differs; en = English subtitle. Source: docs/Starbucks_Service_Investment_Simulation.md. to = who the line is for (player | noor | ellis | priya | all); glance = what the speaker also looks at (model | balance | a name).",
  "speakers": {
   "player": {
    "name": "أنت",
@@ -68,43 +68,55 @@
    "s": "priya",
    "e": "warm",
    "t": "مساء الخير. قبل أن نقرر في الأربعين مليونًا، أحضرت نور الفرع نفسه إلى الطاولة.",
-   "en": "Good evening. Before we decide on the forty million, Noor has brought the store itself to the table."
+   "en": "Good evening. Before we decide on the forty million, Noor has brought the store itself to the table.",
+   "to": "player",
+   "glance": "model"
   },
   "noor_model": {
    "s": "noor",
    "e": "calm",
    "t": "هذا فرع الميدان كما رصدناه صباح الثلاثاء، دقيقة بدقيقة. كل من تراه هنا كان هناك فعلًا. انظر إلى الكاونتر.",
-   "en": "This is the Al-Midan store as we observed it on Tuesday morning, minute by minute. Everyone you see here was really there. Look at the counter."
+   "en": "This is the Al-Midan store as we observed it on Tuesday morning, minute by minute. Everyone you see here was really there. Look at the counter.",
+   "to": "all",
+   "glance": "model"
   },
   "noor_spec": {
    "s": "noor",
    "e": "tense",
    "t": "الطابور يبدو طويلًا الآن. اعرض الفترات الأبطأ والأهدأ قبل أن نقرر ما الذي نغيّره.",
-   "en": "The queue looks long now. Pull up the slower and quieter periods before we decide what to change."
+   "en": "The queue looks long now. Pull up the slower and quieter periods before we decide what to change.",
+   "to": "player",
+   "glance": "model"
   },
   "noor_s2": {
    "s": "noor",
    "e": "calm",
    "t": "نفس الفرع ونفس العاملين. الفرق في الساعة فقط.",
-   "en": "Same store, same staff. Only the hour is different."
+   "en": "Same store, same staff. Only the hour is different.",
+   "to": "player",
+   "glance": "model"
   },
   "noor_cards": {
    "s": "noor",
    "e": "casual",
    "t": "وهذان تعليقان من صندوق الرأي في ذلك اليوم.",
-   "en": "And these are two comments from the comment box that day."
+   "en": "And these are two comments from the comment box that day.",
+   "to": "player"
   },
   "noor_rail": {
    "s": "noor",
    "e": "tense",
    "t": "الكاشير ليس المشكلة. المشروب هو الذي يتأخر.",
-   "en": "The register isn't the problem. It's the drink that's slow."
+   "en": "The register isn't the problem. It's the drink that's slow.",
+   "to": "player",
+   "glance": "model"
   },
   "noor_q": {
    "s": "noor",
    "e": "curious",
    "t": "ما مشكلة الخدمة التي ستحقق فيها أولًا؟",
-   "en": "Which service problem would you investigate first?"
+   "en": "Which service problem would you investigate first?",
+   "to": "player"
   },
   "p_h_peak": {
    "s": "player",
@@ -128,76 +140,95 @@
    "s": "noor",
    "e": "pleased",
    "t": "هذا ما تقوله أرقامك. لنرَ كم يكلف إصلاحه.",
-   "en": "That's what your numbers say. Let's see what fixing it costs."
+   "en": "That's what your numbers say. Let's see what fixing it costs.",
+   "to": "player",
+   "glance": "ellis"
   },
   "noor_h_acc": {
    "s": "noor",
    "e": "skeptical",
    "t": "التعليق وصف الدقة بشكل إيجابي. ما الدليل الآخر على الدقة الذي تريده؟",
-   "en": "The comment described accuracy positively. What other accuracy evidence would you want?"
+   "en": "The comment described accuracy positively. What other accuracy evidence would you want?",
+   "to": "player"
   },
   "noor_h_all": {
    "s": "noor",
    "e": "skeptical",
    "t": "الذروة والهدوء مختلفان. أي فترة ستقيسها مرة أخرى؟",
-   "en": "Peak and off-peak are different. Which period would you measure again?"
+   "en": "Peak and off-peak are different. Which period would you measure again?",
+   "to": "player"
   },
   "ellis_open": {
    "s": "ellis",
    "e": "calm",
    "t": "الطابور الأقصر يفيد الزبون. لكن سؤالي: كم طلبًا إضافيًا مكتملًا نحتاج كل يوم لنغطي العمالة الجديدة؟",
-   "en": "A shorter line helps the customer. But my question is: how many extra completed orders do we need each day to cover the new labor?"
+   "en": "A shorter line helps the customer. But my question is: how many extra completed orders do we need each day to cover the new labor?",
+   "to": "player"
   },
   "ellis_scale": {
    "s": "ellis",
    "e": "calm",
    "t": "في هذه الكفة تكلفة العمالة الإضافية في السنة، وفي تلك ما تضيفه الطلبات. والأشخاص البيض عند الباب افتراض؛ لم يرهم أحد بعد.",
-   "en": "This pan holds the added labor for a year; that one, what the extra orders add. The white figures at the door are an assumption — nobody has seen them yet."
+   "en": "This pan holds the added labor for a year; that one, what the extra orders add. The white figures at the door are an assumption — nobody has seen them yet.",
+   "to": "player",
+   "glance": "balance"
   },
   "ellis_play": {
    "s": "ellis",
    "e": "calm",
    "t": "جرّب الافتراضات بنفسك. حرّك الأرقام وقارن.",
-   "en": "Try the assumptions yourself. Move the numbers and compare."
+   "en": "Try the assumptions yourself. Move the numbers and compare.",
+   "to": "player",
+   "glance": "balance"
   },
   "ellis_12": {
    "s": "ellis",
    "e": "worried",
    "t": "عند اثني عشر طلبًا نخسر ثمانية آلاف وستمئة وأربعين دولارًا في السنة في هذا الفرع.",
    "sub": "عند 12 طلبًا نخسر 8,640 دولارًا في السنة في هذا الفرع.",
-   "en": "At 12 orders we lose $8,640 a year at this store."
+   "en": "At 12 orders we lose $8,640 a year at this store.",
+   "to": "priya",
+   "glance": "balance"
   },
   "ellis_26": {
    "s": "ellis",
    "e": "pleased",
    "t": "عند ستة وعشرين نربح ستة آلاف وأربعمئة وثمانين. الفرق بين الخسارة والربح أربعة عشر طلبًا فقط في اليوم.",
    "sub": "عند 26 نربح 6,480. الفرق بين الخسارة والربح 14 طلبًا فقط في اليوم.",
-   "en": "We make $6,480. Fourteen orders a day is all that separates a loss from a profit."
+   "en": "We make $6,480. Fourteen orders a day is all that separates a loss from a profit.",
+   "to": "player",
+   "glance": "balance"
   },
   "ellis_25": {
    "s": "ellis",
    "e": "curious",
    "t": "لاحظ أن نقطة التعادل صارت أربعة وعشرين طلبًا. افتراض صغير يغير القرار.",
    "sub": "لاحظ أن نقطة التعادل صارت 24 طلبًا. افتراض صغير يغير القرار.",
-   "en": "Notice the break-even moved to 24 orders. A small assumption changes the decision."
+   "en": "Notice the break-even moved to 24 orders. A small assumption changes the decision.",
+   "to": "player",
+   "glance": "balance"
   },
   "ellis_contrib": {
    "s": "ellis",
    "e": "curious",
    "t": "لاحظ كيف تحركت نقطة التعادل حين تغير ربح الطلب. افتراض صغير يغير القرار.",
-   "en": "Notice how the break-even moved when the profit per order changed. A small assumption changes the decision."
+   "en": "Notice how the break-even moved when the profit per order changed. A small assumption changes the decision.",
+   "to": "player",
+   "glance": "balance"
   },
   "ellis_done": {
    "s": "ellis",
    "e": "calm",
-   "t": "حسنًا. بريا وصلت.",
-   "en": "All right. Priya's here."
+   "t": "حسنًا يا بريا، الأرقام أمامك الآن.",
+   "en": "All right, Priya — the numbers are in front of you now.",
+   "to": "priya"
   },
   "priya_open": {
    "s": "priya",
    "e": "firm",
    "t": "نحتاج توصية اليوم. ما الذي يجعلك تستمر فيها، أو تتراجع عنها؟",
-   "en": "We need a recommendation today. What would make you keep it — or reverse it?"
+   "en": "We need a recommendation today. What would make you keep it — or reverse it?",
+   "to": "player"
   },
   "p_rec_all": {
    "s": "player",
@@ -221,49 +252,59 @@
    "s": "noor",
    "e": "excited",
    "t": "أستطيع وضع جداول الفروع كلها من الأسبوع القادم.",
-   "en": "I can have every store's schedule ready from next week."
+   "en": "I can have every store's schedule ready from next week.",
+   "to": "priya"
   },
   "ellis_c_all": {
    "s": "ellis",
    "e": "worried",
    "t": "إن جاءت الزيادة أقل مما نتمنى، نخسر في كل فرع.",
-   "en": "If the lift comes in lower than we hope, we lose money in every store."
+   "en": "If the lift comes in lower than we hope, we lose money in every store.",
+   "to": "priya",
+   "glance": "noor"
   },
   "ellis_c_pilot": {
    "s": "ellis",
    "e": "confident",
    "t": "نفس الأسابيع ونفس ساعات الذروة. هكذا نعرف أن الفرق جاء من العمالة.",
-   "en": "Same weeks, same peak hours. That's how we know the difference came from the labor."
+   "en": "Same weeks, same peak hours. That's how we know the difference came from the labor.",
+   "to": "all"
   },
   "noor_c_handoff": {
    "s": "noor",
    "e": "calm",
    "t": "سأجرب تسليمًا أبسط عند الرف في فرع واحد، قبل أي توظيف.",
-   "en": "I'll try a simpler handoff at the shelf in one store, before any hiring."
+   "en": "I'll try a simpler handoff at the shelf in one store, before any hiring.",
+   "to": "priya",
+   "glance": "model"
   },
   "priya_match": {
    "s": "priya",
    "e": "pleased",
    "t": "هذا شرط أستطيع مراجعته بعد شهرين.",
-   "en": "That's a condition I can review in two months."
+   "en": "That's a condition I can review in two months.",
+   "to": "player"
   },
   "priya_other": {
    "s": "priya",
    "e": "skeptical",
    "t": "الشرط جيد، لكنه لا يقيس القرار الذي اتخذته.",
-   "en": "It's a good condition, but it doesn't test the decision you made."
+   "en": "It's a good condition, but it doesn't test the decision you made.",
+   "to": "player"
   },
   "priya_feel": {
    "s": "priya",
    "e": "firm",
    "t": "الشعور ليس قياسًا. ماذا ستقيس بالضبط؟",
-   "en": "A feeling isn't a measurement. What exactly will you measure?"
+   "en": "A feeling isn't a measurement. What exactly will you measure?",
+   "to": "player"
   },
   "priya_close": {
    "s": "priya",
    "e": "warm",
    "t": "شكرًا. المذكرة عندي.",
-   "en": "Thank you. I have the memo."
+   "en": "Thank you. I have the memo.",
+   "to": "player"
   },
   "nar_end": {
    "s": "narrator",

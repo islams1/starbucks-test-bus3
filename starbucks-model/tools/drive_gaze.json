@@ -1,0 +1,15 @@
+[
+ ["waitjs", "window.__VIEW && __VIEW.mode === 'seat' && !!window.__line", 240], ["wait", 1],
+ ["eval", "(__VIEW.mode = 'cine', __cam([-1.55, 1.42, 1.55], [0.85, 1.0, -0.55], 44), 1)"], ["wait", 1],
+ ["eval", "(__line('priya_hello'), 1)"], ["wait", 1.6], ["shot", "g1_priya.png"], ["wait", 2.2], ["shot", "g2_priya.png"],
+ ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 30],
+ ["eval", "(__line('noor_c_all'), 1)"], ["wait", 1.8], ["shot", "g3_noor_to_priya.png"], ["eval", "__gaze()"], ["wait", 1], ["eval", "__gaze()"],
+ ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 30],
+ ["eval", "(__line('ellis_c_all'), 1)"], ["wait", 1.6], ["shot", "g4_ellis.png"], ["eval", "__gaze()"], ["wait", 1.6], ["shot", "g5_ellis.png"],
+ ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 30],
+ ["eval", "(__line('p_rec_pilot'), 1)"], ["wait", 1.5], ["shot", "g6_player.png"], ["eval", "__gaze()"],
+ ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 30],
+ ["eval", "(__line('ellis_c_pilot'), 1)"], ["wait", 2.0], ["shot", "g7_ellis_all.png"],
+ ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 30], ["wait", 4], ["shot", "g8_idle.png"],
+ ["eval", "JSON.stringify(['noor','ellis','priya'].map(id => { const t = __C[id].look.target; return id + ':' + (t === 'camera' ? 'camera' : t && t.id ? t.id : t && t.isVector3 ? 'point' : String(t)); }))"]
+]

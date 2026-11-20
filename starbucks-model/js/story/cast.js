@@ -128,7 +128,4 @@ export function watchGlance(ch, dur = 1.6) {
   });
 }
 
-// the committee looks at whoever speaks, or at the player / the model
-onUpdate(() => {
-  for (const id of Object.keys(CAST)) { const c = characters[id]; if (!c || !c.holder.visible || c.lockLook) continue; if (!c.look.target) c.lookAt('camera'); }
-});
+// (who looks at whom around the table: story/gaze.js)
