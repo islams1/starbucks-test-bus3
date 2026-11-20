@@ -1,0 +1,6 @@
+﻿[
+ ["waitjs", "!document.getElementById('menu').classList.contains('hidden')", 240], ["wait", 2.5], ["shot", "b_menu.png"],
+ ["eval", "JSON.stringify({q: window.__quality().quality.level, fps: Math.round(__stats.fps), minis: Object.values(__C).filter(c=>c.mini).length})"],
+ ["waitjs", "Object.values(__C).filter(c=>c.mini).length >= 14", 240],
+ ["eval", "JSON.stringify({minis: Object.values(__C).filter(c=>c.mini).length})"]
+]

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect x=%2210%22 y=%2236%22 width=%2244%22 height=%2210%22 rx=%222%22 fill=%22%23d9b26f%22/%3E%3Cpath d=%22M16 36V20h32v16%22 fill=%22none%22 stroke=%22%23d9b26f%22 stroke-width=%224%22/%3E%3C/svg%3E">
+<title>الفرع على الطاولة — قرار الـ 40 مليون دولار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/s40.css">
+<link rel="stylesheet" href="css/glass.css">
+<link rel="stylesheet" href="css/model.css">
+</head>
+<body data-view="cine">
+<canvas id="gl" aria-label="المشهد ثلاثي الأبعاد"></canvas>
+
+<!-- loading -->
+<div id="loading" class="screen">
+  <div class="load-inner">
+    <div class="brandmark"><svg viewBox="0 0 64 64"><rect x="8" y="38" width="48" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><path d="M15 38V22h34v16M22 30h6M36 30h6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+    <div class="load-title">الفرع على الطاولة</div>
+    <div class="load-sub">قرار الـ 40 مليون دولار · سيناريو تعليمي</div>
+    <div class="bar"><i id="loadbar"></i></div>
+    <div id="loadtxt" class="load-txt">جارٍ التحميل…</div>
+    <div id="loadhint" class="load-hint">مكان واحد: غرفة اللجنة ومجسّم الفرع</div>
+    <div id="loaderr" class="load-err hidden"></div>
+  </div>
+</div>
+
+<!-- main menu -->
+<div id="menu" class="screen hidden">
+  <div class="menu-card">
+    <div class="tag">CASE STUDIES · BUSINESS &amp; STRATEGY</div>
+    <h1>الفرع على الطاولة</h1>
+    <p class="lead">أنت مسؤول عمليات الخدمة. على طاولة لجنة الاستثمار مجسّم حيّ لفرع «الميدان» يعيد صباح الثلاثاء. راقب أين يتعطل الطلب، واحسب كم طلبًا يغطي عمالة إضافية، ثم أوصِ اللجنة بقرار ومعه ما يجعلك تستمر فيه أو تتراجع عنه.</p>
+    <div class="modes one"><button class="mode" data-mode="play"><b>اجلس إلى الطاولة</b><span>12–15 دقيقة · غرفة واحدة · تقييم توجيهي من 3</span></button></div>
+    <button id="reviewbtn" class="ghost hidden">عرض مذكرتك المؤكدة</button>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div>
+    <div class="gpuinfo" id="gpuinfo"></div>
+    <div class="menu-foot" id="menufoot">يُفضَّل استخدام سماعات · <a href="#" id="creditslink">المصادر والحقوق</a></div>
+  </div>
+</div>
+
+<!-- instructions -->
+<div id="howto" class="screen hidden">
+  <div class="howto-card">
+    <h2>تعليمات اللعب</h2>
+    <div class="keys">
+      <div class="k"><span class="kbd-mouse"></span><b>اسحب: انظر حولك / لُف حول المجسّم</b></div>
+      <div class="k"><kbd class="wide">عجلة</kbd><b>اقترب من المجسّم أو ابتعد</b><small>أو زرّ «اقترب» · بإصبعين على اللمس</small></div>
+      <div class="k"><kbd>◎</kbd><b>انقر الحلقات أو أزرار الأسفل</b><small>للبطاقة والتعليقات والتابلت</small></div>
+      <div class="k"><kbd class="wide">Tab</kbd><b>درج الأدلة</b></div>
+      <div class="k"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><b>اختيار الرد</b></div>
+      <div class="k"><kbd class="wide">Esc</kbd><b>إيقاف مؤقت</b></div>
+    </div>
+    <div class="task-card">
+      <b>مهمتك:</b> افهم أين يتعطل الطلب في الفرع، واحسب كم طلبًا إضافيًا يغطي العمالة الجديدة، ثم أوصِ اللجنة بقرار ومعه الدليل وشرط المراجعة.<br>
+      <span class="ok">التقييم (من 3):</span> ملاحظة خاصة بالذروة، ومقياس تكلفة مرتبط بربح الطلب، وشرط مراجعة يطابق توصيتك. التوصية نفسها لا تأخذ نقاطًا.
+    </div>
+    <button id="startbtn" class="primary">ابدأ</button>
+  </div>
+</div>
+<div id="preparing" class="hidden">تجهيز الفرع…</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="scenetag">سيناريو تعليمي</div>
+  <div id="objwrap"><div id="objective"><div class="obj-label">الهدف</div><div id="objtext"></div></div><ul id="tasks"></ul></div>
+  <div id="statelist" class="hidden"></div>
+  <div id="caption" aria-live="polite"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="viewbtns"><button id="leanbtn" type="button">اقترب من المجسّم</button><button id="trybtn" type="button">درج الأدلة <kbd>Tab</kbd></button><button id="ambbtn" type="button" aria-pressed="false" title="صوت المقهى">♪ صوت المقهى</button></div>
+  <div id="prompt"></div>
+</div>
+<div id="hotspots"></div>
+<div id="dock" class="empty" role="toolbar" aria-label="ما يمكنك استخدامه"></div>
+
+<!-- dialogue -->
+<div id="subs" class="hidden"><div class="who"><b id="subwho"></b><span id="subrole"></span></div><div id="subtext"></div></div>
+<div id="choices" class="hidden"><div id="choiceq"></div><div id="choicelist"></div></div>
+
+<!-- panels -->
+<div id="qcard" class="hidden"></div>
+<div id="ccard" class="hidden"></div>
+<div id="tabletp" class="hidden"></div>
+<div id="panel" class="hidden"></div>
+<div id="tray" class="hidden"></div>
+<div id="card" class="hidden"></div>
+
+<div id="fade" class="on"></div>
+<div id="letterbox"><i></i><i></i></div>
+<div id="pause" class="screen hidden"><div class="menu-card small"><h2>إيقاف مؤقت</h2><button class="primary" id="resume">متابعة</button><button id="tohowto" class="ghost">التعليمات</button><div class="qsel small"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div></div></div>
+<div id="clicktolock" class="hidden"></div>
+
+<script>
+(function(){
+  function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
+    e.innerHTML='<b>تعذّر تشغيل اللعبة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge (أحدث إصدار) مع تفعيل «تسريع الأجهزة / Hardware acceleration»، ثم أعد تحميل الصفحة.</small>'; }
+  window.__showErr=showErr;
+  addEventListener('error',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||ev.error||'error'); });
+  addEventListener('unhandledrejection',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });
+  try { var c=document.createElement('canvas'); if(!c.getContext('webgl2')) showErr('WebGL2 غير مدعوم أو تسريع الرسوميات معطّل في المتصفح.'); } catch(e){ showErr(e.message); }
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three-mesh-bvh":"https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/build/index.module.js"
+}}
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
