@@ -1,0 +1,8 @@
+﻿[
+ ["waitjs", "!document.getElementById('menu').classList.contains('hidden')", 240], ["wait", 1], ["click", ".mode"], ["wait", 0.6], ["click", "#startbtn"],
+ ["waitjs", "__S.scene === 0 && document.getElementById('subwho').textContent.length > 0 && !document.getElementById('subwho').textContent.includes('الراوي')", 120],
+ ["wait", 0.6], ["shot", "p1.png"], ["eval", "JSON.stringify(__gaze())"],
+ ["wait", 1.4], ["shot", "p2.png"], ["eval", "JSON.stringify(__gaze())"],
+ ["wait", 1.4], ["shot", "p3.png"], ["eval", "JSON.stringify(__gaze())"],
+ ["waitjs", "document.getElementById('subwho').textContent.includes('نور')", 60], ["wait", 1.0], ["shot", "p4_noor.png"], ["eval", "JSON.stringify(__gaze())"]
+]

@@ -1,0 +1,9 @@
+﻿[
+ ["waitjs", "window.__VIEW && __VIEW.mode === 'seat' && !!window.__enter", 240], ["wait", 3], ["shot", "s_seat_screen.png"],
+ ["eval", "JSON.stringify({fps: Math.round(__stats.fps), rend: __stats.rend.toFixed(1), gaze: __gaze()})"],
+ ["eval", "(__VIEW.yaw = 0, __VIEW.pitch = -0.28, 1)"], ["wait", 2], ["shot", "s_seat_front.png"],
+ ["eval", "(__VIEW.mode = 'cine', __cam([1.4, 1.38, 1.5], [-1.4, 1.2, -0.1], 44), 1)"], ["wait", 2], ["shot", "s_wide.png"],
+ ["eval", "(__VIEW.mode = 'seat', __enter(), 1)"], ["wait", 4], ["shot", "s_cafe.png"],
+ ["eval", "(__shot('front', true), 1)"], ["eval", "(__seat(), 1)"], ["wait", 2.5], ["shot", "s_back.png"],
+ ["eval", "JSON.stringify({fps: Math.round(__stats.fps), rend: __stats.rend.toFixed(1), view: __VIEW.mode})"]
+]

@@ -1,0 +1,5 @@
+﻿[
+ ["waitjs", "__S.scene === 3 && document.getElementById('panel').classList.contains('memo') && !document.getElementById('panel').classList.contains('hidden')", 180], ["wait", 0.5], ["key", "Digit1"],
+ ["waitjs", "document.getElementById('subwho').textContent.includes('نور') && !document.getElementById('subs').classList.contains('hidden')", 60], ["wait", 1.2], ["shot", "c1_noor.png"], ["eval", "__gaze()"],
+ ["waitjs", "document.getElementById('subwho').textContent.includes('إليس') && !document.getElementById('subs').classList.contains('hidden')", 60], ["wait", 1.2], ["shot", "c2_ellis.png"], ["eval", "__gaze()"], ["wait", 1.5], ["shot", "c3_ellis.png"]
+]

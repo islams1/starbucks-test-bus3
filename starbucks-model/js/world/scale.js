@@ -13,7 +13,7 @@ const brass = () => new THREE.MeshStandardMaterial({color: 0xc39a5b, roughness: 
 export function buildScale() {
   const R = BAL.root; R.name = 'balance';
   // on the model's west side (left from the player's seat): the tablet will be held on the right
-  R.position.set(TABLE.x - 0.74, TABLE.y, TABLE.z - 0.06); R.rotation.y = 0;
+  R.position.set(TABLE.x - 1.15, TABLE.y, TABLE.z + 0.05); R.rotation.y = 0;
   const B = brass(), dark = new THREE.MeshStandardMaterial({color: 0x2a2b2d, roughness: 0.5, metalness: 0.6});
   const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.018, 40), B); foot.position.y = 0.009; R.add(foot);
   const col = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.009, 0.27, 12), B); col.position.y = 0.018 + 0.135; R.add(col);

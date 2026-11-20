@@ -1,5 +1,6 @@
-// Scene director. 0: the published premise, the committee sits down, Noor starts the replay on the model.
-// 1: watch the counter (the dive to eye level, Ben leaves) → open the queue card's two periods and the comments →
+// Scene director. 0: the published premise, the committee sits down, Noor starts the replay on the hanging screen.
+// 1: watch the counter (the eye goes into the screen: eye level in the café, Ben leaves) → the queue card's two
+// periods and the comments, the order rail inside the replay →
 // the first hypothesis. 2: Ellis's tablet and the balance: what extra orders cover the added labor (compare two).
 // 3: Priya asks for the recommendation → route, its consequence on the table → the memo (evidence + condition).
 // 4: the memo beside the published case, three checks, the coaching rubric; practice attempts after.
@@ -9,17 +10,18 @@ import {playVoice, sfx} from '../core/audio.js';
 import * as cine from '../core/cine.js';
 import {characters as C} from '../actors/character.js';
 import {buildPerformance} from '../actors/performance.js';
-import {MQ, anchor, toWorld, setFigures, showHypothesis, showHandoffTest} from '../world/maquette.js';
+import {MQ, anchor, toWorld, setFigures, showHypothesis, showHandoffTest, inCafe} from '../world/maquette.js';
+import {feedOn, feedShot, setLabel, FEED} from '../world/screenfeed.js';
 import {screen, SEATS, TABLE} from '../world/room.js';
 import {setBalance, balanceAnchor} from '../world/scale.js';
 import {TP, setQueueCard, holdTablet, fitHeld, showCalendars, drawMemoPad, anchorOf, drawTablet} from '../world/tableprops.js';
 import {setModelTime} from '../world/lighting.js';
 import {subtitle, hideSubtitle, choose, toast, objective, fade, hud, $, show} from '../ui/ui.js';
 import {addHotspot, markDone, setHotspotsBusy} from '../ui/hotspots.js';
-import {VIEW, backToSeat, leanIn, focusModel, cineMode, seatLookAt, reducedMotion} from '../ui/view.js';
+import {VIEW, backToSeat, enterCafe, focusCafe, cineMode, seatMode, seatLookAt, reducedMotion, screenCenter} from '../ui/view.js';
 import {S, log, saveCommit, loadCommit, clearCommit} from './state.js';
 import {sit, sleep} from './cast.js';
-import {speaking, silent} from './gaze.js';
+import {speaking, silent, watching} from './gaze.js';
 import {setPeriod, benMoment, periodState, RP} from './replay.js';
 import {startSound, muteAmbience, coin, slide, whoosh} from './sound.js';
 import {openTablet, tabletRect, drawTabletScreen} from './tablet.js';
@@ -46,6 +48,8 @@ function stateList(key) {
   el.innerHTML = `<b>${L[0]}</b><ul>${L.slice(1).map(x => `<li>${x}</li>`).join('')}</ul><span class="illus">${ar('تعليمي', 'Illustrative')}</span>`;
   el.classList.remove('hidden');
 }
+/** the strip under the replay: what is being shown */
+const periodLabel = (k) => k === 'peak' ? ar('إعادة · الثلاثاء 8:10 صباحًا · فرع الميدان · سيناريو تعليمي', 'Replay · Tuesday 8:10 am · Al-Midan store · Illustrative') : ar('إعادة · الثلاثاء 3:30 عصرًا · فرع الميدان · سيناريو تعليمي', 'Replay · Tuesday 3:30 pm · Al-Midan store · Illustrative');
 let capT = 0;
 function caption(text, sec = 4) { const el = $('caption'); el.textContent = text; el.classList.add('on'); clearTimeout(capT); capT = setTimeout(() => el.classList.remove('on'), sec * 1000); }
 
@@ -85,8 +89,8 @@ async function lineImpl(id, {look = true} = {}) {
     if (look && VIEW.mode === 'seat') { const hp = who.headPos().clone(); hp.y -= 0.08; if (!inView(hp)) glanceAt(hp); }
     listenersReact(who, L.e);
     let timeFn = () => 0;
-    const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: !!who.seated, pointTarget: L.glance === 'balance' ? balanceAnchor() : anchor('center')});
-    const p = who.say(url, {emotion: L.e, perf});
+    const perf = buildPerformance(L.t, words, {speakerId: L.s, emotion: L.e, seated: !!who.seated, pointTarget: L.glance === 'balance' ? balanceAnchor() : screenCenter()});
+    const p = who.say(url, {emotion: L.e, perf, getPos: () => inCafe(camera.position) ? null : who.headPos()});
     await new Promise(r => { const t = () => who.voice ? (timeFn = who.voice.time, r()) : requestAnimationFrame(t); t(); setTimeout(r, 1500); });
     subtitle(name, role, text, EN ? null : words, () => timeFn());
     await p;
@@ -141,6 +145,14 @@ function seatCommittee() {
   for (const id of COMMITTEE) C[id].lookAt('camera');
 }
 const headOf = (id) => C[id].headPos().clone().add(V3(0, -0.06, 0));
+// when the committee talk among themselves the camera steps back to show the three of them (and who looks at whom)
+const GROUP = {pos: V3(-1.62, 1.42, 1.6), look: V3(0.5, 1.0, -0.78), fov: 44};
+async function groupShot(fn, {back = null} = {}) {
+  cineMode();
+  await cine.shot(GROUP.pos, GROUP.look, reducedMotion() ? 0 : 1.3, {fov: GROUP.fov});
+  await fn();
+  if (back !== false) await backToSeat({look: back || headOf('priya')});
+}
 // the wall screen: the reported store count (kept apart from the one-store model) / the rollout board
 function screenFact() {
   screen.draw((g, W, H) => {
@@ -148,7 +160,7 @@ function screenFact() {
     g.fillStyle = '#d9b26f'; g.font = '600 34px "IBM Plex Sans Arabic"'; g.textAlign = 'center'; g.fillText(ar('من التقرير السنوي 10-K لعام 2002', 'From the FY2002 Form 10-K'), W / 2, 120);
     g.fillStyle = '#f2efe6'; g.font = '700 200px Inter'; g.fillText('5,886', W / 2, 360);
     g.font = '500 44px "IBM Plex Sans Arabic"'; g.fillText(ar('متجرًا لـ Starbucks في 29 سبتمبر 2002', 'Starbucks retail stores, Sept 29, 2002'), W / 2, 450);
-    g.fillStyle = '#8e9a8f'; g.font = '500 30px "IBM Plex Sans Arabic"'; g.fillText(ar('الرقم المعلن — منفصل عن نموذج الفرع الواحد على الطاولة', 'The reported count — separate from the one-store model on the table'), W / 2, 560);
+    g.fillStyle = '#8e9a8f'; g.font = '500 30px "IBM Plex Sans Arabic"'; g.fillText(ar('الرقم المعلن — منفصل عن إعادة الفرع الواحد على الشاشة', 'The reported count — separate from the one-store replay on the screen'), W / 2, 560);
   });
 }
 function screenRollout(k = 1) {
@@ -166,12 +178,12 @@ function screenRollout(k = 1) {
 // ================================================================= SCENE 0 — the premise, the committee, the replay starts
 async function scene0() {
   S.scene = 0; hud(false); cineMode();
-  setPeriod('peak', {still: true}); setModelTime('off');
+  setPeriod('peak', {still: true}); setModelTime('morning'); feedShot('wide', {cut: true}); feedOn(false);
   screenFact();
-  // close on the sleeping model under the pendant
-  const c = anchor('center');
-  cine.shot(V3(0.62, 1.02, 0.66), c, 0, {fov: 38});
-  cine.fly([V3(0.62, 1.02, 0.66), V3(0.42, 1.0, 0.72), V3(0.18, 0.98, 0.74)], () => c, 16, {fov: 38});
+  // the hanging screen, still dark, against the window wall at sunset; a slow drift along the table
+  const c = screenCenter();
+  cine.shot(V3(0.6, 1.45, 1.55), c, 0, {fov: 40});
+  cine.fly([V3(0.6, 1.45, 1.55), V3(0.1, 1.42, 1.4), V3(-0.4, 1.4, 1.2)], () => c, 16, {fov: 40});
   const el = $('card'); el.className = 'source0'; show('card', true);
   el.innerHTML = `<div class="src0"><div class="tagl src">${ar('من الحالة المنشورة', 'From the published case')}</div><p>${ar('تشير أبحاث الشركة إلى فجوة في الخدمة. المقترح: ساعات عمل إضافية في الفروع، بتكلفة نحو <b>40 مليون دولار</b> في السنة. هل ستعود هذه الأموال؟ لا أحد يعرف بعد.', 'The company\'s research points to a service gap. The proposal: extra labor hours in the stores, at a cost of about <b>$40 million</b> a year. Will that money come back? Nobody knows yet.')}</p><small>Harvard Business Publishing, case 504-016 (Moon &amp; Quelch)</small></div>`;
   await fade(false, 900);
@@ -179,26 +191,29 @@ async function scene0() {
   await wait(0.4); el.classList.add('out'); await wait(0.6); show('card', false); el.classList.remove('out');
   // the committee: from the seat, Priya at the head of the table
   sceneTag(ar('سيناريو تعليمي', 'Illustrative scenario')); hud(true);
-  await cine.shot(SEAT_EYE, headOf('priya'), reducedMotion() ? 0 : 2.2, {fov: 50});
-  seatLookAt(headOf('priya')); cine.stop(); VIEW.mode = 'seat'; document.body.dataset.view = 'seat';
+  await cine.shot(GROUP.pos, GROUP.look, reducedMotion() ? 0 : 2.2, {fov: GROUP.fov});
   await line('priya_hello');
-  glanceAt(headOf('noor'));
-  await line('noor_model');
-  // Noor starts the replay: the dial turns, the model's morning light comes up, the people move
-  setModelTime('morning'); setPeriod('peak', {still: reducedMotion()}); whoosh();
+  await backToSeat({look: headOf('noor'), dur: 1.2});
+  // Noor starts the replay on the screen: Tuesday, 8:10, the store as it was; all eyes go to it
+  setPeriod('peak', {still: reducedMotion()}); feedOn(true, periodLabel('peak')); whoosh(); watching(true);
   stateList('peak');
-  await wait(1.0);
+  setTimeout(() => { if (VIEW.mode === 'seat') glanceAt(screenCenter(), 1.2); }, 2600);
+  await line('noor_model');
+  await wait(1.2);
 }
 
 // ================================================================= SCENE 1 — watch the counter
 async function scene1() {
   S.scene = 1; sceneTag(ar('سيناريو تعليمي · راقب الكاونتر', 'Illustrative scenario · Watch the counter'));
-  setHotspotsBusy(true); cineMode();
-  // the dive: down to a wide eye-level shot of the counter, from just inside the shop window
+  setHotspotsBusy(true); cineMode(); watching(true);
+  // into the screen: the eye moves up to it until the picture fills the view, then stands in the café at eye level
+  feedShot('counter');
+  const sc = screenCenter();
+  if (!reducedMotion()) { await cine.shot(V3(0.2, 1.5, 0.9), sc, 1.4, {fov: 46}); await cine.shot(sc.clone().add(V3(0.95, 0, 0)), sc, 1.3, {fov: 58}); }
+  await fade(true, 160);
   const eye = toWorld(1.5, 1.55, 3.05), at = toWorld(-0.6, 1.15, -1.4);
-  if (!reducedMotion()) await cine.fly([camera.position.clone(), toWorld(1.8, 9, 9.5), toWorld(1.6, 3.2, 5.0), eye], () => at, 3.4, {fov: 46, fov1: 62});
-  else cine.shot(eye, at, 0, {fov: 62});
-  cine.hold(eye, at, {fov: 62});
+  cine.hold(eye, at, {fov: 60});
+  await fade(false, 300);
   caption(ar('[صوت المقهى: طابعة التذاكر، أحاديث خافتة]', '[Café sounds: ticket printer, low chatter]'), 5);
   // ten seconds of the morning: Ben comes in, looks at his watch, leaves before he orders; a drink goes out
   await wait(4.5);
@@ -211,9 +226,14 @@ async function scene1() {
   await Promise.race([ben, wait(24)]);
   caption(ar('خرج قبل أن يطلب. وزبونة أخرى تستلم مشروبها من الرف.', 'He left before ordering. Another customer collects her drink at the shelf.'), 5);
   await wait(2.5);
-  // back up to the seat
-  if (!reducedMotion()) await cine.fly([camera.position.clone(), toWorld(1.2, 6, 9), SEAT_EYE.clone().add(V3(0, 0.05, -0.15)), SEAT_EYE], () => anchor('center'), 2.8, {fov: 62, fov1: 50});
-  seatLookAt(headOf('noor')); cine.stop(); VIEW.mode = 'seat'; document.body.dataset.view = 'seat';
+  // out of the screen, back in the chair (the screen goes on replaying the line)
+  feedShot('line', {cut: true});
+  await fade(true, 200);
+  seatLookAt(screenCenter()); cine.shot(SEAT_EYE, screenCenter(), 0, {fov: 50});
+  await fade(false, 300);
+  await wait(0.8);
+  seatMode(); watching(false);
+  glanceAt(headOf('noor'), 0.9);
   await line('noor_spec');
   // the interactive part: the queue card's two periods, the comments, the rail, the model
   objective(ar('افحص الفرع: افتح فترتي بطاقة الانتظار، واقرأ تعليقًا واحدًا على الأقل.', 'Examine the store: open both periods on the queue card and read at least one comment.'));
@@ -255,21 +275,22 @@ function hotspotsScene1() {
   const s1 = () => S.scene === 1;
   addHotspot({id: 'qcard', label: ar('بطاقة الانتظار', 'Queue observation card'), icon: 'card', pos: () => anchorOf(TP.queueCard, 0.02), when: s1, use: openQueueCard});
   addHotspot({id: 'comments', label: ar('تعليقات الزبائن', 'Customer comments'), icon: 'comment', pos: () => anchorOf(TP.commentBox, 0.08), when: s1, use: openComments});
-  addHotspot({id: 'rail', label: ar('سكة التذاكر · افحص تدفق الطلبات', 'Order rail · Inspect order flow'), icon: 'rail', pos: () => anchor('rail'), when: s1, use: inspectRail});
-  addHotspot({id: 'dial', label: ar('ساعة الإعادة', 'Replay dial'), icon: 'dial', pos: () => anchor('dial'), when: () => s1() && (S.ev.peak || S.ev.off), use: async () => { await showPeriod(RP.period === 'peak' ? 'off' : 'peak'); }, dock: false});
+  addHotspot({id: 'rail', label: ar('سكة التذاكر · افحص تدفق الطلبات', 'Order rail · Inspect order flow'), icon: 'rail', pos: () => VIEW.mode === 'cafe' ? anchor('rail') : null, when: s1, use: inspectRail});
+  addHotspot({id: 'screen', label: ar('ادخل الإعادة', 'Step into the replay'), icon: 'eye', pos: () => screenCenter().add(V3(0.1, -0.35, 0)), modes: ['seat'], when: () => S.scene >= 1 && FEED.on && !busyScene, use: () => enterCafe(), dock: false});
 }
 async function showPeriod(key) {
   setPeriod(key, {still: reducedMotion()}); setQueueCard(key, {[key]: true}); stateList(key); whoosh();
   const first = !S.ev[key]; gain(key); markDone('qcard', S.ev.peak && S.ev.off);
+  feedOn(true, periodLabel(key)); feedShot('wide', {cut: true}); watching(true); setTimeout(() => watching(false), 9000);
   if (key === 'off' && first) line('noor_s2');
-  if (VIEW.mode === 'seat') leanIn('center', {pitch: 0.55, dist: 0.62, yaw: 0});
+  if (VIEW.mode === 'seat') glanceAt(screenCenter(), 0.9);
 }
 function openQueueCard() {
   return new Promise(res => {
     const el = $('qcard'); show('qcard', true);
     const draw = () => {
       el.innerHTML = `<div class="qc"><div class="qc-head"><b>${ar('بطاقة الانتظار', 'Queue observation card')}</b><span class="illus">${ar('تعليمي', 'Illustrative')}</span></div>
-        <p class="qc-hint">${ar('اختر فترة لتُعاد على المجسّم:', 'Pick a period to replay it on the model:')}</p>
+        <p class="qc-hint">${ar('اختر فترة لتُعاد على الشاشة:', 'Pick a period to replay it on the screen:')}</p>
         <button type="button" class="qc-row ${RP.period === 'peak' ? 'on' : ''}" data-k="peak"><span>${ar('الذروة', 'Peak')}<small>${ar('8:10 صباحًا', '8:10 am')}</small></span><b class="num">${S.ev.peak ? ar('7 دقائق', '7 min') : '?'}</b></button>
         <button type="button" class="qc-row ${RP.period === 'off' ? 'on' : ''}" data-k="off"><span>${ar('الهدوء', 'Off-peak')}<small>${ar('3:30 عصرًا', '3:30 pm')}</small></span><b class="num">${S.ev.off ? ar('دقيقتان', '2 min') : '?'}</b></button>
         <p class="qc-note">${ar('متوسط الانتظار من الطلب للاستلام، بيانات محاكاة. نفس الفرع ونفس العاملين.', 'Median wait from order to pickup, simulated data. Same store, same staff.')}</p>
@@ -305,10 +326,11 @@ async function inspectRail() {
   busyScene = true;
   setHotspotsBusy(true);
   if (RP.period !== 'peak') setPeriod('peak', {still: reducedMotion()}), stateList('peak'), setQueueCard('peak');
-  await leanIn('rail', {yaw: -0.12, pitch: 0.42, dist: 0.3});
+  feedShot('rail');
+  await enterCafe('rail', {yaw: -0.15, pitch: 0.32, dist: 2.2});
   caption(ar('تذكرة تُضاف عند الكاشير… والمشروبات تخرج من البار أبطأ.', 'A ticket goes up at the register… drinks leave the bar more slowly.'), 5);
   await wait(reducedMotion() ? 1 : 4);
-  focusModel('pickup'); await wait(reducedMotion() ? 0.5 : 2.5);
+  focusCafe('pickup'); await wait(reducedMotion() ? 0.5 : 2.5);
   gain('rail'); markDone('rail');
   await line('noor_rail');
   busyScene = false;
@@ -319,9 +341,10 @@ async function scene2() {
   S.scene = 2; sceneTag(ar('سيناريو تعليمي · احسب التحسين', 'Illustrative scenario · Price the improvement'));
   if (VIEW.mode !== 'seat') await backToSeat({look: headOf('ellis')});
   else glanceAt(headOf('ellis'));
-  // the question is about the peak: the model goes back to 8:10
+  // the question is about the peak: the replay goes back to 8:10, seen from across the street (where the assumed extra
+  // customers will stand)
   if (RP.period !== 'peak') { setPeriod('peak', {still: reducedMotion()}); setQueueCard('peak'); }
-  stateList('peak');
+  stateList('peak'); feedOn(true, periodLabel('peak')); feedShot('front'); watching(false);
   await line('ellis_open');
   glanceAt(balanceAnchor(), 1.0);
   await line('ellis_scale');
@@ -330,9 +353,8 @@ async function scene2() {
   const tp = TP.tablet.position, from = tp.clone(), to = V3(0.18, TABLE.y + 0.004, 0.52);
   await new Promise(r => { let t = 0; const off = onUpdate((dt) => { t += dt; const k = Math.min(1, t / 0.9), e = k * k * (3 - 2 * k); tp.lerpVectors(from, to, e); TP.tablet.rotation.y = 0.25 * (1 - e); if (k >= 1) { off(); r(); } }); });
   holdTablet(true); document.body.classList.add('tablet-open');
-  // look so that the balance (left) and the sidewalk where the assumed customers stand (middle) stay clear of the
-  // tablet held on the right
-  glanceDir(EN ? 0.58 : 0.03, -0.3, 1.0);
+  // look so that the screen (the street, the assumed customers) and the balance stay clear of the tablet in the hands
+  glanceDir(EN ? 1.27 : 0.84, -0.02, 1.0);
   objective(ar('اعثر على عدد الطلبات الإضافية التي تغطي العمالة، وقارن افتراضين مختلفين.', 'Find the extra orders that cover the labor, and compare two different assumptions.'));
   const fit = onUpdate(() => fitHeld(tabletRect()));
   const said = {};
@@ -386,27 +408,29 @@ async function consequence(r) {
     glanceAt(screen.mesh.position.clone().add(V3(0, 0, 0.3)), 1.0);
     let k = 0; const off = onUpdate((dt) => { k = Math.min(1, k + dt * 0.6); screenRollout(k); if (k >= 1) off(); });
     toast(`<b>${ar('التزام عالٍ', 'High commitment')}</b>`, 'warn');
-    await line('noor_c_all'); await line('ellis_c_all');
+    await groupShot(async () => { await line('noor_c_all'); await line('ellis_c_all'); }, {back: screen.mesh.position.clone()});
   } else if (r === 'pilot') {
     showCalendars(true); slide();
     glanceAt(anchorOf(TP.calendars[0], 0.05), 0.9);
     toast(`<b>${ar('التزام محدود', 'Limited commitment')}</b>`, 'ok');
-    await line('ellis_c_pilot');
+    await wait(1.2);
+    await groupShot(async () => { await line('ellis_c_pilot'); }, {back: anchorOf(TP.calendars[0], 0.05)});
   } else {
-    showHandoffTest(true);
-    await leanIn('pickup', {yaw: 0.35, pitch: 0.5, dist: 0.42});
+    showHandoffTest(true); feedShot('pickup'); watching(true);
+    glanceAt(screenCenter(), 1.0);
     toast(`<b>${ar('تكلفة أقل، ودليل أبطأ على العمالة', 'Lower cost and slower evidence on staffing')}</b>`, 'ok');
+    await wait(1.5);
     await line('noor_c_handoff');
-    await backToSeat({look: headOf('priya')});
+    watching(false); feedShot('wide');
   }
 }
-function clearConsequence() { showCalendars(false); showHandoffTest(false); screenFact(); }
+function clearConsequence() { showCalendars(false); showHandoffTest(false); screenFact(); feedShot('wide'); }
 
 // ================================================================= SCENE 4 — compare the decisions
 async function debrief() {
   S.scene = 4; hud(false); setHotspotsBusy(true);
   cineMode();
-  cine.shot(V3(-0.9, 1.25, 1.35), anchor('center'), reducedMotion() ? 0 : 2.5, {fov: 44});
+  feedShot('wide'); cine.shot(V3(1.4, 1.38, 1.5), V3(-1.4, 1.2, -0.1), reducedMotion() ? 0 : 2.5, {fov: 44});
   const c = DB.compareScreen();
   await line('nar_end');
   c.ready(); await c.done;
@@ -437,21 +461,23 @@ export async function run(dev) {
   seatCommittee();
   $('ambbtn').onclick = () => { const m = muteAmbience(); $('ambbtn').classList.toggle('off', m); $('ambbtn').setAttribute('aria-pressed', m ? 'true' : 'false'); };
   $('trybtn').onclick = () => toggleTray();
-  $('leanbtn').onclick = () => { if (VIEW.mode === 'seat') leanIn(); else if (VIEW.mode === 'model') backToSeat(); };
+  $('leanbtn').onclick = () => { if (VIEW.mode === 'seat') { if (FEED.on) enterCafe(); } else if (VIEW.mode === 'cafe') backToSeat({look: screenCenter()}); };
   if (dev === 'view') {          // look at the set with the replay running, no story (QA: __cam([...],[...],fov))
-    setModelTime(Q.get('t') === 'off' ? 'afternoon' : 'morning'); setPeriod(Q.get('t') === 'off' ? 'off' : 'peak'); stateList(Q.get('t') === 'off' ? 'off' : 'peak');
-    seatLookAt(anchor('center')); VIEW.mode = 'seat'; document.body.dataset.view = 'seat'; hud(true); await fade(false, 300);
-    window.__lean = (f, o) => leanIn(f, o); window.__seat = () => backToSeat(); window.__ben = () => benMoment(); window.__period = (k) => setPeriod(k);
+    const k = Q.get('t') === 'off' ? 'off' : 'peak';
+    setPeriod(k); stateList(k); feedOn(true, periodLabel(k)); feedShot(Q.get('shot') || 'wide', {cut: true});
+    seatLookAt(screenCenter()); seatMode(); hud(true); await fade(false, 300);
+    window.__enter = (f, o) => enterCafe(f, o); window.__seat = () => backToSeat({look: screenCenter()}); window.__ben = () => benMoment(); window.__period = (p) => { setPeriod(p); feedOn(true, periodLabel(p)); };
+    window.__shot = (n, cut) => feedShot(n, {cut}); window.__watch = (on) => watching(on);
     window.__line = (id) => line(id, {look: false});
     return;
   }
   if (dev === 'debrief' || dev === 'review') {
     if (!loadCommit()) { Object.assign(S.ev, {peak: true, off: true, c1: true, rail: true}); S.hyp = 'peak'; S.tabletSeen = true; S.seenLow = true; S.committed = {route: 'pilot', cust: 'peak', cost: 'be', cond: 'pilot', model: {...S.model}}; }
-    setPeriod('peak', {still: true}); setModelTime('morning');
+    setPeriod('peak', {still: true}); feedOn(true, periodLabel('peak'));
     await fade(false, 400); await debrief(); return;
   }
-  if (dev === 's1') { setModelTime('morning'); setPeriod('peak'); stateList('peak'); cine.shot(SEAT_EYE, anchor('center'), 0, {fov: 50}); hud(true); await fade(false, 400); await scene1(); await scene2(); await scene3(); await debrief(); return; }
-  if (dev === 's2') { setModelTime('morning'); setPeriod('peak'); stateList('peak'); Object.assign(S.ev, {peak: true, off: true, c1: true}); S.hyp = 'peak'; showHypothesis('peak'); seatLookAt(anchor('center')); VIEW.mode = 'seat'; hud(true); await fade(false, 400); await scene2(); await scene3(); await debrief(); return; }
-  if (dev === 's3') { setModelTime('morning'); setPeriod('peak'); stateList('peak'); Object.assign(S.ev, {peak: true, off: true, c1: true}); S.hyp = 'peak'; S.tabletSeen = true; S.seenLow = true; S.comparedOrders = new Set([20, 12]); showHypothesis('peak'); seatLookAt(anchor('center')); VIEW.mode = 'seat'; hud(true); await fade(false, 400); await scene3(); await debrief(); return; }
+  if (dev === 's1') { setPeriod('peak'); stateList('peak'); feedOn(true, periodLabel('peak')); cine.shot(SEAT_EYE, screenCenter(), 0, {fov: 50}); hud(true); await fade(false, 400); await scene1(); await scene2(); await scene3(); await debrief(); return; }
+  if (dev === 's2') { setPeriod('peak'); stateList('peak'); feedOn(true, periodLabel('peak')); Object.assign(S.ev, {peak: true, off: true, c1: true}); S.hyp = 'peak'; showHypothesis('peak'); seatLookAt(headOf('ellis')); seatMode(); hud(true); await fade(false, 400); await scene2(); await scene3(); await debrief(); return; }
+  if (dev === 's3') { setPeriod('peak'); stateList('peak'); feedOn(true, periodLabel('peak')); Object.assign(S.ev, {peak: true, off: true, c1: true}); S.hyp = 'peak'; S.tabletSeen = true; S.seenLow = true; S.comparedOrders = new Set([20, 12]); showHypothesis('peak'); seatLookAt(headOf('priya')); seatMode(); hud(true); await fade(false, 400); await scene3(); await debrief(); return; }
   await scene0(); await scene1(); await scene2(); await scene3(); await debrief();
 }

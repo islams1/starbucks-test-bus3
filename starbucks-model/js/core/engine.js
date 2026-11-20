@@ -125,6 +125,10 @@ const lateUpdaters = new Set();
 export const onLateUpdate = (fn) => { lateUpdaters.add(fn); return () => lateUpdaters.delete(fn); };
 const overlays = new Set();          // extra viewport renders (video call)
 export const onOverlay = (fn) => { overlays.add(fn); return () => overlays.delete(fn); };
+/** runs just before the main render (after every update): set up the lights / sky of the world the camera is in,
+ *  render textures that the frame shows (the replay screen) */
+const beforeRender = new Set();
+export const onBeforeRender = (fn) => { beforeRender.add(fn); return () => beforeRender.delete(fn); };
 export const clock = {t: 0, dt: 0, paused: false, scale: 1};
 export const renderOpts = {direct: false, skip: true};   // direct = skip post-processing (CPU mode); skip = don't draw (hidden behind the loading screen)
 let last = performance.now();
@@ -146,6 +150,7 @@ function frame(now) {
   for (const f of lateUpdaters) f(dt, clock.t);
   const t1 = performance.now();
   grade.uniforms.time.value = clock.t * 60 % 1000;
+  if (!renderOpts.skip) for (const f of beforeRender) f();
   if (renderer.shadowMap.enabled && ++shadowCtl.n >= shadowCtl.every) { renderer.shadowMap.needsUpdate = true; shadowCtl.n = 0; }
   if (renderOpts.skip) { /* loading: keep the CPU/GPU free for decoding */ } else if (renderOpts.direct) renderer.render(scene, camera); else composer.render();
   for (const f of overlays) f();

@@ -1,82 +1,107 @@
-// Light: the city at sunset behind the window wall (a photographed sky, Poly Haven, turned so its sun sets in the
-// west), its low sun across the room, the warm pendant over the table, a little fill — and the model's own "replay
-// sun": a narrow beam that lights the store on the table as it was at 8:10 in the morning or 3:30 in the afternoon.
+// Two worlds share one set of lights. The committee room at sunset (a photographed city sky turned so its sun sets in
+// the west, the low sun through the window wall, the warm pendant over the table, two fills) — and the café on Tuesday
+// (a photographed street, morning or afternoon sun through the shop window, a light over the counter, two lamps).
+// The same light objects are moved, recoloured and dimmed between the two (the light count never changes, so nothing
+// recompiles): before the frame for the world the camera is in, before the replay screen for the café.
 import * as THREE from 'three';
-import {scene, onUpdate, damp, SOFTWARE} from '../core/engine.js';
+import {scene, camera, onUpdate, onBeforeRender, SOFTWARE} from '../core/engine.js';
 import {loadHDR} from '../core/assets.js';
 import {onQuality} from '../core/quality.js';
 import {TABLE, ROOM_GLOW} from './room.js';
+import {CAFE_POS, inCafe} from './maquette.js';
 
-const SUN_DIR = new THREE.Vector3(-1, 0.13, 0.22).normalize();      // towards the sun (west, low)
 export const sun = new THREE.DirectionalLight(0xffa868, 1.6);
 export const hemi = new THREE.HemisphereLight(0xbfc6d6, 0x4a3a2e, 0.18);
-export const keyLight = new THREE.SpotLight(0xffd7a6, 2.6, 0, 0.78, 0.75, 0);      // the pendant over the table
-export const modelSun = new THREE.SpotLight(0xffe2bc, 0, 0, 0.36, 0.55, 0);        // the replay light on the model
+export const keyLight = new THREE.SpotLight(0xffd7a6, 2.6, 0, 0.78, 0.75, 0);
 export const fills = [new THREE.PointLight(0xffe2c2, 0.9, 0, 1.1), new THREE.PointLight(0xffe2c2, 0.7, 0, 1.1)];
-const MODEL_C = new THREE.Vector3(TABLE.x - 0.05, TABLE.y + 0.1, TABLE.z + 0.02);
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const ROOM_SUN = V(-1, 0.13, 0.22).normalize();
+const C = (x, y, z) => V(x, y, z).add(CAFE_POS);         // café frame → world
+
+// the café's time of day
 const MOODS = {
-  morning: {dir: new THREE.Vector3(1.0, 0.62, 0.55), color: 0xffdcb0, i: 3.4, lamps: 1.0},
-  afternoon: {dir: new THREE.Vector3(-0.85, 1.05, 0.75), color: 0xfff1e0, i: 2.7, lamps: 0.45},
-  off: {dir: new THREE.Vector3(0.2, 1.2, 0.6), color: 0xfff1e0, i: 0, lamps: 0},
+  morning: {dir: V(0.62, 0.42, 0.66).normalize(), sun: 0xffdcb0, si: 2.6, sky: 0.62, lamps: 1.0, key: 1.4, fill: 0.55},
+  afternoon: {dir: V(-0.55, 0.62, 0.56).normalize(), sun: 0xfff1e0, si: 2.2, sky: 0.72, lamps: 0.45, key: 0.9, fill: 0.35},
+  off: {dir: V(0.2, 0.8, 0.6).normalize(), sun: 0xfff1e0, si: 0.0, sky: 0.15, lamps: 0, key: 0, fill: 0},
 };
-const cur = {dir: MOODS.off.dir.clone(), color: new THREE.Color(MOODS.off.color), i: 0, lamps: 0};
-let want = MOODS.off, lampMat = null;
+let mood = MOODS.morning, lampMat = null;
 export function setModelLamps(mat) { lampMat = mat; }
-/** 'morning' | 'afternoon' | 'off' */
-export function setModelTime(k) { want = MOODS[k] || MOODS.off; }
-// the house lights go down when the eye goes into the model (a theatre: the replay is lit, the room around it fades)
-let dimWant = 0, dim = 0, hemiBase = 0.18; const base = {};
+/** the café's light: 'morning' | 'afternoon' | 'off' */
+export function setModelTime(k) { mood = MOODS[k] || MOODS.off; }
+// the room's house lights can go down a little while the replay plays (a screening)
+let dimWant = 0, dim = 0;
 export function setRoomDim(k) { dimWant = Math.max(0, Math.min(1, k)); }
 
-export async function buildLighting() {
-  // the sky: image-based light + the view behind the glass
-  const hdr = await loadHDR('assets/hdri/sunset_jhbcentral_2k.hdr');
-  const shift = rotateHDRToSun(hdr, SUN_DIR);
+const sky = {room: null, cafe: null};
+let world = null, hemiQ = 1, direct = false;
+/** set the lights, sky and shadows up for 'room' or 'cafe' */
+export function applyWorld(w) {
+  world = w;
+  const sc = sun.shadow.camera;
+  if (w === 'room') {
+    const r = 1 - dim;
+    if (sky.room) { scene.environment = sky.room.hdr; scene.background = sky.room.bg; }
+    scene.environmentIntensity = 0.34 * (1 - dim * 0.6); scene.backgroundIntensity = 0.85 * (1 - dim * 0.7);
+    sun.color.setHex(0xffa868); sun.intensity = 1.6 * r;
+    sun.position.copy(ROOM_SUN).multiplyScalar(14).add(V(0, 0.5, 0)); sun.target.position.set(0.4, 0.4, 0);
+    sc.left = -6; sc.right = 6; sc.top = 5; sc.bottom = -5; sc.near = 2; sc.far = 30;
+    hemi.color.setHex(0xbfc6d6); hemi.groundColor.setHex(0x4a3a2e); hemi.intensity = (direct ? 0.9 : 0.18) * hemiQ * (1 - dim * 0.7);
+    keyLight.color.setHex(0xffd7a6); keyLight.intensity = 2.6 * (1 - dim * 0.75); keyLight.angle = 0.78; keyLight.penumbra = 0.75;
+    keyLight.position.set(TABLE.x, 2.45, TABLE.z + 0.12); keyLight.target.position.set(TABLE.x, TABLE.y, TABLE.z);
+    keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 4;
+    fills[0].position.set(-2.6, 2.6, 1.6); fills[0].color.setHex(0xffe2c2); fills[0].intensity = 0.9 * r;
+    fills[1].position.set(2.8, 2.6, -1.8); fills[1].color.setHex(0xffe2c2); fills[1].intensity = 0.7 * r;
+    ROOM_GLOW.forEach((m, i) => { if (m.isMeshBasicMaterial) { if (m.userData.dimmable) m.color.setScalar(0.75 * (1 - dim * 0.6)); } else m.emissiveIntensity = (m.userData.glow ?? (m.userData.glow = m.emissiveIntensity)) * r; });
+  } else {
+    if (sky.cafe) { scene.environment = sky.cafe.hdr; scene.background = sky.cafe.bg; }
+    scene.environmentIntensity = mood.sky; scene.backgroundIntensity = 1.0;
+    sun.color.setHex(mood.sun); sun.intensity = mood.si;
+    const ct = C(0, 1, 0.5); sun.position.copy(mood.dir).multiplyScalar(20).add(ct); sun.target.position.copy(ct);
+    sc.left = -9; sc.right = 9; sc.top = 9; sc.bottom = -9; sc.near = 2; sc.far = 50;
+    hemi.color.setHex(0xdfe6ef); hemi.groundColor.setHex(0x6a5a48); hemi.intensity = 0.3 * hemiQ;
+    keyLight.color.setHex(0xffd2a0); keyLight.intensity = mood.key * 3.2; keyLight.angle = 0.95; keyLight.penumbra = 0.8;
+    keyLight.position.copy(C(-0.6, 3.3, -0.6)); keyLight.target.position.copy(C(-0.6, 0, -1.6));
+    keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 6;
+    fills[0].position.copy(C(-2.4, 2.9, 1.7)); fills[0].color.setHex(0xffd9b0); fills[0].intensity = mood.fill * 2.2;
+    fills[1].position.copy(C(2.6, 2.9, 0.6)); fills[1].color.setHex(0xffd9b0); fills[1].intensity = mood.fill * 2.0;
+  }
+  sc.updateProjectionMatrix(); keyLight.shadow.camera.updateProjectionMatrix();
+  sun.target.updateMatrixWorld(); keyLight.target.updateMatrixWorld();
+}
+export const worldOf = (p) => inCafe(p) ? 'cafe' : 'room';
+export const currentWorld = () => world;
+
+async function loadSky(hdrUrl, bgUrl, dir) {
+  const hdr = await loadHDR(hdrUrl);
+  const shift = rotateHDRToSun(hdr, dir);
   if (SOFTWARE) downsampleHDR(hdr, 4);
   hdr.mapping = THREE.EquirectangularReflectionMapping;
-  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = 'assets/hdri/sunset_jhbcentral_bg.jpg'; });
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = bgUrl; });
   const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d');
   const dx = Math.round(shift.frac * img.width); g.drawImage(img, dx, 0); g.drawImage(img, dx - img.width, 0); g.drawImage(img, dx + img.width, 0);
   const bg = new THREE.CanvasTexture(c); bg.colorSpace = THREE.SRGBColorSpace; bg.mapping = THREE.EquirectangularReflectionMapping;
-  scene.environment = hdr; scene.background = bg;
-  scene.environmentIntensity = 0.34; scene.backgroundIntensity = 0.85;
-  // the low sun through the window wall
-  sun.position.copy(SUN_DIR).multiplyScalar(14).add(new THREE.Vector3(0, 0.5, 0)); sun.target.position.set(0.4, 0.4, 0);
-  sun.castShadow = true; const sc = sun.shadow.camera; sc.left = -6; sc.right = 6; sc.top = 5; sc.bottom = -5; sc.near = 2; sc.far = 30;
-  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
-  // the pendant over the table: one warm beam, soft edges, its shadow keeps hands and cups on the table
-  keyLight.position.set(TABLE.x, 2.45, TABLE.z + 0.12); keyLight.target.position.set(TABLE.x, TABLE.y, TABLE.z);
+  return {hdr, bg};
+}
+
+export async function buildLighting() {
+  [sky.room, sky.cafe] = await Promise.all([
+    loadSky('assets/hdri/sunset_jhbcentral_2k.hdr', 'assets/hdri/sunset_jhbcentral_bg.jpg', ROOM_SUN),
+    loadSky('assets/hdri/urban_street_04_2k.hdr', 'assets/hdri/urban_street_04_bg.jpg', MOODS.morning.dir),
+  ]);
+  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
   keyLight.castShadow = true; keyLight.shadow.mapSize.set(2048, 2048); keyLight.shadow.bias = -0.0002; keyLight.shadow.normalBias = 0.006; keyLight.shadow.radius = 4;
-  keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 4;
-  // the model's replay light
-  modelSun.target.position.copy(MODEL_C); modelSun.castShadow = true; modelSun.shadow.mapSize.set(2048, 2048);
-  modelSun.shadow.bias = -0.00012; modelSun.shadow.normalBias = 0.0012; modelSun.shadow.radius = 2.5; modelSun.shadow.camera.near = 0.6; modelSun.shadow.camera.far = 3.2;
-  fills[0].position.set(-2.6, 2.6, 1.6); fills[1].position.set(2.8, 2.6, -1.8);
-  scene.add(sun, sun.target, hemi, keyLight, keyLight.target, modelSun, modelSun.target, ...fills);
+  scene.add(sun, sun.target, hemi, keyLight, keyLight.target, ...fills);
   onQuality((L) => {
     const s = L.shadow || 0;
-    modelSun.castShadow = s > 0; keyLight.castShadow = s >= 2048; sun.castShadow = s >= 4096;
+    sun.castShadow = s > 0; keyLight.castShadow = s >= 2048;
     const ms = Math.min(2048, Math.max(1024, s));
-    for (const l of [modelSun, keyLight]) if (l.shadow.mapSize.x !== ms) { l.shadow.mapSize.set(ms, ms); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } }
-    hemiBase = L.direct ? 0.9 : 0.18; hemi.intensity = hemiBase;
+    for (const l of [sun, keyLight]) if (l.shadow.mapSize.x !== ms) { l.shadow.mapSize.set(ms, ms); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } }
+    direct = !!L.direct; hemiQ = L.direct ? 1 : 1;
   });
-  onUpdate((dt) => {
-    const k = 1 - Math.exp(-2.2 * dt);
-    cur.dir.lerp(want.dir, k); cur.color.lerp(new THREE.Color(want.color), k); cur.i += (want.i - cur.i) * k; cur.lamps += (want.lamps - cur.lamps) * k;
-    modelSun.position.copy(MODEL_C).addScaledVector(cur.dir.clone().normalize(), 1.9);
-    modelSun.color.copy(cur.color); modelSun.intensity = cur.i;
-    if (lampMat) lampMat.emissiveIntensity = cur.lamps * 2.4;
-    // house lights
-    if (!base.sun && ROOM_GLOW.length) Object.assign(base, {sun: sun.intensity, key: keyLight.intensity, f0: fills[0].intensity, f1: fills[1].intensity, env: scene.environmentIntensity, bg: scene.backgroundIntensity, glow: ROOM_GLOW.map(m => m.emissiveIntensity ?? 1)});
-    if (!base.sun) return;
-    dim += (dimWant - dim) * (1 - Math.exp(-3 * dt));
-    const r = 1 - dim;
-    sun.intensity = base.sun * r; keyLight.intensity = base.key * (1 - dim * 1.05); fills[0].intensity = base.f0 * r; fills[1].intensity = base.f1 * r;
-    scene.environmentIntensity = base.env * (1 - dim * 0.95); scene.backgroundIntensity = base.bg * (1 - dim * 0.95);
-    hemi.intensity = hemiBase * (1 - dim);
-    ROOM_GLOW.forEach((m, i) => { if (m.isMeshBasicMaterial) m.color.setScalar(0.75 * (1 - dim * 0.85)); else m.emissiveIntensity = base.glow[i] * r; });
-  });
-  return hdr;
+  onUpdate((dt) => { dim += (dimWant - dim) * (1 - Math.exp(-3 * dt)); if (lampMat) lampMat.emissiveIntensity = mood.lamps * 2.4; });
+  // the main frame: the world the camera is in
+  onBeforeRender(() => applyWorld(worldOf(camera.position)));
+  applyWorld('room');
 }
 
 /** box-filter an equirect DataTexture down by factor f (keeps the same data type) */

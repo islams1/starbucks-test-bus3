@@ -17,14 +17,18 @@ export const SEATS = {
   noor: {x: -0.86, z: -1.16, ry: 0},
   ellis: {x: 0.86, z: -1.16, ry: 0},
   priya: {x: 2.44, z: 0.0, ry: -Math.PI / 2},
-  e1: {x: -1.18, z: 1.16, ry: Math.PI}, e2: {x: 1.2, z: 1.16, ry: Math.PI}, e3: {x: -2.44, z: 0.0, ry: Math.PI / 2},
+  e1: {x: -1.18, z: 1.16, ry: Math.PI}, e2: {x: 1.2, z: 1.16, ry: Math.PI},
 };
+// the replay screen: hung from the ceiling at the west end of the table, in front of the window wall, facing the table
+export const HANG = {x: -2.7, y: 1.6, z: 0.0, w: 2.1, h: 2.1 * 9 / 16};
+export let hangScreen = null;          // {mesh, setTexture(tex), on(bool)}
 export const room = new THREE.Group(); room.name = 'room';
 export const ROOM_GLOW = [];          // the room's glowing materials (downlights, the pendant, the screen): dimmed with its lights
 export const venue = new THREE.Group(); venue.name = 'venue';
 export let screen = null;            // the wall display: {mesh, draw(fn)}
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
+const steel0 = () => new THREE.MeshStandardMaterial({color: 0xb9bec4, roughness: 0.3, metalness: 1});
 /** planar UVs in metres so a texture repeat means "per metre" */
 function uvMetres(geo, sx, sy) { const uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * sx, uv.getY(i) * sy); uv.needsUpdate = true; return geo; }
 function box(w, h, d, mat, x, y, z, {cast = true, recv = true, parent = room, uv = null} = {}) {
@@ -110,6 +114,17 @@ export async function buildRoom() {
   const scr = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), new THREE.MeshBasicMaterial({map: scrTex, toneMapped: false, color: 0xbfbfbf}));
   scr.position.set(0, 1.68, z0 + 0.052); room.add(scr); ROOM_GLOW.push(scr.material);
   screen = {mesh: scr, tex: scrTex, draw(fn) { const c = scrTex.image, g = c.getContext('2d'); fn(g, c.width, c.height); scrTex.needsUpdate = true; }, off() { this.draw((g, w, hh) => { g.fillStyle = '#0b0c0e'; g.fillRect(0, 0, w, hh); }); }};
+  // ---------------------------------------------------------------- the replay screen, hanging at the west end of the table
+  {
+    const {x, y, z, w, h: hh} = HANG, g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = Math.PI / 2; room.add(g);
+    box(w + 0.07, hh + 0.07, 0.06, black, 0, 0, -0.035, {parent: g});                     // the body and bezel
+    box(w * 0.5, 0.04, 0.04, black, 0, hh / 2 + 0.09, -0.04, {parent: g});                // the hanging bar
+    for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, h - y - hh / 2 - 0.1, 6), steel0()); c.position.set(s * w * 0.22, (h - y - hh / 2 - 0.1) / 2 + hh / 2 + 0.1, -0.04); g.add(c); }
+    const mat = new THREE.MeshBasicMaterial({color: 0x050607});
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), mat); face.position.z = 0.0; g.add(face);
+    // a thin strip under the picture: what is being replayed (drawn by the screen feed)
+    hangScreen = {group: g, mesh: face, mat, setTexture(tex) { mat.map = tex; mat.color.setHex(tex ? 0xffffff : 0x050607); mat.needsUpdate = true; }};
+  }
   // ---------------------------------------------------------------- east wall: the door and a framed print
   const door = box(1.0, 2.2, 0.06, walnut, x1 - 0.05, 1.1, 1.9); door.rotation.y = Math.PI / 2;
   box(0.03, 0.3, 0.03, brass, x1 - 0.1, 1.05, 1.52);
@@ -137,6 +152,6 @@ export async function buildRoom() {
   } catch (e) { console.warn('clock', e); }
 
   scene.add(room);
-  mergeStatic(room, {cell: 4, exclude: [venue, scr, pend]});
+  mergeStatic(room, {cell: 4, exclude: [venue, scr, pend, hangScreen.group]});
   return room;
 }

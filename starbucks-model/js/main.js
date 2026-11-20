@@ -9,6 +9,7 @@ import {buildMaquette, MQ, anchor} from './world/maquette.js';
 import {buildScale} from './world/scale.js';
 import {buildTableProps} from './world/tableprops.js';
 import {buildLighting, setModelLamps} from './world/lighting.js';
+import {buildFeed} from './world/screenfeed.js';
 import {detectGPU, applyQuality, startAdaptive, savedQuality, quality, LEVELS, dyn, restoreDyn, onQuality} from './core/quality.js';
 import {makeGlass, glassGame, GAME_GLASS} from './ui/glass.js';
 import {loadAnimLib, characters} from './actors/character.js';
@@ -47,6 +48,7 @@ async function boot() {
     loadAnimLib().then(v => (mark('anims'), v)),
     json('data/lines.ar.json'),
   ]);
+  buildFeed();
   await loadCommittee(); mark('committee');
   { const t0 = performance.now(), n = buildContact(scene); console.info('[boot] contact', n, 'tris', Math.round(performance.now() - t0) + 'ms'); }
   // the store's people come in behind the menu
@@ -56,7 +58,7 @@ async function boot() {
   { const lv = Q.get('q') || savedQuality() || quality.auto; restoreDyn(lv === 'custom' ? quality.level : lv); applyQuality(lv); }
   document.querySelectorAll('[data-q]').forEach(b => { if (b.dataset.q === quality.auto) b.querySelector('small').textContent = EN ? 'Auto — suits this device' : 'تلقائي — مناسب لجهازك'; });
   const gi = $('gpuinfo'); if (gi) gi.textContent = (quality.software ? (EN ? '⚠ Hardware acceleration is off in the browser · ' : '⚠ تسريع الرسوميات معطّل في المتصفح — فعّله من الإعدادات لأداء أفضل · ') : '') + (quality.gpu ? (EN ? 'GPU: ' : 'كارت الشاشة: ') + quality.gpu.replace(/ANGLE \(|\)$/g, '').split(',').slice(0, 2).join(' ') : '');
-  camera.position.set(1.6, 1.5, 2.3); camera.lookAt(anchor('center'));
+  camera.position.set(1.6, 1.5, 2.3); camera.lookAt(-1.0, 1.0, 0);
   await new Promise(r => setTimeout(r, 200));
   renderOpts.skip = false;
   mark('ready');
@@ -79,7 +81,7 @@ function setupGlobalKeys() {
   $('tohowto').onclick = () => { show('pause', false); show('howto', true); $('startbtn').textContent = EN ? 'Continue' : 'متابعة'; $('startbtn').onclick = () => { show('howto', false); clock.paused = false; }; };
   $('creditslink').onclick = (e) => { e.preventDefault(); import('./story/debrief.js').then(m => m.showCredits()); };
   // the lean-in button follows the view
-  VIEW.onChange = (m) => { const b = $('leanbtn'); b.textContent = m === 'model' ? (EN ? 'Back to your seat' : 'ارجع لمقعدك') : (EN ? 'Lean into the model' : 'اقترب من المجسّم'); b.disabled = m === 'cine'; };
+  VIEW.onChange = (m) => { const b = $('leanbtn'); b.textContent = m === 'cafe' ? (EN ? 'Back to your seat' : 'ارجع لمقعدك') : (EN ? 'Step into the replay' : 'ادخل الإعادة'); b.disabled = m === 'cine'; };
   VIEW.onChange('seat');
 }
 
@@ -93,8 +95,8 @@ function setupGlobalKeys() {
   const dev = Q.get('dev');
   if (dev) { await minis; resumeAudio(); await run(dev); return; }
   // menu background: a slow drift around the table and the sleeping model
-  let ang = 0; const c = anchor('center');
-  const orbit = onUpdate((dt) => { ang += dt * 0.04; camera.position.set(c.x + Math.sin(ang) * 1.6, 1.45, c.z + Math.cos(ang) * 1.6 + 0.2); camera.lookAt(c.x, c.y + 0.1, c.z); });
+  let ang = 0; const c = new THREE.Vector3(-0.6, 1.05, 0);
+  const orbit = onUpdate((dt) => { ang += dt * 0.04; camera.position.set(c.x + 0.6 + Math.sin(ang) * 1.9, 1.5, c.z + Math.cos(ang) * 1.6 + 0.3); camera.lookAt(c.x, c.y, c.z); });
   await fade(false, 1200);
   if (hasCommit()) $('reviewbtn').classList.remove('hidden');
   show('menu', true);

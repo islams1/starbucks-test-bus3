@@ -20,14 +20,14 @@ export const hotspots = new Map();
 let busy = false;
 const _v = new THREE.Vector3();
 
-/** add({id, label, icon, pos: () => Vector3, modes: ['seat','model'], when: () => bool, use: async () => {}, dock: true}) */
+/** add({id, label, icon, pos: () => Vector3 | null, modes: ['seat','cafe'], when: () => bool, use: async () => {}, dock: true}) */
 export function addHotspot(h) {
   const el = document.createElement('button'); el.className = 'hs'; el.type = 'button'; el.setAttribute('aria-label', h.label);
   el.innerHTML = `<span class="hs-ring"><svg viewBox="0 0 24 24">${ICONS[h.icon] || ICONS.card}</svg></span><span class="hs-label">${h.label}</span>`;
   el.style.display = 'none'; layer.appendChild(el);
   const db = document.createElement('button'); db.className = 'dk'; db.type = 'button'; db.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[h.icon] || ICONS.card}</svg><span>${h.label}</span>`; db.style.display = 'none';
   if (h.dock !== false) dock.appendChild(db);
-  const rec = Object.assign({modes: ['seat', 'model'], when: () => true, done: false}, h, {el, db, visible: false});
+  const rec = Object.assign({modes: ['seat', 'cafe'], when: () => true, done: false}, h, {el, db, visible: false});
   const go = (e) => { e.stopPropagation(); trigger(rec); };
   el.addEventListener('click', go); db.addEventListener('click', go);
   hotspots.set(h.id, rec);
@@ -48,8 +48,9 @@ onUpdate(() => {
   for (const h of hotspots.values()) {
     const on = !busy && h.when() && h.modes.includes(VIEW.mode);
     let vis = false;
-    if (on && h.pos) {
-      _v.copy(typeof h.pos === 'function' ? h.pos() : h.pos).project(camera);
+    const p = on && h.pos ? (typeof h.pos === 'function' ? h.pos() : h.pos) : null;
+    if (p) {
+      _v.copy(p).project(camera);
       if (_v.z < 1 && Math.abs(_v.x) < 0.96 && Math.abs(_v.y) < 0.92) { vis = true; h.el.style.left = (_v.x * 0.5 + 0.5) * W + 'px'; h.el.style.top = (-_v.y * 0.5 + 0.5) * H + 'px'; }
     }
     if (vis !== h.visible) { h.visible = vis; h.el.style.display = vis ? 'flex' : 'none'; }
