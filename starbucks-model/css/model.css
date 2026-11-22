@@ -160,3 +160,4 @@ body.mlock{cursor:none}
 #progress .pg-steps i{height:3px;border-radius:2px;background:rgba(255,255,255,.16)}
 #progress .pg-steps i.on{background:#e9c77f}#progress .pg-steps i.done{background:var(--good)}
 #tasks li.optional{opacity:.85}#tasks li.optional small{color:var(--mute);margin-inline-start:6px}
+#loading{z-index:70}
