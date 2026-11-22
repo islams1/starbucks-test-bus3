@@ -6,10 +6,11 @@ import {renderer, SOFTWARE} from './engine.js';
 
 export const manager = new THREE.LoadingManager();
 const bar = document.getElementById('loadbar'), txt = document.getElementById('loadtxt');
+const EN_LOAD = new URLSearchParams(location.search).get('lang') === 'en';
 let total = 0, done = 0, shown = 0;
 export function track(p, label) {
   total++;
-  return p.then(v => { done++; shown = Math.max(shown, Math.round(done / Math.max(total, 60) * 100)); bar.style.width = shown + '%'; txt.textContent = `جارٍ التحميل… ${shown}%`; return v; },
+  return p.then(v => { done++; shown = Math.max(shown, Math.round(done / Math.max(total, 60) * 100)); bar.style.width = shown + '%'; txt.textContent = (EN_LOAD ? `Loading… ${shown}%` : `جارٍ التحميل… ${shown}%`); return v; },
                 e => { done++; console.error('asset failed', label, e); throw e; });
 }
 

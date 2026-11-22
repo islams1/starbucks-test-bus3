@@ -140,3 +140,23 @@ body.grabbing,body.grabbing #gl{cursor:grabbing}
 #prompt .hp-btn{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
 #prompt .hp-btn:hover,#prompt .hp-btn:focus-visible{background:rgba(255,226,170,.25);outline:2px solid rgba(255,226,170,.7);outline-offset:1px}
 @media (max-width:900px){#prompt.hands{top:52px;max-width:92vw;font-size:.85rem}}
+#card.timecard{z-index:96;background:transparent}   /* over the black fade between the café and the committee room */
+/* on foot in the café: the cross in the middle, the hint to take the mouse, what E acts on */
+#xhair{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 0 0 1.5px rgba(0,0,0,.35);z-index:31;pointer-events:none;display:none}
+body[data-view=walk] #xhair{display:block}
+#lockhint{position:fixed;left:50%;bottom:calc(7% + 150px);transform:translateX(-50%);z-index:31;pointer-events:none;padding:7px 16px;border-radius:999px;font-size:.85rem;color:var(--ink2);background:var(--glass);border:1px solid var(--line);white-space:nowrap}
+#aimtip{position:fixed;left:50%;top:calc(50% + 24px);transform:translateX(-50%);z-index:31;pointer-events:none;padding:5px 14px;border-radius:999px;font-size:.9rem;color:#fff;background:rgba(16,18,20,.7);border:1px solid var(--line);white-space:nowrap}
+#aimtip kbd{margin-inline-end:6px}
+.hs.aim .hs-ring{transform:scale(1.2);box-shadow:0 0 0 3px rgba(255,214,140,.9),0 0 16px rgba(255,214,140,.6)}
+body.mlock{cursor:none}
+
+/* the progress card: the stage, how far through the whole case, the stage's checklist below it */
+#progress{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:9px 14px 10px;display:grid;gap:7px}
+#progress .pg-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:.86rem}
+#progress .pg-head b{font-weight:600}#progress .pg-head span{color:var(--ink2);font:600 .82rem var(--num)}
+#progress .pg-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+#progress .pg-bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#c99a4e,#e9c77f);transition:width .5s ease}
+#progress .pg-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+#progress .pg-steps i{height:3px;border-radius:2px;background:rgba(255,255,255,.16)}
+#progress .pg-steps i.on{background:#e9c77f}#progress .pg-steps i.done{background:var(--good)}
+#tasks li.optional{opacity:.85}#tasks li.optional small{color:var(--mute);margin-inline-start:6px}

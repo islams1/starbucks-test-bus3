@@ -1,0 +1,7 @@
+[
+ ["waitjs", "window.__S && __S.scene === 1 && __VIEW.mode === 'walk'", 200], ["wait", 1.0],
+ ["eval", "(document.getElementById('hud').style.display='none', document.getElementById('dock').style.display='none', document.getElementById('lockhint') && (document.getElementById('lockhint').style.display='none'), 1)"],
+ ["eval", "__cam([62.75, 2.45, -3.05], [62.75, 2.45, -3.8], 40)"], ["wait", 1.2],
+ ["eval", "(async () => { const m = await import('/js/world/cafeprops.js'); const t = m.clockMinutes(); return (Math.floor(t / 60)) + ':' + String(Math.floor(t % 60)).padStart(2, '0'); })()"],
+ ["shot", "clock_a.png"], ["wait", 5], ["shot", "clock_b.png"]
+]

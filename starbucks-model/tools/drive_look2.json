@@ -1,0 +1,11 @@
+[
+ ["waitjs", "window.__S && __S.scene === 1 && __VIEW.mode === 'walk'", 200], ["wait", 1.5],
+ ["eval", "(document.getElementById('hud').style.display='none', document.getElementById('dock').style.display='none', document.getElementById('lockhint').style.display='none', 1)"],
+ ["eval", "__cam([61.6, 1.5, 0.3], [60.9, 0.95, -1.5], 55)"], ["wait", 1], ["shot", "p_counter.png"],
+ ["eval", "__cam([61.0, 1.35, -0.45], [60.85, 1.2, -1.5], 50)"], ["wait", 1], ["shot", "p_case.png"],
+ ["eval", "__cam([62.45, 1.48, -0.55], [62.0, 1.2, -1.6], 50)"], ["wait", 1], ["shot", "p_register.png"],
+ ["eval", "__cam([59.4, 1.6, 0.6], [59.4, 2.3, -3.8], 55)"], ["wait", 1], ["shot", "p_menu.png"],
+ ["eval", "__cam([63.7, 1.6, -0.95], [65.2, 1.6, -0.95], 55)"], ["wait", 1], ["shot", "p_specials.png"],
+ ["eval", "__cam([63.25, 1.45, -2.35], [63.6, 1.0, -3.4], 60)"], ["wait", 1], ["shot", "p_fridge.png"],
+ ["eval", "__cam([59.2, 1.45, -2.4], [59.1, 1.1, -3.5], 55)"], ["wait", 1], ["shot", "p_bar.png"]
+]

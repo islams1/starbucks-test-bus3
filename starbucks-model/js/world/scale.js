@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import {scene, onUpdate, clamp} from '../core/engine.js';
 import {canvasTex} from './materials.js';
 import {TABLE} from './room.js';
+const EN = new URLSearchParams(location.search).get('lang') === 'en';
 
 export const BAL = {root: new THREE.Group(), coins: 0, target: -1, angle: -0.3, vel: 0};     // no orders yet: the labor pan is down
 const COIN_VALUE = 1080, MAX_COINS = 44;
@@ -41,7 +42,7 @@ export function buildScale() {
   });
   BAL.pans = pans;
   // the labor weight (east pan, the right one from the player's seat)
-  const lab = canvasTex(256, 128, (g, w, h) => { g.fillStyle = '#2a2b2d'; g.fillRect(0, 0, w, h); g.fillStyle = '#e9dcc0'; g.font = '700 52px Inter'; g.textAlign = 'center'; g.fillText('$21,600', w / 2, 70); g.font = '500 30px "IBM Plex Sans Arabic"'; g.fillText('عمالة / سنة', w / 2, 112); });
+  const lab = canvasTex(256, 128, (g, w, h) => { g.fillStyle = '#2a2b2d'; g.fillRect(0, 0, w, h); g.fillStyle = '#e9dcc0'; g.font = '700 52px Inter'; g.textAlign = 'center'; g.fillText('$21,600', w / 2, 70); g.font = '500 30px "IBM Plex Sans Arabic"'; g.fillText(EN ? 'labor / year' : 'عمالة / سنة', w / 2, 112); });
   const wt = new THREE.Mesh(new THREE.BoxGeometry(0.062, 0.045, 0.045), [dark, dark, dark, dark, new THREE.MeshStandardMaterial({map: lab, roughness: 0.5}), dark]);
   wt.position.y = 0.0225; wt.castShadow = true; pans[1].add(wt);
   // coins (west pan): up to MAX_COINS in four stacks
@@ -63,7 +64,7 @@ export function buildScale() {
   drawCoins(0);
   // little brass tags on the hangers
   const tag = (txt) => canvasTex(256, 72, (g, w, h) => { g.fillStyle = '#c39a5b'; g.fillRect(0, 0, w, h); g.fillStyle = '#3a2a18'; g.font = '600 34px "IBM Plex Sans Arabic"'; g.textAlign = 'center'; g.fillText(txt, w / 2, 48); });
-  const t0 = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.02), new THREE.MeshStandardMaterial({map: tag('ما تضيفه الطلبات'), metalness: 0.6, roughness: 0.4})); t0.position.set(0, 0.03, 0.06); t0.rotation.x = -0.3; pans[0].add(t0);
+  const t0 = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.02), new THREE.MeshStandardMaterial({map: tag(EN ? 'What orders add' : 'ما تضيفه الطلبات'), metalness: 0.6, roughness: 0.4})); t0.position.set(0, 0.03, 0.06); t0.rotation.x = -0.3; pans[0].add(t0);
   R.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   scene.add(R);
   const _p = new THREE.Vector3();

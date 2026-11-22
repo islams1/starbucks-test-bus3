@@ -46,7 +46,7 @@ async function boot() {
     buildLighting().then(v => (mark('sky'), v)),
     buildRoom().then(async v => { mark('room'); await buildMaquette(); mark('model'); buildScale(); buildTableProps(); return v; }),
     loadAnimLib().then(v => (mark('anims'), v)),
-    json('data/lines.ar.json'),
+    json(`data/lines.${EN ? 'en' : 'ar'}.json`),
   ]);
   buildFeed();
   await loadCommittee(); mark('committee');
@@ -81,7 +81,7 @@ function setupGlobalKeys() {
   $('tohowto').onclick = () => { show('pause', false); show('howto', true); $('startbtn').textContent = EN ? 'Continue' : 'متابعة'; $('startbtn').onclick = () => { show('howto', false); clock.paused = false; }; };
   $('creditslink').onclick = (e) => { e.preventDefault(); import('./story/debrief.js').then(m => m.showCredits()); };
   // the lean-in button follows the view
-  VIEW.onChange = (m) => { const b = $('leanbtn'); b.textContent = m === 'cafe' ? (EN ? 'Back to your seat' : 'ارجع لمقعدك') : (EN ? 'Step into the replay' : 'ادخل الإعادة'); b.disabled = m === 'cine'; };
+  VIEW.onChange = (m) => { const b = $('leanbtn'); b.textContent = m === 'cafe' ? (EN ? 'Back to your seat' : 'ارجع لمقعدك') : (EN ? 'Step into the replay' : 'ادخل الإعادة'); b.disabled = m === 'cine'; b.style.display = m === 'walk' ? 'none' : ''; };   // on foot in the café (stage 1) there is no replay to step into
   VIEW.onChange('seat');
 }
 

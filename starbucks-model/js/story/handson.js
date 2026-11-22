@@ -159,7 +159,7 @@ export function ticketHunt() {
     back = setTimeout(() => { if (held === t) { held = null; putBack(t); } }, oldest ? 3200 : 2600);
     if (oldest) setTimeout(done, 1800);
   };
-  const off = grabbable({id: 'tickets', modes: ['cafe'], objects: () => T.slice(0, n), when: () => true, grab: (h) => { pull(h.object); return null; }, drop: () => {}});
+  const off = grabbable({id: 'tickets', modes: ['cafe', 'walk'], objects: () => T.slice(0, n), when: () => true, grab: (h) => { pull(h.object); return null; }, drop: () => {}});
   const clear = promptButtons(ar('اسحب التذاكر من السكة واقرأ أوقاتها: أي طلب ينتظر أطول من غيره؟', 'Pull tickets off the rail and read their times: which order has waited longest?'),
     [{id: 'old', label: ar('اسحب الأقدم', 'Pull the oldest'), use: () => T[0] && pull(T[0])}]);
   return finished.then(async () => {

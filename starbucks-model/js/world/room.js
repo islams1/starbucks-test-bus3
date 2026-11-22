@@ -8,6 +8,7 @@ import {scene} from '../core/engine.js';
 import {model} from '../core/assets.js';
 import {pbr, canvasTex} from './materials.js';
 import {mergeStatic} from './merge.js';
+import {mug, wallClock} from './cafeprops.js';
 
 export const ROOM = {x0: -4.6, x1: 4.6, z0: -3.6, z1: 3.4, h: 2.95};
 export const TABLE = {x: 0, z: 0, w: 3.7, d: 1.56, y: 0.76};
@@ -142,14 +143,9 @@ export async function buildRoom() {
   box(2.22, 0.03, 0.5, walnut, -1.6, 0.835, z1 - 0.28);
   const steel = new THREE.MeshStandardMaterial({color: 0xc9cdd2, roughness: 0.25, metalness: 1});
   const jug = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.28, 24), steel); jug.position.set(-2.1, 0.99, z1 - 0.3); jug.castShadow = true; room.add(jug);
-  const cupM = new THREE.MeshStandardMaterial({color: 0xf3f0ea, roughness: 0.35});
-  for (let i = 0; i < 6; i++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.032, 0.08, 18), cupM); c.position.set(-1.8 + (i % 3) * 0.12, 0.89, z1 - 0.36 + Math.floor(i / 3) * 0.12); c.castShadow = true; room.add(c); }
+  for (let i = 0; i < 6; i++) { const c = mug({full: false, dark: i % 3 === 1}); c.position.set(-1.8 + (i % 3) * 0.13, 0.85, z1 - 0.36 + Math.floor(i / 3) * 0.13); c.rotation.y = i * 1.1; room.add(c); }
   try { const pl = await model('potted_plant_02'); pl.scale.setScalar(1.6); pl.position.set(x1 - 0.55, 0.16, z1 - 0.55); room.add(pl); } catch (e) { console.warn('plant', e); }
-  try { const ck = await model('wall_clock'); ck.position.set(x1 - 0.03, 2.2, 0.2); ck.rotation.y = -Math.PI / 2; ck.scale.setScalar(1.3); room.add(ck);
-    const mh = ck.getObjectByName('wall_clock_minute_hand'), hh = ck.getObjectByName('wall_clock_hours_hand');
-    if (mh) mh.rotation.z = -Math.PI;                  // 5:30
-    if (hh) hh.rotation.z = -(5.5 / 12) * Math.PI * 2;
-  } catch (e) { console.warn('clock', e); }
+  { const t0 = performance.now(); await wallClock(room, x1 - 0.03, 2.2, 0.2, -Math.PI / 2, 0.42, () => 17 * 60 + 30 + (performance.now() - t0) / 60000); }   // 5:30 pm, running
 
   scene.add(room);
   mergeStatic(room, {cell: 4, exclude: [venue, scr, pend, hangScreen.group]});

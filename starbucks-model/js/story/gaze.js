@@ -10,6 +10,7 @@ import {SEATS, TABLE, HANG} from '../world/room.js';
 import {balanceAnchor} from '../world/scale.js';
 import {FEED} from '../world/screenfeed.js';
 import {VIEW} from '../ui/view.js';
+import {inCafe, toWorld} from '../world/maquette.js';
 
 export const IDS = ['noor', 'ellis', 'priya'];
 const st = {speaker: null, to: 'player', glance: null, last: null, lastEnd: -99, watching: false};
@@ -36,17 +37,26 @@ export function watching(on) { st.watching = on; if (on) for (const id of IDS) i
 const PLAYER_EYE = new THREE.Vector3(0.02, 1.2, 1.02);
 const SCREEN = new THREE.Vector3(HANG.x, HANG.y - 0.05, HANG.z);
 const OFF = {noor: [0, 0.06, -0.25], ellis: [0, -0.04, 0.2], priya: [0, 0.1, 0.05]};
+// stage 1 happens in the café itself: whoever stands there (Noor) looks at the player there, at the line and the
+// counter instead of the hanging screen, and at nobody who is back in the committee room
+const where = (c) => inCafe(c.holder.position) ? 'cafe' : 'room';
 function resolve(k, self) {
-  // the player is in the chair: from the seat that is the camera; in a director's shot, or while the player is inside
-  // the replay, they look at the chair
-  if (k === 'player') return VIEW.mode === 'seat' ? 'camera' : PLAYER_EYE;
+  // the player is in the chair (or on foot in the café): the camera is their eyes; in a director's shot, or while the
+  // player is inside the replay, they look at the chair
+  if (k === 'player') return VIEW.mode === 'seat' || VIEW.mode === 'walk' ? 'camera' : PLAYER_EYE;
+  if (C[self] && where(C[self]) === 'cafe') {
+    if (k === 'screen') return toWorld(2.9, 1.35, 0.2);                  // the line at the register
+    if (k === 'balance') return toWorld(0.6, 1.05, -1.5);                 // the counter
+    if (k === 'down') { const h = C[self].holder; return h.position.clone().add(new THREE.Vector3(Math.sin(h.rotation.y) * 0.9, 0.3, Math.cos(h.rotation.y) * 0.9)); }
+    return C[k] && C[k].holder.visible && where(C[k]) === 'cafe' ? C[k] : 'camera';
+  }
   if (k === 'screen') { const o = OFF[self] || [0, 0, 0]; return SCREEN.clone().add(new THREE.Vector3(...o)); }
   if (k === 'down') { const s = SEATS[self]; return new THREE.Vector3(s.x - Math.sin(s.ry) * -0.45, TABLE.y + 0.02, s.z - Math.cos(s.ry) * -0.45); }
   if (k === 'balance') return balanceAnchor().add(new THREE.Vector3(0, -0.12, 0));
   if (C[k] && C[k].holder.visible) return C[k];
   return 'camera';
 }
-const others = (self) => IDS.filter(id => id !== self && C[id] && C[id].holder.visible);
+const others = (self) => IDS.filter(id => id !== self && C[id] && C[id].holder.visible && (!C[self] || where(C[id]) === where(C[self])));
 const screenOn = () => FEED.on;
 const waiting = () => !document.getElementById('choices').classList.contains('hidden') || document.getElementById('panel').classList.contains('memo') && !document.getElementById('panel').classList.contains('hidden');
 const look = (k) => k === 'screen' && !screenOn() ? 'down' : k;     // only for idle choices: a line that names the screen still looks at it

@@ -1,0 +1,337 @@
+{
+ "_note": "English version (?lang=en). t = what the voice says (figures written as words so the lips follow them); sub = the subtitle when it differs; en = the English subtitle; to / glance as in lines.ar.json. Voices: python -I tools/gen_voice.py en.",
+ "speakers": {
+  "player": {
+   "en": [
+    "You",
+    "Service operations lead"
+   ],
+   "name": "You",
+   "role": "Service operations lead",
+   "voice": "en-US-AndrewNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "noor": {
+   "en": [
+    "Noor",
+    "Shift lead"
+   ],
+   "name": "Noor",
+   "role": "Shift lead",
+   "voice": "en-US-AvaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "ellis": {
+   "en": [
+    "Ellis",
+    "Finance partner"
+   ],
+   "name": "Ellis",
+   "role": "Finance partner",
+   "voice": "en-GB-RyanNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "priya": {
+   "en": [
+    "Priya",
+    "Investment committee chair"
+   ],
+   "name": "Priya",
+   "role": "Investment committee chair",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "narrator": {
+   "en": [
+    "Narrator",
+    ""
+   ],
+   "name": "Narrator",
+   "role": "",
+   "voice": "en-US-ChristopherNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  }
+ },
+ "lines": {
+  "nar_open": {
+   "s": "narrator",
+   "e": "news",
+   "t": "The company's research points to a service gap. The proposal: extra labor hours in the stores, at a cost of about forty million dollars a year. Will that money come back? Nobody knows yet.",
+   "en": "The company's research points to a service gap. The proposal: extra labor hours in the stores, at a cost of about forty million dollars a year. Will that money come back? Nobody knows yet."
+  },
+  "priya_hello": {
+   "s": "priya",
+   "e": "warm",
+   "to": "all",
+   "glance": "screen",
+   "t": "Good evening. Before we decide on the forty million, Noor has brought us a recording of the store itself.",
+   "en": "Good evening. Before we decide on the forty million, Noor has brought us a recording of the store itself."
+  },
+  "noor_model": {
+   "s": "noor",
+   "e": "calm",
+   "to": "all",
+   "glance": "screen",
+   "t": "This is the Al-Midan store as we recorded it on Tuesday morning, minute by minute. Everyone you see on the screen was really there. Look at the counter.",
+   "en": "This is the Al-Midan store as we recorded it on Tuesday morning, minute by minute. Everyone you see on the screen was really there. Look at the counter."
+  },
+  "noor_spec": {
+   "s": "noor",
+   "e": "tense",
+   "to": "player",
+   "glance": "screen",
+   "t": "The queue looks long now. Pull up the slower and quieter periods before we decide what to change.",
+   "en": "The queue looks long now. Pull up the slower and quieter periods before we decide what to change."
+  },
+  "noor_s2": {
+   "s": "noor",
+   "e": "calm",
+   "to": "all",
+   "glance": "screen",
+   "t": "Same store, same staff. Only the hour is different.",
+   "en": "Same store, same staff. Only the hour is different."
+  },
+  "noor_cards": {
+   "s": "noor",
+   "e": "casual",
+   "to": "player",
+   "t": "And these are two comments from the comment box that day.",
+   "en": "And these are two comments from the comment box that day."
+  },
+  "noor_rail": {
+   "s": "noor",
+   "e": "tense",
+   "to": "all",
+   "glance": "screen",
+   "t": "The register isn't the problem. It's the drink that's slow.",
+   "en": "The register isn't the problem. It's the drink that's slow."
+  },
+  "noor_q": {
+   "s": "noor",
+   "e": "curious",
+   "to": "player",
+   "t": "Which service problem would you investigate first?",
+   "en": "Which service problem would you investigate first?"
+  },
+  "p_h_peak": {
+   "s": "player",
+   "e": "confident",
+   "t": "The pickup wait at peak.",
+   "en": "The pickup wait at peak."
+  },
+  "p_h_acc": {
+   "s": "player",
+   "e": "unsure",
+   "t": "Order accuracy.",
+   "en": "Order accuracy."
+  },
+  "p_h_all": {
+   "s": "player",
+   "e": "unsure",
+   "t": "A storewide service problem.",
+   "en": "A storewide service problem."
+  },
+  "noor_h_peak": {
+   "s": "noor",
+   "e": "pleased",
+   "to": "player",
+   "glance": "ellis",
+   "t": "That's what your numbers say. Let's see what fixing it costs.",
+   "en": "That's what your numbers say. Let's see what fixing it costs."
+  },
+  "noor_h_acc": {
+   "s": "noor",
+   "e": "skeptical",
+   "to": "player",
+   "glance": "screen",
+   "t": "The comment described accuracy positively. What other accuracy evidence would you want?",
+   "en": "The comment described accuracy positively. What other accuracy evidence would you want?"
+  },
+  "noor_h_all": {
+   "s": "noor",
+   "e": "skeptical",
+   "to": "player",
+   "glance": "screen",
+   "t": "Peak and off-peak are different. Which period would you measure again?",
+   "en": "Peak and off-peak are different. Which period would you measure again?"
+  },
+  "ellis_open": {
+   "s": "ellis",
+   "e": "calm",
+   "to": "player",
+   "glance": "noor",
+   "t": "A shorter line helps the customer. But my question is: how many extra completed orders do we need each day to cover the new labor?",
+   "en": "A shorter line helps the customer. But my question is: how many extra completed orders do we need each day to cover the new labor?"
+  },
+  "ellis_scale": {
+   "s": "ellis",
+   "e": "calm",
+   "to": "all",
+   "glance": "balance",
+   "t": "This pan holds the added labor for a year; that one, what the extra orders add. The pale figures outside the door on the screen are an assumption — nobody has seen them yet.",
+   "en": "This pan holds the added labor for a year; that one, what the extra orders add. The pale figures outside the door on the screen are an assumption — nobody has seen them yet."
+  },
+  "ellis_coins": {
+   "s": "ellis",
+   "e": "calm",
+   "to": "player",
+   "glance": "balance",
+   "t": "Put a coin in the orders’ pan for every extra completed order a day, until the pans balance.",
+   "en": "Put a coin in the orders’ pan for every extra completed order a day, until the pans balance."
+  },
+  "ellis_level": {
+   "s": "ellis",
+   "e": "pleased",
+   "to": "player",
+   "glance": "balance",
+   "t": "Level. Twenty extra orders a day cover the labor — if each order adds three dollars.",
+   "en": "Level. Twenty extra orders a day cover the labor — if each order adds three dollars."
+  },
+  "ellis_play": {
+   "s": "ellis",
+   "e": "calm",
+   "to": "player",
+   "glance": "balance",
+   "t": "Try the assumptions yourself. Move the numbers and compare.",
+   "en": "Try the assumptions yourself. Move the numbers and compare."
+  },
+  "ellis_12": {
+   "s": "ellis",
+   "e": "worried",
+   "to": "priya",
+   "glance": "balance",
+   "t": "At twelve orders we lose eight thousand six hundred and forty dollars a year at this store.",
+   "sub": "At 12 orders we lose $8,640 a year at this store.",
+   "en": "At 12 orders we lose $8,640 a year at this store."
+  },
+  "ellis_26": {
+   "s": "ellis",
+   "e": "pleased",
+   "to": "all",
+   "glance": "balance",
+   "t": "We make six thousand four hundred and eighty dollars. Fourteen orders a day is all that separates a loss from a profit.",
+   "sub": "We make $6,480. Fourteen orders a day is all that separates a loss from a profit.",
+   "en": "We make $6,480. Fourteen orders a day is all that separates a loss from a profit."
+  },
+  "ellis_25": {
+   "s": "ellis",
+   "e": "curious",
+   "to": "player",
+   "glance": "balance",
+   "t": "Notice the break-even moved to twenty-four orders. A small assumption changes the decision.",
+   "sub": "Notice the break-even moved to 24 orders. A small assumption changes the decision.",
+   "en": "Notice the break-even moved to 24 orders. A small assumption changes the decision."
+  },
+  "ellis_contrib": {
+   "s": "ellis",
+   "e": "curious",
+   "to": "player",
+   "glance": "balance",
+   "t": "Notice how the break-even moved when the profit per order changed. A small assumption changes the decision.",
+   "en": "Notice how the break-even moved when the profit per order changed. A small assumption changes the decision."
+  },
+  "ellis_done": {
+   "s": "ellis",
+   "e": "calm",
+   "to": "priya",
+   "t": "All right, Priya — the numbers are in front of you now.",
+   "en": "All right, Priya — the numbers are in front of you now."
+  },
+  "priya_open": {
+   "s": "priya",
+   "e": "firm",
+   "to": "player",
+   "glance": "noor",
+   "t": "We need a recommendation today. What would make you keep it — or reverse it?",
+   "en": "We need a recommendation today. What would make you keep it — or reverse it?"
+  },
+  "p_rec_all": {
+   "s": "player",
+   "e": "confident",
+   "t": "I recommend adding staff across all stores now.",
+   "en": "I recommend adding staff across all stores now."
+  },
+  "p_rec_pilot": {
+   "s": "player",
+   "e": "confident",
+   "t": "I recommend a matched-store pilot first.",
+   "en": "I recommend a matched-store pilot first."
+  },
+  "p_rec_handoff": {
+   "s": "player",
+   "e": "calm",
+   "t": "I recommend keeping staffing steady and testing the pickup step first.",
+   "en": "I recommend keeping staffing steady and testing the pickup step first."
+  },
+  "noor_c_all": {
+   "s": "noor",
+   "e": "excited",
+   "to": "priya",
+   "t": "I can have every store's schedule ready from next week.",
+   "en": "I can have every store's schedule ready from next week."
+  },
+  "ellis_c_all": {
+   "s": "ellis",
+   "e": "worried",
+   "to": "priya",
+   "glance": "noor",
+   "t": "If the lift comes in lower than we hope, we lose money in every store.",
+   "en": "If the lift comes in lower than we hope, we lose money in every store."
+  },
+  "ellis_c_pilot": {
+   "s": "ellis",
+   "e": "confident",
+   "to": "all",
+   "t": "Same weeks, same peak hours. That's how we know the difference came from the labor.",
+   "en": "Same weeks, same peak hours. That's how we know the difference came from the labor."
+  },
+  "noor_c_handoff": {
+   "s": "noor",
+   "e": "calm",
+   "to": "priya",
+   "glance": "screen",
+   "t": "I'll try a simpler handoff at the shelf in one store, before any hiring.",
+   "en": "I'll try a simpler handoff at the shelf in one store, before any hiring."
+  },
+  "priya_match": {
+   "s": "priya",
+   "e": "pleased",
+   "to": "player",
+   "glance": "ellis",
+   "t": "That's a condition I can review in two months.",
+   "en": "That's a condition I can review in two months."
+  },
+  "priya_other": {
+   "s": "priya",
+   "e": "skeptical",
+   "to": "player",
+   "t": "It's a good condition, but it doesn't test the decision you made.",
+   "en": "It's a good condition, but it doesn't test the decision you made."
+  },
+  "priya_feel": {
+   "s": "priya",
+   "e": "firm",
+   "to": "player",
+   "t": "A feeling isn't a measurement. What exactly will you measure?",
+   "en": "A feeling isn't a measurement. What exactly will you measure?"
+  },
+  "priya_close": {
+   "s": "priya",
+   "e": "warm",
+   "to": "all",
+   "t": "Thank you. I have the memo.",
+   "en": "Thank you. I have the memo."
+  },
+  "nar_end": {
+   "s": "narrator",
+   "e": "news",
+   "t": "The published case asks managers to weigh service improvement against a forty-million-dollar yearly labor commitment. The store model you explored showed how the whole decision shifts when the order volume shifts.",
+   "en": "The published case asks managers to weigh service improvement against a forty-million-dollar yearly labor commitment. The store model you explored showed how the whole decision shifts when the order volume shifts."
+  }
+ }
+}

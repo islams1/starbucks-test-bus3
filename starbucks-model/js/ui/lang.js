@@ -1,4 +1,4 @@
-// English page texts (?lang=en). Voices stay Arabic; subtitles and UI switch to English.
+// English version (?lang=en): page texts here; voices, subtitles and lip-sync from data/lines.en.json + assets/vo/en.
 export const EN = new URLSearchParams(location.search).get('lang') === 'en';
 export function applyLanguage() {
   const $ = (s) => document.querySelector(s);

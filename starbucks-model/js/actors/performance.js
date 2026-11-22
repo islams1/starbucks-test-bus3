@@ -3,16 +3,16 @@
 // head tilt + raised brows on questions, emphasis on numbers, looking at people who are named, pointing at
 // things referred to ("انظر إلى هذا…"), shrugs on uncertainty, a thoughtful glance when weighing options.
 
-const strip = (w) => w.replace(/[ً-ْٰـ]/g, '').replace(/[«»"'،,.؟?!:؛…\-()]/g, '').trim();
+const strip = (w) => w.replace(/[ً-ْٰـ]/g, '').replace(/[«»"'’،,.؟?!:;؛…\-()—]/g, '').trim().toLowerCase();   // Arabic or English
 const base = (w) => { const s = strip(w); return s.length > 2 && /^[وف]/.test(s) ? [s, s.slice(1)] : [s]; };
 const set = (str) => new Set(str.split(' '));
-const NEG = set('لا لم لن ليس ليست لست ليسوا ممنوع');   // (دون/بلا mean "without": not a refusal)
-const AFF = set('نعم جيد تمام صحيح حسنا أكيد بالضبط ماشي عادل رائع ممتاز موافق طبعا فعلا شكرا');
-const QW = set('لماذا لمن هل كيف ماذا متى أين كم أي أيهما');
-const NUM = set('ثلاثة ثلاث أربعة أربع خمسة خمس ستة ست سبعة سبع ثمانية ثماني تسعة تسع عشرة عشر عشرين مئة مائة ألف ألفا بالمئة أضعاف نصف ربع خمسين وتسعين وعشرين مليون الثامنة السابعة التاسعة الخامسة العاشرة الأولى الثانية');
-const POINT = set('انظر هذا هذه الجدار الشاشة اللوحة');
-const THINK = set('أفضل دعني ربما أعتقد أظن لعل');
-const NAMES = {'نور': 'noor', 'إليس': 'ellis', 'بريا': 'priya', 'سلمى': 'salma'};
+const NEG = set('لا لم لن ليس ليست لست ليسوا ممنوع no not never dont doesnt didnt isnt arent wasnt wont cant cannot nobody nothing');   // (دون/بلا mean "without": not a refusal)
+const AFF = set('نعم جيد تمام صحيح حسنا أكيد بالضبط ماشي عادل رائع ممتاز موافق طبعا فعلا شكرا yes right good fine sure exactly okay great thanks thank correct absolutely agreed level');
+const QW = set('لماذا لمن هل كيف ماذا متى أين كم أي أيهما why who whom how what when where which whose');
+const NUM = set('ثلاثة ثلاث أربعة أربع خمسة خمس ستة ست سبعة سبع ثمانية ثماني تسعة تسع عشرة عشر عشرين مئة مائة ألف ألفا بالمئة أضعاف نصف ربع خمسين وتسعين وعشرين مليون الثامنة السابعة التاسعة الخامسة العاشرة الأولى الثانية one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred thousand million percent half twice');
+const POINT = set('انظر هذا هذه الجدار الشاشة اللوحة look this these here screen board wall');
+const THINK = set('أفضل دعني ربما أعتقد أظن لعل maybe perhaps probably think guess suppose');
+const NAMES = {'نور': 'noor', 'إليس': 'ellis', 'بريا': 'priya', 'سلمى': 'salma', noor: 'noor', ellis: 'ellis', priya: 'priya', salma: 'salma'};
 
 /**
  * @param text   line text
@@ -45,7 +45,7 @@ export function buildPerformance(text, words, ctx) {
     if (has(NEG)) {
       negSeen = true; lastNeg = i;
       const next = toks[i + 1] ? strip(toks[i + 1]) : '';
-      if (next === 'أعرف' || next === 'أدري') { push(t, 'shrug'); const e = ev[ev.length - 1]; if (e && e.type === 'shrug') e.words = true; }
+      if (next === 'أعرف' || next === 'أدري' || next === 'know' || next === 'sure') { push(t, 'shrug'); const e = ev[ev.length - 1]; if (e && e.type === 'shrug') e.words = true; }
       else push(t, 'shake');
     } else if (has(AFF) && i - lastNeg > 2) push(t, 'nod');   // "لا أعرف بالضبط" is not agreement
     else if (has(QW) && (isQuestion || i < 2)) push(t, 'tilt');

@@ -49,6 +49,30 @@ function visemeSeq(word) {
   return out.length ? out : [V.aa];
 }
 
+// ---- the same for English spelling: digraphs first (th, sh, ch, ph, ng, ck, ee, oo…), silent final e and gh,
+// doubled consonants once, c soft before e/i/y. Spelling is not sound, but the mouth shapes it gives are close.
+const EN_ONE = {b: V.PP, m: V.PP, p: V.PP, f: V.FF, v: V.FF, t: V.DD, d: V.DD, k: V.kk, g: V.kk, q: V.kk, j: V.CH, s: V.SS, z: V.SS,
+  n: V.nn, l: V.nn, r: V.RR, w: V.U, y: V.I, a: V.aa, e: V.E, i: V.I, o: V.O, u: V.U};
+const EN_TWO = {th: [V.TH], sh: [V.CH], ch: [V.CH], ph: [V.FF], ng: [V.nn], ck: [V.kk], qu: [V.kk, V.U], wh: [V.U], gh: [],
+  ee: [V.I], ea: [V.I], ie: [V.I], ey: [V.E, V.I], oo: [V.U], ou: [V.aa, V.U], ow: [V.O, V.U], ai: [V.E, V.I], ay: [V.E, V.I],
+  ei: [V.E, V.I], oa: [V.O], oi: [V.O, V.I], oy: [V.O, V.I], au: [V.O], aw: [V.O], er: [V.E, V.RR], ir: [V.E, V.RR], ur: [V.E, V.RR]};
+function visemeSeqEn(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g, ''), out = [];
+  for (let i = 0; i < w.length;) {
+    const two = w.slice(i, i + 2);
+    if (two === 'tc' && w[i + 2] === 'h') { out.push(V.CH); i += 3; continue; }
+    if (EN_TWO[two]) { out.push(...EN_TWO[two]); i += 2; continue; }
+    const ch = w[i];
+    if (ch === w[i - 1] && !'aeiou'.includes(ch)) { i++; continue; }                 // doubled consonant
+    if (ch === 'e' && i === w.length - 1 && w.length > 2) { i++; continue; }         // silent final e
+    if (ch === 'c') out.push('eiy'.includes(w[i + 1] || '') ? V.SS : V.kk);
+    else if (ch === 'x') out.push(V.kk, V.SS);
+    else if (ch !== 'h' && EN_ONE[ch] != null) out.push(EN_ONE[ch]);
+    i++;
+  }
+  return out.length ? out : [V.aa];
+}
+
 const KEEP_MORPHS = ['AA_VI_00_Sil', 'AA_VI_01_PP', 'AA_VI_02_FF', 'AA_VI_03_TH', 'AA_VI_04_DD', 'AA_VI_05_KK', 'AA_VI_06_CH', 'AA_VI_07_SS',
   'AA_VI_08_nn', 'AA_VI_09_RR', 'AA_VI_10_aa', 'AA_VI_11_E', 'AA_VI_12_I', 'AA_VI_13_O', 'AA_VI_14_U',
   'AK_09_EyeBlinkLeft', 'AK_10_EyeBlinkRight', 'AK_25_JawOpen', 'AK_44_MouthSmileLeft', 'AK_45_MouthSmileRight',
@@ -254,7 +278,7 @@ export class Character {
     if (!radio) { this._inhale = 0.42; breath(0.6); await new Promise(r => setTimeout(r, 300)); }
     const [voice, words] = await Promise.all([playVoice(url + '.mp3', getPos || (() => this.headPos()), {radio}), fetch(url + '.json').then(r => r.ok ? r.json() : []).catch(() => [])]);
     this.voice = voice;
-    this.words = words.map(([o, d, w]) => ({o: o / 1000, d: d / 1000, seq: visemeSeq(w)}));
+    this.words = words.map(([o, d, w]) => ({o: o / 1000, d: d / 1000, seq: /[a-z]/i.test(w) ? visemeSeqEn(w) : visemeSeq(w)}));   // English or Arabic spelling
     const loop = perf ? perf.loop : 'auto';
     const standingTalk = gesture && this.o.talkAnims && !this.seated && !this.walking && loop !== 'none';
     let prev = null;

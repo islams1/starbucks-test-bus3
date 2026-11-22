@@ -1,6 +1,6 @@
-"""Generate neural Arabic voice-over for every line in data/lines.<lang>.json using edge-tts.
+"""Generate neural voice-over (Arabic or English) for every line in data/lines.<lang>.json using edge-tts.
 Writes assets/vo/<lang>/<id>.mp3 (skips existing unless text changed: hash stored in manifest).
-Run inside starbucks-40m/:  python -I tools/gen_voice.py ar
+Run inside starbucks-model/:  python -I tools/gen_voice.py ar   (or: en)
 """
 import asyncio, hashlib, json, os, sys
 import edge_tts

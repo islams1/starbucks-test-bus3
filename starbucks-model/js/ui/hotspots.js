@@ -3,7 +3,8 @@
 import * as THREE from 'three';
 import {camera, onUpdate} from '../core/engine.js';
 import {sfx} from '../core/audio.js';
-import {VIEW} from './view.js';
+import {VIEW, mouseLocked, modalOpen} from './view.js';
+const EN = new URLSearchParams(location.search).get('lang') === 'en';
 
 const ICONS = {
   card: '<rect x="4" y="6" width="16" height="12" rx="1.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M7 10h10M7 14h6" stroke="#fff" stroke-width="1.5"/>',
@@ -20,14 +21,14 @@ export const hotspots = new Map();
 let busy = false;
 const _v = new THREE.Vector3();
 
-/** add({id, label, icon, pos: () => Vector3 | null, modes: ['seat','cafe'], when: () => bool, use: async () => {}, dock: true}) */
+/** add({id, label, icon, pos: () => Vector3 | null, modes: ['seat','cafe','walk'], when: () => bool, use: async () => {}, dock: true}) */
 export function addHotspot(h) {
   const el = document.createElement('button'); el.className = 'hs'; el.type = 'button'; el.setAttribute('aria-label', h.label);
   el.innerHTML = `<span class="hs-ring"><svg viewBox="0 0 24 24">${ICONS[h.icon] || ICONS.card}</svg></span><span class="hs-label">${h.label}</span>`;
   el.style.display = 'none'; layer.appendChild(el);
   const db = document.createElement('button'); db.className = 'dk'; db.type = 'button'; db.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[h.icon] || ICONS.card}</svg><span>${h.label}</span>`; db.style.display = 'none';
   if (h.dock !== false) dock.appendChild(db);
-  const rec = Object.assign({modes: ['seat', 'cafe'], when: () => true, done: false}, h, {el, db, visible: false});
+  const rec = Object.assign({modes: ['seat', 'cafe', 'walk'], when: () => true, done: false}, h, {el, db, visible: false});
   const go = (e) => { e.stopPropagation(); trigger(rec); };
   el.addEventListener('click', go); db.addEventListener('click', go);
   hotspots.set(h.id, rec);
@@ -51,10 +52,23 @@ onUpdate(() => {
     const p = on && h.pos ? (typeof h.pos === 'function' ? h.pos() : h.pos) : null;
     if (p) {
       _v.copy(p).project(camera);
-      if (_v.z < 1 && Math.abs(_v.x) < 0.96 && Math.abs(_v.y) < 0.92) { vis = true; h.el.style.left = (_v.x * 0.5 + 0.5) * W + 'px'; h.el.style.top = (-_v.y * 0.5 + 0.5) * H + 'px'; }
+      if (_v.z < 1 && Math.abs(_v.x) < 0.96 && Math.abs(_v.y) < 0.92) { vis = true; h.sx = (_v.x * 0.5 + 0.5) * W; h.sy = (-_v.y * 0.5 + 0.5) * H; h.el.style.left = h.sx + 'px'; h.el.style.top = h.sy + 'px'; }
     }
     if (vis !== h.visible) { h.visible = vis; h.el.style.display = vis ? 'flex' : 'none'; }
     const dv = on ? '' : 'none'; if (h.db.style.display !== dv) h.db.style.display = dv;
   }
   dock.classList.toggle('empty', ![...hotspots.values()].some(h => h.db.style.display !== 'none' && h.db.isConnected));
+  // on foot in the café: the thing nearest the middle of the view (the cross) is the one E or a click acts on
+  let best = null, bd = Math.min(W, H) * 0.16;
+  if ((VIEW.mode === 'walk' || VIEW.mode === 'seat' && mouseLocked()) && !busy && !modalOpen()) for (const h of hotspots.values()) {
+    if (!h.visible) continue;
+    const d = Math.hypot(h.sx - W / 2, h.sy - H / 2); if (d < bd) { bd = d; best = h; }
+  }
+  if (best !== aimed) { if (aimed) aimed.el.classList.remove('aim'); aimed = best; if (aimed) aimed.el.classList.add('aim'); }
+  aimTip.classList.toggle('hidden', !aimed);
+  if (aimed) aimTip.innerHTML = `<kbd>E</kbd> ${aimed.label}`;
 });
+let aimed = null;
+const aimTip = document.createElement('div'); aimTip.id = 'aimtip'; aimTip.className = 'hidden'; document.body.appendChild(aimTip);
+addEventListener('keydown', (e) => { if (e.code === 'KeyE' && !e.repeat && aimed && (VIEW.mode === 'walk' || VIEW.mode === 'seat') && !(e.target.closest && e.target.closest('input,textarea'))) trigger(aimed); });
+addEventListener('mousedown', (e) => { if (e.button === 0 && mouseLocked() && aimed) trigger(aimed); });

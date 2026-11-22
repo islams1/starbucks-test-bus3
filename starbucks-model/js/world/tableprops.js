@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import {scene, camera, onUpdate} from '../core/engine.js';
 import {canvasTex} from './materials.js';
 import {TABLE} from './room.js';
+import {mug} from './cafeprops.js';
 
 const Y = TABLE.y;
 export const TP = {};
@@ -63,12 +64,7 @@ export function buildTableProps() {
   TP.memo = flat(0.15, 0.2, paperM(memoT), 0.36, 0.52, -0.12, Y + 0.004);
   const pen = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.14, 10), new THREE.MeshStandardMaterial({color: 0x1d1e20, roughness: 0.3, metalness: 0.6})); pen.rotation.z = Math.PI / 2; pen.rotation.y = 0.5; pen.position.set(0.48, Y + 0.0045, 0.5); pen.castShadow = true; scene.add(pen); TP.pen = pen;
   // coffee at each place
-  const mugM = new THREE.MeshStandardMaterial({color: 0xf1ede5, roughness: 0.35}), coffeeM = new THREE.MeshStandardMaterial({color: 0x2b1a10, roughness: 0.15});
-  for (const [x, z] of [[0.66, 0.4], [-0.7, -0.55], [1.12, -0.6], [1.95, 0.3]]) {
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.036, 0.09, 20), mugM); m.position.set(x, Y + 0.045, z); m.castShadow = true; scene.add(m);
-    const c = new THREE.Mesh(new THREE.CircleGeometry(0.036, 20), coffeeM); c.rotation.x = -Math.PI / 2; c.position.set(x, Y + 0.08, z); scene.add(c);
-    const h = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.006, 8, 16, Math.PI), mugM); h.position.set(x + 0.04, Y + 0.05, z); h.rotation.z = -Math.PI / 2; scene.add(h);
-  }
+  [[0.66, 0.4, 0.4], [-0.7, -0.55, 2.6], [1.12, -0.6, 1.7], [1.95, 0.3, 3.4]].forEach(([x, z, ry], i) => { const m = mug({dark: i === 2}); m.position.set(x, Y, z); m.rotation.y = ry; scene.add(m); });
   // the pilot route's two calendar cards (hidden until then): test store and comparison store, the same weeks
   TP.calendars = [0, 1].map(i => {
     const t = canvasTex(400, 300, (g, w, h) => {

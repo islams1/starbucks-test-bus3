@@ -1,0 +1,7 @@
+[
+ ["waitjs", "window.__S && __S.scene === 1 && __VIEW.mode === 'walk' && document.getElementById('objtext').textContent.length > 0 && !document.body.classList.contains('hs-busy')", 200], ["wait", 1.5],
+ ["eval", "(() => { const d = __C.noor.headPos().clone().add(new __THREE.Vector3(0, -0.5, 0)).sub(__camera.position); __VIEW.yaw = Math.atan2(-d.x, -d.z); __VIEW.pitch = Math.asin(d.y / d.length()); return 1; })()"],
+ ["wait", 0.8], ["eval", "document.getElementById('aimtip').textContent"], ["shot", "aim_noor.png"],
+ ["key", "KeyE"], ["wait", 1.2],
+ ["eval", "JSON.stringify({qcard: !document.getElementById('qcard').classList.contains('hidden')})"], ["shot", "aim_card.png"]
+]

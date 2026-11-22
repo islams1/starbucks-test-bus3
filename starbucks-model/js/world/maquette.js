@@ -8,6 +8,9 @@ import {scene, onUpdate, damp} from '../core/engine.js';
 import {model} from '../core/assets.js';
 import {pbr, canvasTex} from './materials.js';
 import {mergeStatic} from './merge.js';
+import {espresso, grinder, syrups, wallClock, setClockTime, notice, paperCup, cupStack} from './cafeprops.js';
+import {buildCounter2002, bakeryCase, register2002, tipJar, condiments, fridge2002, menuBoard2002, menuFrame, specialsBoard, graniteMaterial, cherryMaterial} from './cafe2002.js';
+const EN = new URLSearchParams(location.search).get('lang') === 'en';
 
 export const SCALE = 1;
 export const CAFE_POS = new THREE.Vector3(60, 0, 0);
@@ -71,16 +74,8 @@ export const cafeMaterials = M;
 
 // ---------------------------------------------------------------- live props: tickets on the rail, cups on the shelf, clock
 const tickets = [], shelfCups = [];
-let clockTex = null, clockMin = 8 * 60 + 10;
-function drawClock(g, w, h) {
-  g.fillStyle = '#f8f6f1'; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 4, 0, 7); g.fill();
-  g.strokeStyle = '#222'; g.lineWidth = 8; g.stroke();
-  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g.lineWidth = 6; g.beginPath(); g.moveTo(w / 2 + Math.sin(a) * w * 0.38, h / 2 - Math.cos(a) * h * 0.38); g.lineTo(w / 2 + Math.sin(a) * w * 0.45, h / 2 - Math.cos(a) * h * 0.45); g.stroke(); }
-  const hr = (clockMin / 60) % 12, mi = clockMin % 60;
-  const hand = (a, L, wd) => { g.lineWidth = wd; g.lineCap = 'round'; g.beginPath(); g.moveTo(w / 2, h / 2); g.lineTo(w / 2 + Math.sin(a) * L, h / 2 - Math.cos(a) * L); g.stroke(); };
-  hand(hr / 12 * Math.PI * 2, w * 0.24, 12); hand(mi / 60 * Math.PI * 2, w * 0.36, 8);
-}
-export function setModelClock(min) { clockMin = min; MQ.clockMin = min; if (clockTex) { const c = clockTex.image; drawClock(c.getContext('2d'), c.width, c.height); clockTex.needsUpdate = true; } }
+let clockMin = 8 * 60 + 10;
+export function setModelClock(min) { clockMin = min; MQ.clockMin = min; setClockTime(min); }
 /** n tickets clipped to the order rail (while the player is reading the rail by hand it stays as it is) */
 export function setTickets(n) { MQ.ticketCount = n; if (MQ.ticketsHeld) return; tickets.forEach((t, i) => { t.visible = i < n; }); }
 /** the tickets: the first clipped (index 0, nearest the register end) is the oldest order still waiting at 8:10 */
@@ -93,8 +88,7 @@ MQ.tickets = tickets;
 export function setShelfCups(n) { shelfCups.forEach((c, i) => { c.visible = i < n; }); MQ.cupCount = n; }
 export const shelfCupCount = () => MQ.cupCount || 0;
 function makeCup(parent, x, y, z) {
-  const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g);
-  cyl(g, 0.045, 0.036, 0.13, M.cup, 0, 0.065, 0, 14); cyl(g, 0.048, 0.048, 0.016, M.lid, 0, 0.138, 0, 14); cyl(g, 0.0465, 0.041, 0.05, M.sleeve, 0, 0.07, 0, 14);
+  const g = paperCup(); g.position.set(x, y, z); g.rotation.y = Math.random() * Math.PI * 2; parent.add(g);
   return g;
 }
 /** a cup for someone's right hand (in the hand bone's frame: Rocketbox bones are in centimetres) */
@@ -158,7 +152,7 @@ function buildMarks() {
   const g = new THREE.Group(); g.visible = false; R.add(g); marks.handoff = g;
   box(g, 1.4, 0.06, 0.5, M.oak, -4.55, 1.0, -0.65);
   box(g, 0.06, 1.0, 0.06, M.black, -5.15, 0.5, -0.65);
-  const sign = canvasTex(512, 160, (c, w, h) => { c.fillStyle = '#2f4a3f'; c.fillRect(0, 0, w, h); c.fillStyle = '#f2efe6'; c.font = '600 64px "IBM Plex Sans Arabic"'; c.textAlign = 'center'; c.fillText('نقطة تسليم', w / 2, 104); });
+  const sign = canvasTex(512, 160, (c, w, h) => { c.fillStyle = '#2f4a3f'; c.fillRect(0, 0, w, h); c.fillStyle = '#f2efe6'; c.font = '600 64px "IBM Plex Sans Arabic", Inter, sans-serif'; c.textAlign = 'center'; c.fillText(EN ? 'Handoff point' : 'نقطة تسليم', w / 2, 104); });
   plane(g, 1.2, 0.38, new THREE.MeshStandardMaterial({map: sign, roughness: 0.6}), -4.55, 1.6, -0.62);
   const l = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), new THREE.MeshStandardMaterial({color: 0xfff1d6, emissive: 0xffc27a, emissiveIntensity: 2})); l.position.set(-4.55, 2.05, -0.62); g.add(l);
 }
@@ -193,28 +187,38 @@ export async function buildMaquette() {
   MQ.door = doorG;
   box(R, 1.17, 0.12, 0.14, M.black, 4.2, 2.44, fz);
   // a sign over the door (unbranded)
-  const st = canvasTex(1024, 200, (g, w, h) => { g.fillStyle = '#2f4a3f'; g.fillRect(0, 0, w, h); g.fillStyle = '#f2efe6'; g.font = '600 110px "IBM Plex Sans Arabic"'; g.textAlign = 'center'; g.fillText('مقهى الميدان', w / 2, 140); });
+  const st = canvasTex(1024, 200, (g, w, h) => { g.fillStyle = '#2f4a3f'; g.fillRect(0, 0, w, h); g.fillStyle = '#f2efe6'; g.font = '600 110px "IBM Plex Sans Arabic", Inter, sans-serif'; g.textAlign = 'center'; g.fillText(EN ? 'Al-Midan Café' : 'مقهى الميدان', w / 2, 140); });
   plane(R, 3.2, 0.62, new THREE.MeshStandardMaterial({map: st, roughness: 0.6}), -1.0, WH - 0.25, z1 + 0.23);
   // ---------------------------------------------------------------- counter, bar, back counter
   const CZ0 = -1.9, CZ1 = -1.2, CX0 = -4.0, CX1 = 2.6;
-  box(R, CX1 - CX0, 1.0, CZ1 - CZ0, M.counterFront, (CX0 + CX1) / 2, 0.5, (CZ0 + CZ1) / 2, {uv: [CX1 - CX0, 1]});
-  box(R, CX1 - CX0 + 0.06, 0.05, CZ1 - CZ0 + 0.08, M.marble, (CX0 + CX1) / 2, 1.025, (CZ0 + CZ1) / 2 + 0.02, {uv: [CX1 - CX0, 1]});
-  box(R, 7.8, 0.92, 0.62, M.backCounter, -0.8, 0.46, -3.45);
-  box(R, 7.8, 0.04, 0.66, M.marble, -0.8, 0.94, -3.45, {uv: [7.8, 0.66]});
-  for (const x of [-1.6, -0.2]) { const g = new THREE.Group(); g.position.set(x, 0.96, -3.45); R.add(g); box(g, 0.9, 0.5, 0.55, M.steel, 0, 0.25, 0); box(g, 0.92, 0.06, 0.57, M.black, 0, 0.53, 0); for (const dx of [-0.25, 0.25]) cyl(g, 0.05, 0.05, 0.12, M.black, dx, 0.12, 0.3, 10); }
-  cyl(R, 0.12, 0.14, 0.45, M.black, 0.9, 1.18, -3.5, 14); cyl(R, 0.12, 0.08, 0.2, M.steel, 0.9, 1.5, -3.5, 14);
-  for (let i = 0; i < 4; i++) makeCup(R, 1.5 + (i % 2) * 0.12, 0.96 + Math.floor(i / 2) * 0.13, -3.4);
-  box(R, 1.0, 2.0, 0.7, M.steel, 3.6, 1.0, -3.4);
-  const reg = new THREE.Group(); reg.position.set(2.0, 1.05, -1.62); R.add(reg); box(reg, 0.08, 0.25, 0.08, M.black, 0, 0.12, 0); const scr = box(reg, 0.42, 0.3, 0.03, M.black, 0, 0.32, 0.03); scr.rotation.x = -0.35;
-  const menu = canvasTex(1024, 320, (g, w, h) => {
-    g.fillStyle = '#20231f'; g.fillRect(0, 0, w, h); g.fillStyle = '#efe9db'; g.textAlign = 'center'; g.font = '600 56px "IBM Plex Sans Arabic"';
-    ['قهوة', 'لاتيه', 'كابتشينو', 'شاي'].forEach((t, i) => g.fillText(t, 140 + i * 250, 130));
-    g.font = '500 40px Inter'; g.fillStyle = '#c8b38a'; ['2.50', '3.75', '3.75', '2.25'].forEach((t, i) => g.fillText(t, 140 + i * 250, 220));
-  });
-  const mb = plane(R, 4.2, 1.3, new THREE.MeshStandardMaterial({map: menu, roughness: 0.7}), -0.6, 2.25, z0 + 0.02);
-  clockTex = canvasTex(256, 256, () => {});
-  const ck = new THREE.Mesh(new THREE.CircleGeometry(0.42, 32), new THREE.MeshStandardMaterial({map: clockTex, roughness: 0.5})); ck.position.set(2.6, 2.35, z0 + 0.02); R.add(ck);
+  // the customers' counter, as cafés built them around 2002: cherry raised-panel cabinetry, tan-brown granite
+  buildCounter2002(R, {x0: CX0, x1: CX1, zb: CZ0, zf: CZ1});
+  // the back counter (the barista's): the same cherry doors, the same granite
+  box(R, 7.8, 0.92, 0.62, cherryMaterial(), -0.8, 0.46, -3.45);
+  for (let x = -4.6; x < 3.0; x += 0.6) box(R, 0.004, 0.78, 0.004, M.black, x, 0.47, -3.137, {cast: false});
+  box(R, 7.86, 0.035, 0.68, graniteMaterial(), -0.8, 0.94, -3.44, {uv: [7.86 / 1.1, 0.68 / 1.1]});
+  await Promise.all([
+    espresso(R, -0.9, 0.96, -3.5, 0),                                                    // where the barista works (SPOTS.barMachine)
+    bakeryCase(R, {xa: 0.35, xb: 1.3, zf: CZ1, zb: CZ0 + 0.05, y: 1.05}),                  // set into the counter, curved glass to the customer
+  ]);
+  register2002(R, 2.0, 1.05, -1.62);                                                     // drawer, cashier's screen, green pole display, card swipe
+  tipJar(R, 2.48, 1.05, -1.33);
+  condiments(R, -2.55, 1.05, -1.36);
+  grinder(R, -0.15, 0.96, -3.5); grinder(R, 0.25, 0.96, -3.5);
+  syrups(R, -2.95, 0.96, -3.56, 6);
+  for (const [x, n] of [[1.45, 7], [1.62, 6], [1.79, 8]]) { const s = cupStack(n); s.position.set(x, 0.96, -3.42); R.add(s); }
+  for (let i = 0; i < 3; i++) makeCup(R, 2.15 + i * 0.13, 0.96, -3.36);
+  fridge2002(R, 3.6, -3.42, 0.78, 2.0, 0.72);
+  // the menu of the time in a wooden frame: small / medium / large prices of 2002, and the way through the shop
+  const mb = plane(R, 4.2, 1.31, new THREE.MeshStandardMaterial({map: menuBoard2002(), roughness: 0.85, color: 0xb9b0a0}), -0.6, 2.47, z0 + 0.03);   // a matt print, kept under the bloom threshold (no glow over the letters)
+  menuFrame(R, -0.6, 2.47, z0 + 0.025, 4.2, 1.31);
+  // the day's offers, in chalk, on the wall by the line
+  specialsBoard(R, x1 - 0.015, 1.6, -0.95, -Math.PI / 2);
+  // the clock runs from the hour of the period shown; the promise behind the bar; the pick-up notice by the shelf
+  const ck = await wallClock(R, 2.75, 2.45, z0 + 0.03, 0, 0.6);
   setModelClock(clockMin);
+  notice(R, -3.75, 1.72, z0 + 0.025, 0, EN ? ['Our promise', 'Your drink in about 3 minutes.', 'Made right, every time.'] : ['وعدنا', 'مشروبك خلال 3 دقائق تقريبًا.', 'مصنوع صحيحًا، في كل مرة.']);
+  notice(R, x0 + 0.012, 1.55, -0.35, Math.PI / 2, EN ? ['Pick-up', 'Drinks are made in the order they were paid for.', 'Please wait here: we call your name and number.'] : ['الاستلام', 'نحضّر المشروبات بترتيب الدفع.', 'انتظر هنا من فضلك: ننادي اسمك ورقمك.'], {w: 0.28, head: '#8a5a2e'});
   // pendant lamps over the counter and the tables
   for (const [x, z] of [[-3.3, -1.55], [-1.3, -1.55], [0.7, -1.55], [2.2, -1.55], [-3.0, 1.6], [-0.9, 1.6], [1.0, 2.4]]) {
     cyl(R, 0.006, 0.006, 0.75, M.black, x, WH - 0.375, z, 4);
@@ -234,7 +238,7 @@ export async function buildMaquette() {
   box(R, 1.3, 0.05, 0.36, M.oak, -3.35, 1.32, -1.25);
   for (const x of [-3.95, -2.75]) box(R, 0.04, 0.27, 0.04, M.steel, x, 1.18, -1.25);
   for (let i = 0; i < 6; i++) shelfCups.push(makeCup(R, -3.85 + i * 0.2, 1.345, -1.25));
-  const ps = canvasTex(512, 160, (g, w, h) => { g.fillStyle = '#2f4a3f'; g.fillRect(0, 0, w, h); g.fillStyle = '#f2efe6'; g.font = '600 72px "IBM Plex Sans Arabic"'; g.textAlign = 'center'; g.fillText('الاستلام', w / 2, 108); });
+  const ps = canvasTex(512, 160, (g, w, h) => { g.fillStyle = '#2f4a3f'; g.fillRect(0, 0, w, h); g.fillStyle = '#f2efe6'; g.font = '600 72px "IBM Plex Sans Arabic", Inter, sans-serif'; g.textAlign = 'center'; g.fillText(EN ? 'Pickup' : 'الاستلام', w / 2, 108); });
   plane(R, 1.1, 0.34, new THREE.MeshStandardMaterial({map: ps, roughness: 0.6, side: THREE.DoubleSide}), -3.27, 2.02, -1.28);
   box(R, 0.04, 1.1, 0.04, M.black, -2.68, 1.6, -1.3);
   MQ.anchors.pickup = P(-3.35, 1.4, -1.0);
@@ -257,7 +261,7 @@ export async function buildMaquette() {
   Object.assign(MQ.anchors, {center: P(0, 1.2, 0.0), counter: P(0, 1.2, -1.5), door: P(4.2, 1.4, 3.8)});
   R.position.copy(CAFE_POS);
   scene.add(R); R.updateMatrixWorld(true);
-  mergeStatic(R, {cell: 8, exclude: [MQ.live, figs, doorG, ...tickets, ...shelfCups, ...Object.values(marks), mb, ck]});
+  mergeStatic(R, {cell: 8, exclude: [MQ.live, figs, doorG, ...tickets, ...shelfCups, ...Object.values(marks), mb, ck].filter(Boolean)});
   setTickets(9); setShelfCups(3);
   return R;
 }
@@ -270,7 +274,7 @@ function ticketTex(i) {
     g.strokeStyle = '#c9c1b0'; g.lineWidth = 2; g.setLineDash([6, 5]); g.beginPath(); g.moveTo(10, 56); g.lineTo(w - 10, 56); g.stroke(); g.setLineDash([]);
     g.fillStyle = '#1f2a44'; g.font = '700 56px Inter'; g.textAlign = 'center'; g.fillText(T.at, w / 2, 122);
     g.fillStyle = '#6b604c'; g.font = '500 18px Inter'; g.fillText('AM', w / 2, 146);
-    g.fillStyle = '#2b2a26'; g.font = '600 24px "IBM Plex Sans Arabic"'; g.fillText(T.drink[0], w / 2, 192);
+    g.fillStyle = '#2b2a26'; g.font = '600 24px "IBM Plex Sans Arabic", Inter, sans-serif'; g.fillText(T.drink[EN ? 1 : 0], w / 2, 192);
     g.fillStyle = '#999'; for (let k = 0; k < 2; k++) g.fillRect(24, 214 + k * 14, 60 + ((i * 37 + k * 23) % 50), 4);
   });
 }

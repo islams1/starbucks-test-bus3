@@ -26,7 +26,8 @@ player can step into the replay (a full-size café rendered live into the screen
    rubric out of 3 (peak-specific observation, cost tied to contribution, matching condition); practice attempts after.
 
 - Run: `python -I tools/devserver.py` (inside this folder), then open http://127.0.0.1:8792/index.html
-  - `?lang=en` English subtitles and UI · `?still` still frames (also with prefers-reduced-motion / the no-GPU level)
+  - `en.html` (or `?lang=en`) the full English version: English voices (with English lip-sync and gestures), subtitles, UI, and
+    the texts inside the replay (signs, menu, tickets, the balance) · `?still` still frames (also with prefers-reduced-motion / the no-GPU level)
   - `?dev=view` look at the set with the replay running (`__enter('rail')`, `__seat()`, `__period('off')`,
     `__shot('pickup')`, `__watch(true)`, `__line('noor_rail')`); `__gaze()` prints who looks at whom
   - `?dev=s1` / `s2` / `s3` / `debrief` jump to a scene
@@ -57,7 +58,8 @@ player can step into the replay (a full-size café rendered live into the screen
   pad, calendars), `lighting.js`; `js/story/replay.js` (the people in the café), `gaze.js`, `flow.js` (the scenes),
   `score.js` (arithmetic + rubric), `tablet.js`, `memo.js`, `debrief.js`; `js/ui/view.js` (seat / inside the replay /
   director camera), `hotspots.js` (rings + the dock of buttons).
-- Voices: `data/lines.ar.json`, `python -I tools/gen_voice.py ar`.
+- Voices: `data/lines.ar.json` / `data/lines.en.json`, then `python -I tools/gen_voice.py ar` (or `en`). In the English
+  file `t` is what is spoken (figures as words) and `sub` the subtitle. `tools/drive_full_en.json` plays it in English.
 
 Historical facts: Harvard Business Publishing case 504-016 (premise only, from the public listing) and the Starbucks
 FY2002 Form 10-K (5,886 stores). Everything else — the store, its recording, people, dialogue, figures — is

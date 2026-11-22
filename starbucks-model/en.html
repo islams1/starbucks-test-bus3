@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Store on the Table — English</title>
+<script>
+  // the English version: the same game with ?lang=en (voices, lip-sync, subtitles, UI and the texts inside the café)
+  var q = new URLSearchParams(location.search); q.set('lang', 'en');
+  location.replace('index.html?' + q.toString());
+</script>
+</head>
+<body style="background:#000;color:#ccc;font-family:sans-serif">
+<p><a href="index.html?lang=en" style="color:#d9b26f">Open the English version</a></p>
+</body>
+</html>

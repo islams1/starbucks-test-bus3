@@ -316,10 +316,10 @@ export const GAME_GLASS = [
   ['#menu .menu-card', 'card', 0], ['#howto .howto-card', 'card', 0], ['#pause .menu-card', 'card', 0], ['#gfx .gx-card', 'card', 0],
   ['#tray .tray-in', 'card', 0], ['#card .cmp-col', 'card', 0], ['#card .qz', 'card', 0], ['#card .sc', 'card', 0], ['#card .cr', 'card', 0],
   ['#panel .memo-doc', 'card', 0],
-  ['#objective', 'card', 1], ['#subs #subtext', 'floating', 1], ['#toasts .toast', 'floating', 1], ['#choicelist .choice', 'floating', 1],
+  ['#objective', 'card', 1], ['#progress', 'card', 1], ['#subs #subtext', 'floating', 1], ['#toasts .toast', 'floating', 1], ['#choicelist .choice', 'floating', 1],
   ['#panel .mcard', 'floating', 1], ['.coach-tip', 'floating', 1],
   ['#calendar', 'clock', 2],
-  ['#scenetag', 'pill', 3], ['#subs .who', 'pill', 3], ['#tasks li', 'pill', 3, 12], ['#clicktolock', 'pill', 3], ['.hs .hs-label', 'pill', 4],
+  ['#scenetag', 'pill', 3], ['#subs .who', 'pill', 3], ['#tasks li', 'pill', 3, 12], ['#clicktolock', 'pill', 3], ['#lockhint', 'pill', 3], ['#aimtip', 'pill', 2], ['.hs .hs-label', 'pill', 4],
 ];
 // the game elements a card can lie over (their text would show through a card sharp: cut holes in them)
 const UNDER = '#hud > *, #tasks li, #hotspots .hs, #subs, #choices';
