@@ -45,13 +45,13 @@ export function buildPerformance(text, words, ctx) {
     if (has(NEG)) {
       negSeen = true; lastNeg = i;
       const next = toks[i + 1] ? strip(toks[i + 1]) : '';
-      if (next === 'أعرف' || next === 'أدري') push(t, 'shrug');
+      if (next === 'أعرف' || next === 'أدري') { push(t, 'shrug'); const e = ev[ev.length - 1]; if (e && e.type === 'shrug') e.words = true; }
       else push(t, 'shake');
     } else if (has(AFF) && i - lastNeg > 2) push(t, 'nod');   // "لا أعرف بالضبط" is not agreement
     else if (has(QW) && (isQuestion || i < 2)) push(t, 'tilt');
     else if (has(NUM) || /\d/.test(tok)) push(t, 'emph');
     else if (has(POINT) && ctx.pointTarget) push(t, 'point');
-    else if (has(THINK)) push(t, 'think');
+    else if (has(THINK) && !ctx.seated) push(t, 'think');
     // clause ends: a small nod on statements, a lift + tilt on questions
     if (/[.!]$/.test(tok) && i < T - 1) push(endAt(i) - 0.05, 'nod');
     if (/[؟?]$/.test(tok)) push(endAt(i) - 0.15, 'tilt');
@@ -67,6 +67,8 @@ export function buildPerformance(text, words, ctx) {
   let loop = 'auto';
   if (T <= 5) loop = 'none';
   if (ev.some(e => e.type === 'point') && !ctx.seated) loop = 'present';
-  if (['unsure', 'skeptical', 'annoyed'].includes(ctx.emotion) && T <= 6 && !ev.some(e => e.type === 'shrug')) ev.unshift({t: Math.max(0.2, at(0)), type: 'shrug'});
+  if (!ctx.seated && ['unsure', 'skeptical', 'annoyed'].includes(ctx.emotion) && T <= 6 && !ev.some(e => e.type === 'shrug')) ev.unshift({t: Math.max(0.2, at(0)), type: 'shrug'});
+  // seated at the table the hands stay where they are: only the head carries the beats (a shrug only when the words say "I don't know")
+  if (ctx.seated) return {events: ev.filter(e => e.type !== 'point' && (e.type !== 'shrug' || e.words)), loop: 'none'};
   return {events: ev, loop};
 }

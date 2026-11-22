@@ -81,8 +81,14 @@ function drawClock(g, w, h) {
   hand(hr / 12 * Math.PI * 2, w * 0.24, 12); hand(mi / 60 * Math.PI * 2, w * 0.36, 8);
 }
 export function setModelClock(min) { clockMin = min; MQ.clockMin = min; if (clockTex) { const c = clockTex.image; drawClock(c.getContext('2d'), c.width, c.height); clockTex.needsUpdate = true; } }
-/** n tickets clipped to the order rail */
-export function setTickets(n) { tickets.forEach((t, i) => { t.visible = i < n; }); MQ.ticketCount = n; }
+/** n tickets clipped to the order rail (while the player is reading the rail by hand it stays as it is) */
+export function setTickets(n) { MQ.ticketCount = n; if (MQ.ticketsHeld) return; tickets.forEach((t, i) => { t.visible = i < n; }); }
+/** the tickets: the first clipped (index 0, nearest the register end) is the oldest order still waiting at 8:10 */
+const DRINKS = [['لاتيه كبير', 'Large latte'], ['كابتشينو', 'Cappuccino'], ['أمريكانو مثلج', 'Iced americano'], ['موكا', 'Mocha'], ['لاتيه فانيلا', 'Vanilla latte'], ['شاي بالحليب', 'Chai latte'],
+  ['إسبريسو مزدوج', 'Double espresso'], ['فلات وايت', 'Flat white'], ['كراميل مثلج', 'Iced caramel'], ['لاتيه', 'Latte'], ['موكا بيضاء', 'White mocha'], ['شاي أخضر', 'Green tea']];
+const AT = [3, 4, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11];
+export const ticketInfo = (i) => ({i, no: 41 + i, at: '8:' + String(AT[i]).padStart(2, '0'), waited: 10 - AT[i], drink: DRINKS[i]});
+MQ.tickets = tickets;
 /** n finished drinks waiting on the pickup shelf */
 export function setShelfCups(n) { shelfCups.forEach((c, i) => { c.visible = i < n; }); MQ.cupCount = n; }
 export const shelfCupCount = () => MQ.cupCount || 0;
@@ -256,9 +262,16 @@ export async function buildMaquette() {
   return R;
 }
 function ticketTex(i) {
-  return canvasTex(64, 96, (g, w, h) => {
-    g.fillStyle = '#fbf8f0'; g.fillRect(0, 0, w, h); g.fillStyle = '#3a3a3a'; g.font = '700 20px Inter'; g.fillText('#' + (41 + i), 6, 22);
-    g.fillStyle = '#999'; for (let k = 0; k < 4; k++) g.fillRect(6, 36 + k * 14, 30 + Math.random() * 22, 4);
+  // readable when the ticket is pulled off the rail and held up: number, order time, the drink
+  const T = ticketInfo(i);
+  return canvasTex(160, 256, (g, w, h) => {
+    g.fillStyle = '#fbf8f0'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#3a3a3a'; g.font = '700 34px Inter'; g.textAlign = 'left'; g.fillText('#' + T.no, 12, 40);
+    g.strokeStyle = '#c9c1b0'; g.lineWidth = 2; g.setLineDash([6, 5]); g.beginPath(); g.moveTo(10, 56); g.lineTo(w - 10, 56); g.stroke(); g.setLineDash([]);
+    g.fillStyle = '#1f2a44'; g.font = '700 56px Inter'; g.textAlign = 'center'; g.fillText(T.at, w / 2, 122);
+    g.fillStyle = '#6b604c'; g.font = '500 18px Inter'; g.fillText('AM', w / 2, 146);
+    g.fillStyle = '#2b2a26'; g.font = '600 24px "IBM Plex Sans Arabic"'; g.fillText(T.drink[0], w / 2, 192);
+    g.fillStyle = '#999'; for (let k = 0; k < 2; k++) g.fillRect(24, 214 + k * 14, 60 + ((i * 37 + k * 23) % 50), 4);
   });
 }
 /** world position of a café-frame anchor (for hotspots / camera shots) */

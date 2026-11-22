@@ -27,6 +27,7 @@ import {startSound, muteAmbience, coin, slide, whoosh} from './sound.js';
 import {openTablet, tabletRect, drawTabletScreen} from './tablet.js';
 import * as MEMO from './memo.js';
 import * as DB from './debrief.js';
+import {balanceByHand, ticketHunt, signMemo, trayCenter, sortComments, commentsCenter} from './handson.js';
 import {ROUTES, annual, money} from './score.js';
 
 const EN = Q.get('lang') === 'en';
@@ -302,11 +303,24 @@ function openQueueCard() {
     draw();
   });
 }
-function openComments() {
+// the comment cards: taken out of the box by hand, turned over, sorted onto two mats (the list is the other way)
+const CMS = [{k: 'c1', ok: 'speed'}, {k: 'c2', ok: 'accuracy'}];
+const fbText = (c, t) => (t === c.ok ? '✓ ' : '') + ar('ملاحظة نوعية من زبون واحد: تصف تجربته، ولا تقيس ' + (c.ok === 'speed' ? 'زمن الانتظار.' : 'دقة الطلبات.'), 'A qualitative observation from one customer: it describes an experience, it does not measure ' + (c.ok === 'speed' ? 'the wait.' : 'order accuracy.'));
+async function openComments() {
+  const first = !S.ev.c1 && !S.ev.c2;
+  if (first) line('noor_cards', {look: false});
+  if (VIEW.mode === 'seat') glanceAt(commentsCenter(), 0.8);
+  const how = await sortComments({cards: CMS.map(c => ({k: c.k, ok: c.ok, text: EVT[c.k]()})), tags: S.tags,
+    onOpen: (k) => gain(k),
+    onTag: (k, t) => { S.tags[k] = t; log('tag', k, t); return fbText(CMS.find(x => x.k === k), t); }});
+  if (how === 'list') await openCommentsList(false);
+  markDone('comments', S.ev.c1 && S.ev.c2);
+}
+function openCommentsList(sayLine = true) {
   return new Promise(async res => {
-    const first = !S.ev.c1 && !S.ev.c2;
+    const first = sayLine && !S.ev.c1 && !S.ev.c2;
     const el = $('ccard'); show('ccard', true);
-    const CM = [{k: 'c1', ok: 'speed'}, {k: 'c2', ok: 'accuracy'}];
+    const CM = CMS;
     const draw = () => {
       el.innerHTML = `<div class="cm"><div class="cm-head"><b>${ar('صندوق الرأي — ذلك الثلاثاء', 'Comment box — that Tuesday')}</b></div><div class="cm-cards">${CM.map(c => `
         <div class="cm-card ${S.ev[c.k] ? 'open' : ''}" data-k="${c.k}">${S.ev[c.k]
@@ -317,7 +331,6 @@ function openComments() {
       el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { sfx.ui(); const k = b.closest('.cm-card').dataset.k; S.tags[k] = b.dataset.t; log('tag', k, b.dataset.t); draw(); });
       el.querySelector('#cmclose').onclick = () => { sfx.ui(); show('ccard', false); markDone('comments', S.ev.c1 && S.ev.c2); res(); };
     };
-    const fbText = (c, t) => (t === c.ok ? '✓ ' : '') + ar('ملاحظة نوعية من زبون واحد: تصف تجربته، ولا تقيس ' + (c.ok === 'speed' ? 'زمن الانتظار.' : 'دقة الطلبات.'), 'A qualitative observation from one customer: it describes an experience, it does not measure ' + (c.ok === 'speed' ? 'the wait.' : 'order accuracy.'));
     draw();
     if (first) line('noor_cards');
   });
@@ -329,7 +342,8 @@ async function inspectRail() {
   feedShot('rail');
   await enterCafe('rail', {yaw: -0.15, pitch: 0.32, dist: 2.2});
   caption(ar('تذكرة تُضاف عند الكاشير… والمشروبات تخرج من البار أبطأ.', 'A ticket goes up at the register… drinks leave the bar more slowly.'), 5);
-  await wait(reducedMotion() ? 1 : 4);
+  // by hand: pull the tickets off the rail and read their times until the order that has waited longest turns up
+  await ticketHunt();
   focusCafe('pickup'); await wait(reducedMotion() ? 0.5 : 2.5);
   gain('rail'); markDone('rail');
   await line('noor_rail');
@@ -348,9 +362,16 @@ async function scene2() {
   await line('ellis_open');
   glanceAt(balanceAnchor(), 1.0);
   await line('ellis_scale');
+  // by hand first: a coin in the orders' pan for every extra order a day, until the beam is level
+  glanceAt(trayCenter().lerp(balanceAnchor(), 0.55).add(V3(0, 0.02, 0)), 0.9);
+  objective(ar('وازن الكفتين بيدك: عملة في كفة الطلبات لكل طلب إضافي مكتمل في اليوم.', 'Balance the pans by hand: a coin in the orders’ pan for each extra completed order a day.'));
+  line('ellis_coins', {look: false});
+  await balanceByHand({onOrders: (n) => { setFigures(n); drawTablet((g, W, H) => drawTabletScreen(g, W, H, S.model)); }});
+  await chain;
+  await line('ellis_level', {look: false});
   // the tablet slides across the table into the player's hands
   slide();
-  const tp = TP.tablet.position, from = tp.clone(), to = V3(0.18, TABLE.y + 0.004, 0.52);
+  const tp = TP.tablet.position, from = tp.clone(), to = V3(0.04, TABLE.y + 0.004, 0.52);   // (left of the memo pad: it stays there after use)
   await new Promise(r => { let t = 0; const off = onUpdate((dt) => { t += dt; const k = Math.min(1, t / 0.9), e = k * k * (3 - 2 * k); tp.lerpVectors(from, to, e); TP.tablet.rotation.y = 0.25 * (1 - e); if (k >= 1) { off(); r(); } }); });
   holdTablet(true); document.body.classList.add('tablet-open');
   // look so that the screen (the street, the assumed customers) and the balance stay clear of the tablet in the hands
@@ -395,11 +416,16 @@ async function scene3() {
     if (v === 'ok') break;
     if (v === 'route') { clearConsequence(); memo.route = null; memo.cust = memo.cost = memo.cond = null; }
   }
+  // the memo on the pad: the player signs it with the pen (a close look at the pad)
+  cineMode();
+  const pad = anchorOf(TP.memo, 0);
+  await cine.shot(pad.clone().add(V3(-0.02, 0.36, 0.24)), pad, reducedMotion() ? 0 : 1.0, {fov: 46});
+  await signMemo([ar('التوصية: ', 'Rec: ') + (EN ? ROUTES[memo.route].en : ROUTES[memo.route].t), ar('دليل الزبائن ✓', 'Customer evidence ✓'), ar('دليل التكلفة ✓', 'Cost evidence ✓'), ar('شرط المراجعة ✓', 'Review condition ✓')]);
+  await backToSeat({look: headOf('priya'), dur: 1.0});
   // Priya on the condition
   await line(memo.cond === 'feel' ? 'priya_feel' : memo.cond === memo.route ? 'priya_match' : 'priya_other');
   S.committed = {route: memo.route, cust: memo.cust, cost: memo.cost, cond: memo.cond, whyLine: memo.whyLine, note: memo.note || '', model: {...S.model}, hyp: S.hyp, at: Date.now()};
   saveCommit(); log('commit', memo.route);
-  drawMemoPad([ar('التوصية: ', 'Rec: ') + (EN ? ROUTES[memo.route].en : ROUTES[memo.route].t), ar('مؤكدة ✓', 'Confirmed ✓')]);
   toast(`<b>${ar('المذكرة مؤكدة', 'Memo confirmed')}</b> · ${ar('نسخة محفوظة للمراجعة', 'a copy is locked for the debrief')}`, 'ev');
   await line('priya_close');
 }
@@ -469,6 +495,7 @@ export async function run(dev) {
     window.__enter = (f, o) => enterCafe(f, o); window.__seat = () => backToSeat({look: screenCenter()}); window.__ben = () => benMoment(); window.__period = (p) => { setPeriod(p); feedOn(true, periodLabel(p)); };
     window.__shot = (n, cut) => feedShot(n, {cut}); window.__watch = (on) => watching(on);
     window.__line = (id) => line(id, {look: false});
+    window.__sitAs = (fa, ma) => { for (const id of COMMITTEE) sit(C[id], SEATS[id], {anim: C[id].g === 'm' ? ma : fa}); };
     return;
   }
   if (dev === 'debrief' || dev === 'review') {

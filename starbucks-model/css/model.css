@@ -131,3 +131,12 @@ body.tablet-open #statelist,body.tablet-open #viewbtns,body.tablet-open #objwrap
   #objective{max-width:58vw}
 }
 @media (prefers-reduced-motion:reduce){.hs-ring:after{animation:none}#caption,#fade{transition:none}}
+/* hands-on: the hand cursor over things you can take, and the prompt's buttons (the no-drag way) */
+#gl.can-grab{cursor:grab}
+body.grabbing,body.grabbing #gl{cursor:grabbing}
+#prompt.hands{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;pointer-events:auto;bottom:auto;top:12px;max-width:min(600px,48vw);width:max-content;padding:8px 10px 8px 14px;color:#f3eee4}
+#prompt.hands .hp-txt{padding:0 6px;line-height:1.5}
+#prompt.hands .hp-txt b{color:#ffd99a}
+#prompt .hp-btn{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+#prompt .hp-btn:hover,#prompt .hp-btn:focus-visible{background:rgba(255,226,170,.25);outline:2px solid rgba(255,226,170,.7);outline-offset:1px}
+@media (max-width:900px){#prompt.hands{top:52px;max-width:92vw;font-size:.85rem}}

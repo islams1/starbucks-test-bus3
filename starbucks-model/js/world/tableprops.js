@@ -61,7 +61,7 @@ export function buildTableProps() {
   const memoT = canvasTex(360, 480, (g, w, h) => { g.fillStyle = '#fbf8f0'; g.fillRect(0, 0, w, h); g.strokeStyle = '#d9d0bc'; for (let y = 90; y < h; y += 34) { g.beginPath(); g.moveTo(20, y); g.lineTo(w - 20, y); g.stroke(); } g.fillStyle = '#2f4a3f'; g.font = '600 30px "IBM Plex Sans Arabic"'; g.textAlign = 'right'; g.fillText(EN ? 'Decision memo' : 'مذكرة القرار', w - 24, 56); });
   TP.memoTex = memoT;
   TP.memo = flat(0.15, 0.2, paperM(memoT), 0.36, 0.52, -0.12, Y + 0.004);
-  const pen = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.14, 10), new THREE.MeshStandardMaterial({color: 0x1d1e20, roughness: 0.3, metalness: 0.6})); pen.rotation.z = Math.PI / 2; pen.rotation.y = 0.5; pen.position.set(0.48, Y + 0.0045, 0.5); pen.castShadow = true; scene.add(pen);
+  const pen = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.14, 10), new THREE.MeshStandardMaterial({color: 0x1d1e20, roughness: 0.3, metalness: 0.6})); pen.rotation.z = Math.PI / 2; pen.rotation.y = 0.5; pen.position.set(0.48, Y + 0.0045, 0.5); pen.castShadow = true; scene.add(pen); TP.pen = pen;
   // coffee at each place
   const mugM = new THREE.MeshStandardMaterial({color: 0xf1ede5, roughness: 0.35}), coffeeM = new THREE.MeshStandardMaterial({color: 0x2b1a10, roughness: 0.15});
   for (const [x, z] of [[0.66, 0.4], [-0.7, -0.55], [1.12, -0.6], [1.95, 0.3]]) {

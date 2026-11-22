@@ -1,0 +1,6 @@
+﻿[
+ ["waitjs", "!!window.__sitAs", 240], ["wait", 2],
+ ["eval", "(__cam([-1.62, 1.42, 1.6], [0.5, 1.0, -0.78], 44), 1)"], ["wait", 1.0],
+ ["eval", "(__line('ellis_c_all'), 1)"], ["wait", 1.2], ["shot", "t1.png"], ["eval", "__gaze()"], ["wait", 1.5], ["shot", "t2.png"], ["eval", "__gaze()"],
+ ["wait", 3], ["eval", "(__line('priya_hello'), 1)"], ["wait", 1.5], ["shot", "t3.png"], ["eval", "__gaze()"], ["wait", 1.8], ["shot", "t4.png"], ["eval", "__gaze()"], ["wait", 1.8], ["shot", "t5.png"], ["eval", "__gaze()"]
+]

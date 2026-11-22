@@ -28,7 +28,7 @@ window.__quality = () => ({applyQuality, LEVELS, quality, dyn});
 window.__cam = async (p, l, fov = 50) => (await import('./core/cine.js')).shot(new THREE.Vector3(...p), new THREE.Vector3(...l), 0, {fov});
 
 // the cards that are liquid glass in this game (the paper props — queue card, comments, tablet, memo — stay paper)
-GAME_GLASS.push(['#statelist', 'card', 1], ['#dock .dk', 'pill', 3], ['#viewbtns button', 'pill', 3], ['#caption', 'floating', 1]);
+GAME_GLASS.push(['#statelist', 'card', 1], ['#dock .dk', 'pill', 3], ['#viewbtns button', 'pill', 3], ['#caption', 'floating', 1], ['#prompt.hands', 'floating', 1]);
 if (makeGlass({composer, renderer, camera, on: Q.get('glass') !== '0' && Q.get('q') !== 'low'})) {
   glassGame();
   onQuality((L) => window.__glass.attach(!L.direct));

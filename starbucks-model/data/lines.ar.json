@@ -176,6 +176,22 @@
    "to": "all",
    "glance": "balance"
   },
+  "ellis_coins": {
+   "s": "ellis",
+   "e": "calm",
+   "t": "ضع في كفة الطلبات عملة عن كل طلب إضافي مكتمل في اليوم، حتى تتوازن الكفتان.",
+   "en": "Put a coin in the orders’ pan for every extra completed order a day, until the pans balance.",
+   "to": "player",
+   "glance": "balance"
+  },
+  "ellis_level": {
+   "s": "ellis",
+   "e": "pleased",
+   "t": "توازنت. عشرون طلبًا إضافيًا في اليوم تغطي العمالة، إذا كان ربح الطلب ثلاثة دولارات.",
+   "en": "Level. Twenty extra orders a day cover the labor — if each order adds three dollars.",
+   "to": "player",
+   "glance": "balance"
+  },
   "ellis_play": {
    "s": "ellis",
    "e": "calm",

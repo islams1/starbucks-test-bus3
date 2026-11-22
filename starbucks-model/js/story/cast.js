@@ -48,7 +48,8 @@ export async function loadMinis(onEach) {
 
 export function sit(ch, seat, {anim = null} = {}) {
   ch.seated = true; ch.walking = null; seat.taken = ch.id;
-  const name = anim || (ch.g === 'm' ? 'm_sit_table_idle_neutral_01' : 'f_sit_table_idle_neutral_01');
+  // the calm breathing clip: hands rest on the table; the "idle" clips have a talking-hand gesture baked in
+  const name = anim || (ch.g === 'm' ? 'm_sit_table_breathe_01' : 'f_sit_table_breathe_01');
   let x = seat.x, z = seat.z, y = 0;
   // sit on the chair that is really there: the pelvis over the seat (a little towards the back rest), the thighs on it
   const chair = findSeat(seat.x - Math.sin(seat.ry) * 0.06, seat.z - Math.cos(seat.ry) * 0.06, 0), clip = animLib[name];

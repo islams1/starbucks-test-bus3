@@ -24,7 +24,7 @@ export function speaking(who, to = 'player', glance = null) {
   st.speaker = who; st.to = to || 'player'; st.glance = glance;
   const t = now();
   for (const id of IDS) {
-    if (id === who) per[id] = {t: speakerBase(id), until: t + rnd(1.3, 2.4)};   // the speaker opens on the one addressed
+    if (id === who) per[id] = {t: speakerBase(id), until: t + rnd(2.6, 4.0)};   // the speaker opens on the one addressed
     else per[id] = {t: per[id] ? per[id].t : 'player', until: t + rnd(0.15, 0.5)};   // a listener a beat later
   }
 }
@@ -61,27 +61,31 @@ function next(id) {
   const sp = st.speaker, mates = others(id);
   if (sp === id) {                                            // speaking
     const base = speakerBase(id);
-    if (st.glance && Math.random() < 0.3) return [st.glance, rnd(1.0, 1.8)];
-    // a speaker's eyes move between the listeners: mostly the one addressed, now and then the others
-    if (Math.random() < 0.38 && mates.length) return [pick(base === 'player' ? mates : ['player', ...mates.filter(o => o !== base)]), rnd(0.9, 1.6)];
-    return [base, rnd(1.6, 3.0)];
+    // steady: mostly on the one addressed; now and then one glance at what is talked about or at another listener
+    const prev = per[id] && per[id].t;
+    const away = prev && prev !== base;                          // just looked away: come back
+    if (!away && st.glance && Math.random() < 0.22) return [st.glance, rnd(1.2, 1.8)];
+    if (!away && Math.random() < 0.14 && mates.length) return [pick(base === 'player' ? mates : ['player', ...mates.filter(o => o !== base)]), rnd(1.0, 1.5)];
+    return [base, rnd(3.0, 5.0)];
   }
-  if (sp === 'player') return Math.random() < 0.8 ? ['player', rnd(2, 4)] : [pick(mates), rnd(0.7, 1.1)];
+  if (sp === 'player') return Math.random() < 0.9 ? ['player', rnd(3, 5)] : [pick(mates), rnd(0.9, 1.3)];
   if (sp === 'narrator') return [look(weighted([['screen', 6], ['down', 3], [pick(mates) || 'down', 1]])), rnd(2.5, 5)];
   if (sp) {                                                   // a colleague speaks
     const r = Math.random();
     // over the playing replay, a line about the screen splits the eyes between the one speaking and the screen
-    if (st.watching && st.glance === 'screen' && screenOn()) return r < 0.5 ? [sp, rnd(1.6, 3)] : ['screen', rnd(1.4, 2.6)];
-    if (r < 0.78) return [sp, rnd(2, 4)];
-    if (r < 0.9 && st.to !== id && st.to !== 'all' && st.to !== sp) return [st.to, rnd(0.8, 1.3)];
-    return [st.glance || look(Math.random() < 0.5 ? 'screen' : pick(mates) || 'down'), rnd(0.8, 1.3)];
+    if (st.watching && st.glance === 'screen' && screenOn()) return r < 0.5 ? [sp, rnd(2.5, 4)] : ['screen', rnd(2.5, 4)];
+    const prev = per[id] && per[id].t;
+    if (prev && prev !== sp) return [sp, rnd(3, 5)];            // after a glance, back to the one speaking
+    if (r < 0.88) return [sp, rnd(3, 5)];
+    if (st.to !== id && st.to !== 'all' && st.to !== sp) return [st.to, rnd(1.0, 1.4)];
+    return [st.glance || look(Math.random() < 0.5 ? 'screen' : pick(mates) || 'down'), rnd(1.0, 1.4)];
   }
   // nobody speaks
   const t = now();
   if (st.last && st.last !== id && t - st.lastEnd < 1.6) return [st.last, st.lastEnd + 1.6 - t];
-  if ((st.watching || VIEW.mode === 'cafe') && screenOn()) return [weighted([['screen', 9], [pick(mates), 1]]), rnd(2.5, 5)];
-  if (waiting()) return [weighted([['player', 6], [pick(mates), 4]]), rnd(1.5, 3.5)];
-  return [look(weighted([['screen', 3], [pick(mates) || 'down', 3], ['player', 2], ['down', 1.5]])), rnd(2.5, 6)];
+  if ((st.watching || VIEW.mode === 'cafe') && screenOn()) return [weighted([['screen', 9], [pick(mates), 1]]), rnd(4, 7)];
+  if (waiting()) return [weighted([['player', 7], [pick(mates), 3]]), rnd(3, 5)];
+  return [look(weighted([['screen', 3], [pick(mates) || 'down', 3], ['player', 2], ['down', 1.5]])), rnd(4, 8)];
 }
 
 window.__gaze = () => JSON.stringify({speaker: st.speaker, to: st.to, watching: st.watching, per: Object.fromEntries(IDS.map(id => [id, per[id] && per[id].t]))});

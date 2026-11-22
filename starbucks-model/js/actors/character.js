@@ -367,7 +367,11 @@ export class Character {
   }
   _postBones() {
     const sk = this.mesh.skeleton, b = this.bones;
-    return [b.spine2, b.neck, b.head, b.le, b.re, ...['L', 'R'].flatMap(s => [sk.getBoneByName(`Bip01_${s}_UpperArm`), sk.getBoneByName(`Bip01_${s}_Forearm`)])].filter(Boolean);
+    return [b.spine2, b.neck, b.head, b.le, b.re, ...this._clavicles(), ...['L', 'R'].flatMap(s => [sk.getBoneByName(`Bip01_${s}_UpperArm`), sk.getBoneByName(`Bip01_${s}_Forearm`)])].filter(Boolean);
+  }
+  _clavicles() {
+    // only when they really are children of the neck (true for the Rocketbox Biped rigs)
+    return this.__clav || (this.__clav = ['L', 'R'].map(s => this.mesh.skeleton.getBoneByName(`Bip01_${s}_Clavicle`)).filter(c => c && c.parent === this.bones.neck));
   }
   /** safety net: the body must always be driven by a full-weight animation; anything less shows the bind (T) pose */
   _guardPose(dt) {
@@ -413,9 +417,18 @@ export class Character {
     const up = new THREE.Vector3(0, 1, 0).applyQuaternion(this.holder.quaternion);
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.holder.getWorldQuaternion(new THREE.Quaternion()));
     const wgt = this.look.weight;
-    if (b.spine2) rotBoneWorld(b.spine2, up, this.look.yaw * 0.2 * wgt);
-    if (b.neck) { rotBoneWorld(b.neck, up, this.look.yaw * 0.33 * wgt); rotBoneWorld(b.neck, right, this.look.pitch * 0.4 * wgt); }
-    rotBoneWorld(b.head, up, this.look.yaw * 0.37 * wgt); rotBoneWorld(b.head, right, this.look.pitch * 0.5 * wgt);
+    // seated at a table the hands rest on it: turning the chest would swing the forearms into the table (and the arm
+    // solver would then lift a hand, which reads as a random gesture) — a seated person turns the neck and head
+    const sw = this.seated ? 0 : 0.2, nw = this.seated ? 0.45 : 0.33, hw = this.seated ? 0.5 : 0.37;
+    if (b.spine2) rotBoneWorld(b.spine2, up, this.look.yaw * sw * wgt);
+    if (b.neck) {
+      const ny = this.look.yaw * nw * wgt, np = this.look.pitch * 0.4 * wgt;
+      rotBoneWorld(b.neck, up, ny); rotBoneWorld(b.neck, right, np);
+      // in the Biped skeleton the clavicles hang from the neck: turning the head must not swing the shoulders and the
+      // arms with it (a hand resting on a table would sink into it and the arm solver would lift it — a stray gesture)
+      for (const c of this._clavicles()) { rotBoneWorld(c, right, -np); rotBoneWorld(c, up, -ny); }
+    }
+    rotBoneWorld(b.head, up, this.look.yaw * hw * wgt); rotBoneWorld(b.head, right, this.look.pitch * 0.5 * wgt);
     const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(this.holder.quaternion); rotBoneWorld(b.head, fwd, this._roll);
     // breathing: slow chest rise (deeper on the inhale before a line)
     const ex = this.exertion || 0;
