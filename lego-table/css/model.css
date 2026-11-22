@@ -1,0 +1,163 @@
+/* «الفرع على الطاولة» — the parts that are new in this game: view buttons, the dock, the model's state list,
+   captions, the queue card, the comment box, the held tablet, the memo steps. */
+button.hs{background:none;border:0;padding:0;color:inherit;font:inherit}
+button.hs:focus-visible .hs-ring{outline:3px solid #ffd88a;outline-offset:3px}
+body.hs-busy #hotspots,body.hs-busy #dock{opacity:0;pointer-events:none}
+#hotspots,#dock{transition:opacity .25s}
+body[data-view="cine"] #dock,body[data-view="cine"] #viewbtns{opacity:0;pointer-events:none}
+
+/* objective + tasks in one column (top right in Arabic) */
+#objwrap{position:absolute;top:18px;right:22px;display:flex;flex-direction:column;gap:8px;max-width:340px;align-items:stretch}
+[dir=ltr] #objwrap{right:22px}
+#objwrap #objective,#objwrap #tasks{position:static;max-width:none}
+#objwrap #tasks{margin:0}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+p.ltr{display:block;text-align:end}
+/* view buttons (left side, under the model's state list) */
+#viewbtns{position:absolute;left:18px;top:262px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;pointer-events:auto;transition:opacity .25s}
+body.tablet-open #subs{left:30%;width:min(620px,52vw)}
+body.tablet-open #statelist,body.tablet-open #viewbtns,body.tablet-open #objwrap{opacity:0;pointer-events:none}
+[dir=ltr] body.tablet-open #subs{left:70%}
+#viewbtns button{background:var(--glass);border:1px solid var(--line);color:var(--ink);border-radius:20px;padding:7px 14px;font:600 .88rem var(--ar);display:inline-flex;gap:6px;align-items:center}
+#viewbtns button:hover{border-color:var(--accent)}
+#viewbtns button:disabled{opacity:.4}
+#viewbtns button kbd{font-size:.72rem;height:1.6em}
+#ambbtn.off{color:var(--mute);text-decoration:line-through}
+
+/* the dock: everything usable now, as buttons (keyboard and touch) */
+#dock{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:8px;z-index:21;flex-wrap:wrap;justify-content:center;max-width:min(860px,92vw)}
+#dock.empty{display:none}
+#subs:not(.hidden)~#dock,#choices:not(.hidden)~#dock{bottom:auto;top:62px}
+.dk{display:inline-flex;align-items:center;gap:8px;background:var(--glass2);border:1px solid var(--line);color:var(--ink);border-radius:22px;padding:8px 16px 8px 12px;font:600 .92rem var(--ar);cursor:pointer}
+.dk svg{width:18px;height:18px}
+.dk:hover,.dk:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px rgba(217,178,111,.35)}
+.dk.done{color:var(--ink2)}.dk.done span:after{content:" ✓";color:var(--good)}
+
+/* the model's static state list (what the replay shows, as text) */
+#statelist{position:absolute;left:18px;top:60px;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:200px;font-size:.88rem;pointer-events:auto}
+#statelist b{display:block;color:var(--accent);margin-bottom:4px}
+#statelist ul{margin:0;padding-inline-start:16px;color:var(--ink2);line-height:1.7}
+#statelist .illus{display:inline-block;margin:6px 0 0}
+#objective:has(#objtext:empty){display:none}
+#tasks:empty{display:none}
+#scenetag{left:18px;right:auto}
+
+/* captions for sounds and actions (not dialogue) */
+#caption{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);max-width:min(760px,90vw);background:rgba(0,0,0,.6);color:#f1ece2;padding:6px 16px;border-radius:8px;font-size:.98rem;opacity:0;transition:opacity .4s;text-align:center}
+#caption.on{opacity:1}
+#preparing{position:fixed;left:50%;bottom:12%;transform:translateX(-50%);z-index:61;color:#e9e3d6;background:rgba(0,0,0,.5);padding:8px 18px;border-radius:20px}
+
+/* toasts */
+.toast.warn{border-right-color:#e59b7a}.toast.ok{border-right-color:var(--good)}
+[dir=ltr] .toast{border-right:1px solid var(--line);border-left:3px solid var(--accent)}
+
+/* the queue observation card (paper, at the side: the model stays in view) */
+#qcard,#ccard{position:fixed;top:50%;right:22px;transform:translateY(-50%);z-index:44}
+[dir=ltr] #qcard,[dir=ltr] #ccard{right:auto;left:22px}
+.qc,.cm{background:#f7f3ea;color:#2b2a26;border-radius:10px;padding:16px 18px;width:min(340px,86vw);box-shadow:0 20px 60px rgba(0,0,0,.5);display:grid;gap:10px}
+.qc-head,.cm-head{display:flex;align-items:center;gap:6px;font-size:1.08rem;border-bottom:1px dashed #b9ae95;padding-bottom:8px}
+.qc-head .illus{color:#8a7a57;border-color:#b9ae95}
+.qc-hint{margin:0;color:#6b604c;font-size:.9rem}
+.qc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid #d9d0bc;border-radius:8px;padding:10px 12px;font:600 1rem var(--ar);color:#2b2a26;cursor:pointer;text-align:start}
+.qc-row small{display:block;color:#8a816f;font-weight:500;font-size:.82rem}
+.qc-row b{font:700 1.15rem var(--num);color:#1f3a30}
+.qc-row.on{border-color:#2f4a3f;box-shadow:0 0 0 2px rgba(47,74,63,.25);background:#f1f5f2}
+.qc-row:focus-visible{outline:3px solid #d9b26f}
+.qc-note{margin:0;color:#7a6f5d;font-size:.8rem;line-height:1.6}
+.qc .ghost,.cm .ghost{color:#2b2a26;border-color:#b9ae95;justify-self:start}
+
+/* the comment box */
+.cm{width:min(400px,90vw)}
+.cm-cards{display:grid;gap:10px}
+.cm-card{background:#fff;border:1px solid #d9d0bc;border-radius:8px;padding:12px;min-height:64px;display:grid;gap:8px}
+.cm-open{background:#fbf7ee;border:1px dashed #b9ae95;border-radius:8px;padding:14px;font:600 .95rem var(--ar);color:#2b2a26;cursor:pointer}
+.cm-card .hand{font:500 1.25rem/1.8 "Noto Naskh Arabic",serif;color:#1f2a44}
+.cm-tags{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.88rem;color:#6b604c}
+.cm-tags button{padding:6px 12px;border-radius:8px;border:1px solid #b9ae95;background:#fff;font:600 .9rem var(--ar);color:#2b2a26;cursor:pointer}
+.cm-tags button.on{background:#2f4a3f;color:#fff;border-color:#2f4a3f}
+.cm-fb{font-size:.84rem;color:#6b604c;line-height:1.6}
+
+/* the tablet in the player's hands (the 3D tablet and hands are fitted behind this panel) */
+#tabletp{position:fixed;z-index:44;right:3vw;bottom:3vh;width:min(520px,46vw)}
+[dir=ltr] #tabletp{right:auto;left:3vw}
+.tp-scr{background:#f4f2ee;color:#1d1d1b;border-radius:12px;padding:14px 16px;display:grid;gap:9px;font-size:.92rem}
+.tp-head{display:flex;align-items:center;gap:8px;font-size:1.08rem}
+.tp-head .illus{color:#8a7a57;border-color:#b9ae95}
+.tp-fixed{display:flex;justify-content:space-between;gap:8px;color:#6b604c;font-size:.82rem;flex-wrap:wrap}
+.tp-fixed b{font-family:var(--num);color:#2b2a26}
+.tp-row{display:grid;grid-template-columns:1fr auto 3.6em;gap:8px;align-items:center;background:#fff;border:1px solid #e1dcd1;border-radius:8px;padding:7px 10px}
+.tp-row>span:first-child{font-size:.86rem;line-height:1.4}
+.tp-ctl{display:flex;align-items:center;gap:6px;direction:ltr}
+.tp-ctl input{width:min(150px,16vw);accent-color:#2f4a3f}
+.tp-ctl button{width:30px;height:30px;border-radius:8px;border:1px solid #cfc4ab;background:#fff;font:700 1rem var(--num);cursor:pointer}
+.tp-row b{font:700 1.05rem var(--num);direction:ltr;text-align:center}
+.tp-quick{display:flex;gap:6px;flex-wrap:wrap}
+.tp-quick button{padding:6px 10px;border-radius:8px;border:1px solid #2f4a3f;background:#fff;color:#2f4a3f;font:600 .84rem var(--ar);cursor:pointer}
+.tp-quick .ghosty{border-color:#bbb;color:#666}
+.tp-res{background:#fff;border:1px solid #e1dcd1;border-radius:8px;padding:8px 12px;display:grid;gap:4px}
+.tp-res>div{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.tp-res b{font-family:var(--num);direction:ltr}
+.tp-calc{color:#8a816f;font-size:.8rem;justify-content:flex-end!important}
+.tp-big{border-top:1px solid #eee;padding-top:4px;font-weight:700;font-size:1.02rem}
+.tp-big b{font-size:1.35rem}
+.tp-big.above,.tp-big.above b{color:#2f7d4f}.tp-big.below,.tp-big.below b{color:#b23b2e}.tp-big.even,.tp-big.even b{color:#8a6d1f}
+.tp-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#6b604c;font-size:.85rem}
+.tp-foot .primary{padding:.55em 1.8em}
+.tp-foot .primary:disabled{opacity:.4;transform:none}
+.num{font-family:var(--num)}
+
+/* memo steps */
+.memo-step{color:var(--accent);font:600 .85rem var(--num);text-shadow:0 1px 3px #000}
+.mcard.off{opacity:.45;cursor:not-allowed}
+.mcard.sel{border-color:var(--accent)}
+.mcard .need{color:#e0a08a}
+.mback{justify-self:center;margin-top:4px}
+.whyline{margin-top:6px;font-size:.85rem;border-radius:6px;padding:4px 8px;background:#efe9dc;color:#5b513f}
+.whyline.fit{background:#e3efe7;color:#24543a}.whyline.nofit{background:#f4e4dc;color:#7a3a28}
+.md-foot{gap:8px;flex-wrap:wrap}
+.practice{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;color:var(--ink2);font-size:.9rem}
+.dmemo .whyline{background:rgba(255,255,255,.06);color:var(--ink2)}
+
+/* the opening card fades out */
+#card.source0 .src0{transition:opacity .6s}
+#card.source0.out .src0{opacity:0}
+#card.source0{background:rgba(5,5,5,.55)}
+
+@media (max-width:760px){
+  #tabletp{left:2vw;right:2vw;bottom:2vh;width:auto}
+  .tp-row{grid-template-columns:1fr 3.6em}.tp-row .tp-ctl{grid-column:1/-1;order:3}.tp-ctl input{width:100%;flex:1}
+  #qcard,#ccard{top:auto;bottom:12px;right:50%;transform:translateX(50%)}
+  #statelist{top:auto;bottom:70px;font-size:.8rem}
+  #objective{max-width:58vw}
+}
+@media (prefers-reduced-motion:reduce){.hs-ring:after{animation:none}#caption,#fade{transition:none}}
+/* hands-on: the hand cursor over things you can take, and the prompt's buttons (the no-drag way) */
+#gl.can-grab{cursor:grab}
+body.grabbing,body.grabbing #gl{cursor:grabbing}
+#prompt.hands{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;pointer-events:auto;bottom:auto;top:12px;max-width:min(600px,48vw);width:max-content;padding:8px 10px 8px 14px;color:#f3eee4}
+#prompt.hands .hp-txt{padding:0 6px;line-height:1.5}
+#prompt.hands .hp-txt b{color:#ffd99a}
+#prompt .hp-btn{font:inherit;font-size:.9rem;padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+#prompt .hp-btn:hover,#prompt .hp-btn:focus-visible{background:rgba(255,226,170,.25);outline:2px solid rgba(255,226,170,.7);outline-offset:1px}
+@media (max-width:900px){#prompt.hands{top:52px;max-width:92vw;font-size:.85rem}}
+#card.timecard{z-index:96;background:transparent}   /* over the black fade between the café and the committee room */
+/* on foot in the café: the cross in the middle, the hint to take the mouse, what E acts on */
+#xhair{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 0 0 1.5px rgba(0,0,0,.35);z-index:31;pointer-events:none;display:none}
+body[data-view=walk] #xhair{display:block}
+#lockhint{position:fixed;left:50%;bottom:calc(7% + 150px);transform:translateX(-50%);z-index:31;pointer-events:none;padding:7px 16px;border-radius:999px;font-size:.85rem;color:var(--ink2);background:var(--glass);border:1px solid var(--line);white-space:nowrap}
+#aimtip{position:fixed;left:50%;top:calc(50% + 24px);transform:translateX(-50%);z-index:31;pointer-events:none;padding:5px 14px;border-radius:999px;font-size:.9rem;color:#fff;background:rgba(16,18,20,.7);border:1px solid var(--line);white-space:nowrap}
+#aimtip kbd{margin-inline-end:6px}
+.hs.aim .hs-ring{transform:scale(1.2);box-shadow:0 0 0 3px rgba(255,214,140,.9),0 0 16px rgba(255,214,140,.6)}
+body.mlock{cursor:none}
+
+/* the progress card: the stage, how far through the whole case, the stage's checklist below it */
+#progress{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:9px 14px 10px;display:grid;gap:7px}
+#progress .pg-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:.86rem}
+#progress .pg-head b{font-weight:600}#progress .pg-head span{color:var(--ink2);font:600 .82rem var(--num)}
+#progress .pg-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+#progress .pg-bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#c99a4e,#e9c77f);transition:width .5s ease}
+#progress .pg-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+#progress .pg-steps i{height:3px;border-radius:2px;background:rgba(255,255,255,.16)}
+#progress .pg-steps i.on{background:#e9c77f}#progress .pg-steps i.done{background:var(--good)}
+#tasks li.optional{opacity:.85}#tasks li.optional small{color:var(--mute);margin-inline-start:6px}
+#loading{z-index:70}

@@ -1,0 +1,1 @@
+[["waitfor", "#menu:not(.hidden)", 180000], ["wait", 1.5], ["shot", "menu.png"], ["click", "#playbtn"], ["wait", 1.2], ["shot", "howto.png"], ["click", "#startbtn"], ["wait", 2]]

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect x=%224%22 y=%2236%22 width=%2256%22 height=%2210%22 rx=%222%22 fill=%22%23d9b26f%22/%3E%3Crect x=%2210%22 y=%2224%22 width=%2212%22 height=%2210%22 rx=%222%22 fill=%22%23c8553d%22/%3E%3Crect x=%2226%22 y=%2224%22 width=%2212%22 height=%2210%22 rx=%222%22 fill=%22%232f6fb0%22/%3E%3Crect x=%2242%22 y=%2224%22 width=%2212%22 height=%2210%22 rx=%222%22 fill=%22%232e8b6e%22/%3E%3C/svg%3E">
+<title>ما تحمله الطاولة — خطة التحوّل بثماني وحدات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/s40.css">
+<link rel="stylesheet" href="css/glass.css">
+<link rel="stylesheet" href="css/model.css">
+<link rel="stylesheet" href="css/lego.css">
+</head>
+<body data-view="cine" data-place="cine">
+<canvas id="gl" aria-label="المشهد ثلاثي الأبعاد"></canvas>
+
+<!-- loading -->
+<div id="loading" class="screen">
+  <div class="load-inner">
+    <div class="brandmark"><svg viewBox="0 0 64 64"><rect x="6" y="38" width="52" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><rect x="12" y="24" width="11" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><rect x="27" y="24" width="11" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><rect x="42" y="24" width="11" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="3"/></svg></div>
+    <div class="load-title">ما تحمله الطاولة</div>
+    <div class="load-sub">خطة التحوّل بثماني وحدات · سيناريو تعليمي</div>
+    <div class="bar"><i id="loadbar"></i></div>
+    <div id="loadtxt" class="load-txt">جارٍ التحميل…</div>
+    <div id="loadhint" class="load-hint">ورشة المنتجات وطاولة العمل</div>
+    <div id="loaderr" class="load-err hidden"></div>
+  </div>
+</div>
+
+<!-- main menu -->
+<div id="menu" class="screen hidden">
+  <div class="menu-card">
+    <div class="tag">CASE STUDIES · BUSINESS &amp; STRATEGY</div>
+    <h1>ما تحمله الطاولة</h1>
+    <p class="lead">أنت قائد خطة التحوّل في «ركن للألعاب»، شركة متخيَّلة تمرّ بعامٍ صعب. على طاولة العمل أربعة مقترحات، وأمامك رفّ لا يحمل إلا ثماني قطع خشبية: كل قدرة التنفيذ في هذه الدورة. موّل بيدك ما يتّسع، ورتّب ما يبدأ أولًا، وسمِّ ما ينتظر، ثم اعرض خطتك على رئيس المجلس. وفي النهاية يُفتح أرشيف حقيقي على الحائط.</p>
+    <div class="modes one"><button class="mode" data-mode="play" id="playbtn"><b>قف إلى طاولة العمل</b><span>13–16 دقيقة · ورشة واحدة · ملاحظات توجيهية لا درجة</span></button></div>
+    <button id="contbtn" class="ghost hidden">تابع من حيث توقفت</button>
+    <button id="reviewbtn" class="ghost hidden">اعرض عرضك المُلتزَم به</button>
+    <div class="qsel"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div>
+    <div class="gpuinfo" id="gpuinfo"></div>
+    <div class="menu-foot" id="menufoot">يُفضَّل استخدام سماعات · <a href="#" id="creditslink">المصادر والحقوق</a></div>
+  </div>
+</div>
+
+<!-- instructions -->
+<div id="howto" class="screen hidden">
+  <div class="howto-card">
+    <h2>تعليمات اللعب</h2>
+    <div class="keys">
+      <div class="k"><span class="kbd-mouse"></span><b>اسحب على مكان فارغ لتنظر حولك</b><small>أو الأسهم</small></div>
+      <div class="k"><span class="kk"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><b>امشِ في الورشة</b><small>أو الأسهم · Shift للجري · وزرّ «عُد إلى طاولة العمل» يرجعك إليها</small></div>
+      <div class="k"><kbd>✋</kbd><b>اضغط على مكعّب واسحبه إلى قاعدة مقترح</b><small>أو انقر القاعدة نفسها لتموّلها، وانقرها ثانيةً لتعيد الوحدات</small></div>
+      <div class="k"><kbd>◎</kbd><b>انقر الحلقات أو أزرار الأسفل</b><small>لفتح المقترحات والتقرير</small></div>
+      <div class="k"><kbd>L</kbd><b>قائمة الطاولة</b><small>كل الأشياء والأفعال كأزرار</small></div>
+      <div class="k"><span class="kk"><kbd>1</kbd><span class="kd">–</span><kbd>5</kbd></span><b>شرط المراجعة</b></div>
+      <div class="k"><kbd class="wide">Esc</kbd><b>إيقاف مؤقت</b></div>
+    </div>
+    <div class="task-card">
+      <b>مهمتك:</b> افتح المقترحات الأربعة واقرأ تقرير التاجر، ثم وزّع الوحدات الثماني على ما يستطيع الفريق تنفيذه فعلًا، ورتّب ما يبدأ أولًا، وسمِّ حاجة تنتظر، واختر شرطًا تراجع عنده خطتك.<br>
+      <span class="ok">الملاحظات:</span> استخدام صحيح للقدرة، وحاجة منتظرة مسمّاة، وشرط مراجعة يطابق ما يبدأ أولًا — مع ملاحظة عن الخطر. لا درجة مقابل ما فعلته شركة حقيقية.
+    </div>
+    <button id="startbtn" class="primary">ابدأ</button>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="scenetag">سيناريو تعليمي · شركة متخيَّلة</div>
+  <div id="ledger" class="hidden" role="status" aria-label="سجلّ القدرة">
+    <div class="lg-top"><b id="lgused">مستخدم 0 من 8</b><span id="lgfree">حرّ 8</span></div>
+    <div class="lg-seg" id="lgseg"></div>
+    <div class="lg-items" id="lgitems"></div>
+    <div class="lg-ref" id="lgref"></div>
+    <div class="lg-line" id="lgline" aria-live="polite"></div>
+  </div>
+  <div id="objwrap"><div id="objective"><div class="obj-label">الهدف</div><div id="objtext"></div></div><div id="progress" class="hidden"><div class="pg-head"><b id="pgstage"></b><span id="pgpct"></span></div><div class="pg-bar"><i id="pgfill"></i></div><div class="pg-steps" id="pgsteps"></div></div><ul id="tasks"></ul></div>
+  <div id="caption" aria-live="polite"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="viewbtns"><button id="listbtn" type="button">قائمة الطاولة <kbd>L</kbd></button><button id="ambbtn" type="button" aria-pressed="false" title="صوت الورشة">♪ صوت الورشة</button><button id="langbtn" type="button">English</button></div>
+  <div id="prompt"></div>
+</div>
+<div id="hotspots"></div>
+<div id="dock" class="empty" role="toolbar" aria-label="ما يمكنك استخدامه"></div>
+
+<!-- dialogue -->
+<div id="subs" class="hidden"><div class="who"><b id="subwho"></b><span id="subrole"></span></div><div id="subtext"></div></div>
+<div id="choices" class="hidden"><div id="choiceq"></div><div id="choicelist"></div></div>
+
+<!-- cards -->
+<div id="tcard" class="hidden"></div>
+<div id="pcard" class="hidden"></div>
+<div id="notecard" class="hidden"></div>
+<div id="list" class="hidden"></div>
+<div id="receipt" class="hidden"></div>
+<div id="pitch" class="hidden"></div>
+<div id="coach" class="hidden"></div>
+<div id="archive" class="hidden"></div>
+<div id="checks" class="hidden"></div>
+<div id="final" class="hidden"></div>
+<div id="card" class="hidden"></div>
+
+<div id="fade" class="on"></div>
+<div id="letterbox"><i></i><i></i></div>
+<div id="pause" class="screen hidden"><div class="menu-card small"><h2>إيقاف مؤقت</h2><button class="primary" id="resume">متابعة</button><button id="tohowto" class="ghost">التعليمات</button><div class="qsel small"><span>جودة الرسوميات:</span><button data-q="low"><b>منخفضة</b><small>أجهزة ضعيفة</small></button><button data-q="medium"><b>متوسطة</b><small>لاب توب عادي / موبايل</small></button><button data-q="high"><b>عالية</b><small>كارت شاشة منفصل</small></button><button data-q="cpu"><b>خفيفة جدًا</b><small>بدون كارت شاشة</small></button></div></div></div>
+
+<script>
+(function(){
+  function showErr(msg){ var e=document.getElementById('loaderr'); if(!e) return; e.classList.remove('hidden');
+    e.innerHTML='<b>تعذّر تشغيل اللعبة على هذا الجهاز/المتصفح</b><br>'+String(msg).replace(/</g,'&lt;').slice(0,400)+'<br><small>جرّب Google Chrome أو Microsoft Edge (أحدث إصدار) مع تفعيل «تسريع الأجهزة / Hardware acceleration»، ثم أعد تحميل الصفحة.</small>'; }
+  window.__showErr=showErr;
+  addEventListener('error',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr(ev.message||ev.error||'error'); });
+  addEventListener('unhandledrejection',function(ev){ if(document.getElementById('loading') && !document.getElementById('loading').classList.contains('hidden')) showErr((ev.reason&&(ev.reason.message||ev.reason))||'error'); });
+  try { var c=document.createElement('canvas'); if(!c.getContext('webgl2')) showErr('WebGL2 غير مدعوم أو تسريع الرسوميات معطّل في المتصفح.'); } catch(e){ showErr(e.message); }
+})();
+</script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three-mesh-bvh":"https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/build/index.module.js"
+}}
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

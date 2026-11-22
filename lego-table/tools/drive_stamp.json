@@ -1,0 +1,2 @@
+[["waitfor", "#hud:not(.hidden)", 180000], ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 60], ["wait", 1],
+ ["eval", "(() => { const b = document.querySelector('#dock .dk[data-id=\"note\"]'); b && b.click(); return 'ok'; })()"], ["wait", 2.5], ["click", ".stampbtn.untested"], ["wait", 2.6], ["shot", "st.png"]]

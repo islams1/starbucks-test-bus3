@@ -1,0 +1,1 @@
+[["waitfor", "#archive:not(.hidden)", 180000], ["wait", 3.5], ["shot", "a1.png"], ["click", "#arnext"], ["wait", 3.5], ["shot", "a2.png"], ["click", "#arnext"], ["wait", 3.5], ["shot", "a3.png"]]

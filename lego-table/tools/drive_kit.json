@@ -1,0 +1,5 @@
+[["waitfor", "#menu:not(.hidden)", 180000],
+ ["eval", "(async () => { const m = await import('/tools/probe3.js'); await m.add('modular_urban_apartments_facade', 0, -60, -200); await m.add('modular_factory_facade', 0, -60, -300); return 'ok'; })()"],
+ ["eval", "(() => { __scene.background = new __THREE.Color(0x9aa4ad); return 1; })()"],
+ ["eval", "__cam([0, -52, -160], [0, -54, -200], 60)"], ["wait", 2], ["shot", "kit_apts.png"],
+ ["eval", "__cam([0, -52, -255], [0, -54, -300], 60)"], ["wait", 2], ["shot", "kit_factory.png"]]

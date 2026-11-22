@@ -1,0 +1,38 @@
+/* Liquid glass (glass.md §12). js/ui/glass.js draws the glass into the canvas under every registered element
+   ([data-glass="card|floating|pill|primary|clock"]). While the pass draws (html.glass-on) the element itself is only
+   its text: background, blur and border go, the text turns to ink #F6F4EE with a soft shadow. An element over the
+   16-shape cap ([data-glass-drop]) and every element when the pass is off keep their CSS panels (game.css, s40.css),
+   which are the fallback: dark translucent fill, backdrop blur, a white hairline. */
+:root{
+  --g-ink:#F6F4EE; --g-ink2:rgb(246 244 238 / .86); --g-mute:rgb(246 244 238 / .68);
+  --g-ink-shadow:0 1px 2px rgb(0 0 0 / .4),0 0 12px rgb(0 0 0 / .16);
+  --g-shadow:0 14px 36px rgb(0 0 0 / .22),0 2px 6px rgb(0 0 0 / .12);
+}
+html.glass-on [data-glass]:not([data-glass-drop]){
+  background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  border-color:transparent!important;box-shadow:var(--g-shadow)!important;
+  color:var(--g-ink);text-shadow:var(--g-ink-shadow);
+  --ink:var(--g-ink);--ink2:var(--g-ink2);--mute:var(--g-mute);
+}
+/* hover on a glass button: a faint ink fill over the glass */
+html.glass-on button[data-glass]:not([data-glass-drop]):hover:not(:disabled){background:rgb(246 244 238 / .08)!important}
+/* the next hotspot keeps its gold ring */
+html.glass-on .hs.next .hs-label[data-glass]:not([data-glass-drop]),html.glass-on .hs:hover .hs-label[data-glass]:not([data-glass-drop]){box-shadow:0 0 0 1px rgb(255 214 140 / .8),0 0 16px rgb(255 214 140 / .5)!important}
+/* the speaker's name sits on the subtitle as its own pill */
+html.glass-on #subs .who:not([data-glass-drop]){margin-bottom:6px;padding:4px 16px}
+html.glass-on #subtext:not([data-glass-drop]) .w{opacity:.55}
+html.glass-on #subtext:not([data-glass-drop]) .w.on{opacity:1}
+
+/* the screens and dialogs that hold glass cards show the world, not a dark veil: the glass dims itself for 4.5 : 1 */
+html.glass-on #menu,html.glass-on #howto,html.glass-on #pause,html.glass-on #gfx{background:transparent}
+html.glass-on #card.compare,html.glass-on #card.quiz,html.glass-on #card.score,html.glass-on #card.credits,html.glass-on #tray,html.glass-on #panel.memo{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* the memo was a light paper sheet: on glass its dark text turns to ink */
+html.glass-on .memo-doc:not([data-glass-drop]) dt{color:var(--g-mute)}
+html.glass-on .memo-doc:not([data-glass-drop]) dd em{background:rgb(246 244 238 / .14);color:var(--g-ink)}
+html.glass-on .memo-doc:not([data-glass-drop]) .why{color:var(--g-ink2)}
+html.glass-on .memo-doc:not([data-glass-drop]) .md-foot .ghost{color:var(--g-ink);border-color:rgb(246 244 238 / .35)}
+/* boxes inside a glass card: a thin ink wash instead of a dark fill */
+html.glass-on [data-glass]:not([data-glass-drop]) :is(.mode,.k,.qsel button,.evc,.qz-opts button,.qz-fb,.task-card,.howto-hot){background:rgb(246 244 238 / .07)}
+html.glass-on [data-glass]:not([data-glass-drop]) :is(.mode,.qsel button):hover{background:rgb(246 244 238 / .13)}
+html.glass-on [data-glass]:not([data-glass-drop]) .qsel button.on{background:rgb(217 178 111 / .28)}

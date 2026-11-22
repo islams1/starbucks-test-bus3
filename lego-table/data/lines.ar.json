@@ -1,0 +1,381 @@
+{
+ "_note": "Concept A dialogue (ar). t = spoken (numbers as words), sub = subtitle, en = English subtitle; to / glance / gesture from the scenario table.",
+ "speakers": {
+  "player": {
+   "name": "أنت",
+   "role": "قائد خطة التحوّل",
+   "en": [
+    "You",
+    "Turnaround lead"
+   ],
+   "voice": "ar-SA-HamedNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "ina": {
+   "name": "إينا",
+   "role": "رئيسة التصميم",
+   "en": [
+    "Ina",
+    "Design head"
+   ],
+   "voice": "ar-EG-SalmaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "mikael": {
+   "name": "ميكائيل",
+   "role": "رئيس العمليات",
+   "en": [
+    "Mikael",
+    "Operations head"
+   ],
+   "voice": "ar-SY-LaithNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "rania": {
+   "name": "رانيا",
+   "role": "مسؤولة قنوات البيع",
+   "en": [
+    "Rania",
+    "Channel lead"
+   ],
+   "voice": "ar-AE-FatimaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "victor": {
+   "name": "فيكتور",
+   "role": "رئيس مجلس الإدارة",
+   "en": [
+    "Victor",
+    "Board chair"
+   ],
+   "voice": "ar-AE-HamdanNeural",
+   "rate": "-6%",
+   "pitch": "-4Hz"
+  },
+  "narrator": {
+   "name": "الراوي",
+   "role": "",
+   "en": [
+    "Narrator",
+    ""
+   ],
+   "voice": "ar-QA-MoazNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  }
+ },
+ "lines": {
+  "nar_open": {
+   "s": "narrator",
+   "e": "news",
+   "t": "شركة رُكن للألعاب تمرّ بعامٍ صعب. على الطاولة مقترحات أكثر مما يستطيع الفريق تنفيذه. أنت قائد خطة التحوّل، ومعك ثماني وحدات من قدرة التنفيذ لهذه الدورة.",
+   "sub": "شركة رُكن للألعاب تمرّ بعامٍ صعب. على الطاولة مقترحات أكثر مما يستطيع الفريق تنفيذه. أنت قائد خطة التحوّل، ومعك 8 وحدات من قدرة التنفيذ لهذه الدورة.",
+   "en": "Rukn Toy Company is having a hard year. There are more proposals on the table than the team can deliver. You lead the turnaround, and you have eight units of execution capacity for this cycle."
+  },
+  "victor_hello": {
+   "s": "victor",
+   "e": "firm",
+   "t": "خذوا وقتكم على الطاولة. حين تنتهون، أريد ترتيبًا واضحًا، وخطرًا له اسم، وشرطًا للمراجعة.",
+   "en": "Take your time at the table. When you are done, I want a clear order, a named risk and a review condition.",
+   "to": "all"
+  },
+  "rania_open": {
+   "s": "rania",
+   "e": "calm",
+   "t": "تاجر التجزئة عندنا يطلب توريدًا منتظمًا للخط الذي يشتريه العملاء فعلًا.",
+   "en": "Our retailer is asking for regular delivery of the line that customers already buy.",
+   "to": "player"
+  },
+  "rania_note": {
+   "s": "rania",
+   "e": "calm",
+   "t": "هذا تقريره عن المخزون والطلب. اقرأه قبل أن تقرّر.",
+   "en": "This is the retailer's report on stock and demand. Read it before you decide.",
+   "to": "player",
+   "glance": "note",
+   "gesture": "report"
+  },
+  "ina_open": {
+   "s": "ina",
+   "e": "hopeful",
+   "t": "موضوع جديد قد يجذب عائلات تمرّ بجانب رفّنا الحالي ولا تتوقف.",
+   "en": "A new theme could bring in families who pass our current shelf.",
+   "to": "player",
+   "glance": "theme",
+   "gesture": "box"
+  },
+  "mikael_open": {
+   "s": "mikael",
+   "e": "firm",
+   "t": "كل مقترح يأخذ أشخاصًا من عملٍ آخر. لديك ثماني وحدات من القدرة في هذه الدورة.",
+   "sub": "كل مقترح يأخذ أشخاصًا من عملٍ آخر. لديك 8 وحدات من القدرة في هذه الدورة.",
+   "en": "Each proposal takes people away from something else. You have eight units of capacity this cycle.",
+   "to": "player",
+   "glance": "rack",
+   "gesture": "point"
+  },
+  "ina_to_mikael": {
+   "s": "ina",
+   "e": "persuasive",
+   "t": "لكن إن لم نجرّب شيئًا جديدًا الآن، فمتى؟",
+   "en": "But if we don't try something new now, then when?",
+   "to": "mikael"
+  },
+  "mikael_to_ina": {
+   "s": "mikael",
+   "e": "firm",
+   "t": "حين نستطيع أن نوفّر له فريقًا، دون أن نسحب الناس من التوصيل.",
+   "en": "When we can staff it without pulling people off delivery.",
+   "to": "ina"
+  },
+  "rania_to_both": {
+   "s": "rania",
+   "e": "tense",
+   "t": "والتاجر لا ينتظر. الرفّ الفارغ يذهب لغيرنا.",
+   "en": "And the retailer won't wait. An empty shelf goes to someone else.",
+   "to": "all"
+  },
+  "mikael_task": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "افتح المقترحات الأربعة أولًا، واقرأ تقرير التاجر. ثم نوزّع الوحدات.",
+   "en": "Open all four proposals first, and read the retailer's report. Then we allocate the units.",
+   "to": "player",
+   "glance": "rack"
+  },
+  "q_core": {
+   "s": "rania",
+   "e": "confident",
+   "t": "هذا الخط يُباع فعلًا، وقطعه مألوفة لعملائنا. أربع وحدات تُبقي فريقه كاملًا.",
+   "sub": "هذا الخط يُباع فعلًا، وقطعه مألوفة لعملائنا. 4 وحدات تُبقي فريقه كاملًا.",
+   "en": "This line already sells, and its parts are familiar to our customers. Four units keep its team fully staffed.",
+   "to": "player",
+   "glance": "core"
+  },
+  "q_delivery": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "التاجر يجد الرفّ فارغًا مرة وممتلئًا مرة. بوحدتين نعيّن مسؤولًا عن التوفّر ونثبّت التوريد.",
+   "en": "The retailer finds the shelf empty one week and full the next. With two units we name an availability owner and steady supply.",
+   "to": "player",
+   "glance": "delivery",
+   "gesture": "label"
+  },
+  "q_theme": {
+   "s": "ina",
+   "e": "hopeful",
+   "t": "الفكرة واعدة، لكن لم يجرّبها أي عميل بعد. ثلاث وحدات تعطينا تجربة صغيرة وقرارًا بعدها.",
+   "sub": "الفكرة واعدة، لكن لم يجرّبها أي عميل بعد. 3 وحدات تعطينا تجربة صغيرة وقرارًا بعدها.",
+   "en": "The idea is promising, but no customer has tried it yet. Three units give us a small pilot and a decision after it.",
+   "to": "player",
+   "glance": "theme"
+  },
+  "q_venue": {
+   "s": "ina",
+   "e": "excited",
+   "t": "مكان تأتي إليه العائلات لتبني معنا. يصل إلى ناس لا يدخلون متاجر التجزئة.",
+   "en": "A place where families come to build with us. It reaches people who never walk into a retail store.",
+   "to": "player",
+   "glance": "venue"
+  },
+  "q_venue2": {
+   "s": "mikael",
+   "e": "skeptical",
+   "t": "لكنه يحتاج وقتًا طويلًا ونموذج تشغيل جديدًا كاملًا. خمس وحدات، والتزام بعدها.",
+   "sub": "لكنه يحتاج وقتًا طويلًا ونموذج تشغيل جديدًا كاملًا. 5 وحدات، والتزام بعدها.",
+   "en": "But it needs a long lead time and a whole new operating model. Five units, and a commitment after that.",
+   "to": "ina",
+   "glance": "venue"
+  },
+  "rania_tag_wrong": {
+   "s": "rania",
+   "e": "skeptical",
+   "t": "ليس طلبًا غير مُختبَر. التقرير عن خطّنا الحالي، والعملاء يطلبونه بالاسم.",
+   "en": "It isn't untested demand. The report is about our existing range, and customers ask for it by name.",
+   "to": "player",
+   "glance": "note"
+  },
+  "rania_tag_ok": {
+   "s": "rania",
+   "e": "pleased",
+   "t": "صحيح. الطلب موجود. المشكلة أن البضاعة لا تكون دائمًا على الرفّ.",
+   "en": "Right. The demand is there. The problem is that the goods are not always on the shelf.",
+   "to": "player",
+   "glance": "note"
+  },
+  "mikael_alloc": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "لا شيء مموَّل الآن. خذ الوحدات من الرفّ واضغطها على قاعدة ما ستموّله. ويمكنك إعادتها متى شئت.",
+   "en": "Nothing is funded yet. Take units from the rack and press them onto the base of what you will fund. You can return them any time.",
+   "to": "player",
+   "glance": "rack"
+  },
+  "mikael_refuse": {
+   "s": "mikael",
+   "e": "firm",
+   "t": "لا يتّسع. لكي يدخل هذا، يجب أن ينتظر شيء آخر.",
+   "en": "It doesn't fit. For this to go in, something else has to wait.",
+   "to": "player",
+   "glance": "rack"
+  },
+  "f_core": {
+   "s": "rania",
+   "e": "pleased",
+   "t": "جيد. خطّنا الحالي له فريق.",
+   "en": "Good. Our current line has its team.",
+   "to": "player"
+  },
+  "f_delivery": {
+   "s": "mikael",
+   "e": "confident",
+   "t": "سأعيّن مسؤولًا عن التوفّر من الغد.",
+   "en": "I'll name an availability owner tomorrow.",
+   "to": "player"
+  },
+  "f_theme": {
+   "s": "ina",
+   "e": "pleased",
+   "t": "تجربة صغيرة تكفي لنتعلّم.",
+   "en": "A small pilot is enough to learn.",
+   "to": "player"
+  },
+  "f_venue": {
+   "s": "mikael",
+   "e": "worried",
+   "t": "خمس وحدات في عملٍ طويل. سنحتاج قرارًا آخر لاحقًا.",
+   "en": "Five units into long work. We'll need another decision later.",
+   "to": "player"
+  },
+  "mikael_order": {
+   "s": "mikael",
+   "e": "curious",
+   "t": "موّلت اثنين. أيّهما يبدأ أولًا؟ ضع البطاقتين في صينية الترتيب.",
+   "en": "You funded two. Which starts first? Put the two cards in the priority tray.",
+   "to": "player"
+  },
+  "ina_need": {
+   "s": "ina",
+   "e": "calm",
+   "t": "وما الذي ينتظر؟ سمِّ حاجة واحدة لم تموّلها، حتى لا تضيع.",
+   "en": "And what waits? Name one need you didn't fund, so it doesn't get lost.",
+   "to": "player"
+  },
+  "mikael_receipt": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "هذا ما سيُنفَّذ، وهذا ما ينتظر. لكل سطر أثر.",
+   "en": "This is what gets done, and this is what waits. Every line has a consequence.",
+   "to": "player"
+  },
+  "victor_q": {
+   "s": "victor",
+   "e": "firm",
+   "t": "ما الذي يحدث أولًا؟ وما الشرط الذي يجعلك تغيّر الخطة؟",
+   "en": "What happens first? What condition would make you change the plan?",
+   "to": "player"
+  },
+  "victor_single": {
+   "s": "victor",
+   "e": "calm",
+   "t": "مقترح واحد، فهو الأول. أخبرني إذن بما ينتظر، وبشرط المراجعة.",
+   "en": "One proposal, so it comes first. Then tell me what waits, and the review condition.",
+   "to": "player"
+  },
+  "victor_m_core": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "الخطة تحمي الخط الحالي، وتعطينا نقطة نعود إليها.",
+   "en": "The plan protects the existing range and gives us a point to revisit.",
+   "to": "player"
+  },
+  "victor_m_delivery": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "سنرى إن تحسّن التوصيل قبل أن نضيف عملًا.",
+   "en": "We can see whether delivery improved before adding work.",
+   "to": "player"
+  },
+  "victor_m_theme": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "للتجربة بوابة قبل أن نتحمّل التكلفة كاملة.",
+   "en": "The trial has a gate before we carry the full cost.",
+   "to": "player"
+  },
+  "victor_m_venue": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "سمّيت الشرط الذي نقبل عنده الالتزام الأكبر.",
+   "en": "You have named the condition for taking on the larger commitment.",
+   "to": "player"
+  },
+  "victor_other": {
+   "s": "victor",
+   "e": "skeptical",
+   "t": "هذا الشرط لا يختبر ما وضعته أولًا.",
+   "en": "That condition doesn't test what you put first.",
+   "to": "player"
+  },
+  "victor_spend": {
+   "s": "victor",
+   "e": "skeptical",
+   "t": "صرف الوحدات الباقية فورًا ليس شرطًا للمراجعة. ما الذي ستراقبه؟",
+   "en": "Spending the remaining units right away is not a review condition. What will you watch?",
+   "to": "player"
+  },
+  "victor_first_changed": {
+   "s": "victor",
+   "e": "calm",
+   "t": "تغيّر المقترح الأول، فاختر شرط مراجعة جديدًا.",
+   "en": "The first proposal changed, so pick a new review condition.",
+   "to": "player"
+  },
+  "player_pitch": {
+   "s": "player",
+   "e": "confident",
+   "t": "هذه خطتي: ما يبدأ أولًا، وما ينتظر باسمه، وشرط نراجع عنده.",
+   "en": "This is my plan: what starts first, what waits by name, and a condition to review it.",
+   "to": "victor"
+  },
+  "victor_commit": {
+   "s": "victor",
+   "e": "warm",
+   "t": "شكرًا. سأحفظ هذه النسخة كما هي. والآن نفتح الأرشيف على الحائط.",
+   "en": "Thank you. I'll keep this copy as it is. Now let's open the archive on the wall.",
+   "to": "player",
+   "glance": "wall"
+  },
+  "nar_archive1": {
+   "s": "narrator",
+   "e": "news",
+   "t": "هذا أرشيف حقيقي. في تقريرها السنوي لعام ألفين وأربعة، وصفت مجموعة ليغو خطة عمل بثلاثة محاور.",
+   "sub": "هذا أرشيف حقيقي. في تقريرها السنوي لعام 2004، وصفت مجموعة LEGO خطة عمل بثلاثة محاور.",
+   "en": "This is a real archive. In its 2004 annual report, the LEGO Group described an action plan with three themes."
+  },
+  "nar_archive2": {
+   "s": "narrator",
+   "e": "news",
+   "t": "ركّزت ليغو من جديد على منتجاتها الأساسية، وعملت على أداء العملاء والتشغيل، وقلّلت انكشافها على بعض الأنشطة والأصول. ويصف تقريرها المالي عودةً إلى الربح في عام ألفين وخمسة.",
+   "sub": "ركّزت LEGO من جديد على منتجاتها الأساسية، وعملت على أداء العملاء والتشغيل، وقلّلت انكشافها على بعض الأنشطة والأصول. ويصف تقريرها المالي عودةً إلى الربح في عام 2005.",
+   "en": "LEGO refocused on core products, worked on customer and operating performance, and reduced its exposure to some activities and assets. Its financial report describes a return to profit in 2005."
+  },
+  "nar_archive3": {
+   "s": "narrator",
+   "e": "news",
+   "t": "التقرير يعرض تغييرات كثيرة مترابطة ونتيجة إجمالية، لا بطاقة واحدة. لذلك نختبر كل تغيير مقترح بشرط مراجعة محدّد.",
+   "en": "The report shows several linked changes and an overall result, not one card. That is why each proposed change is tested with a defined review condition."
+  },
+  "victor_end": {
+   "s": "victor",
+   "e": "warm",
+   "t": "خطتك تبقى كما التزمت بها. قارنها، وجرّب توزيعًا آخر إن أردت.",
+   "en": "Your plan stays as you committed it. Compare it, and try another allocation if you like.",
+   "to": "player"
+  }
+ }
+}

@@ -1,0 +1,1 @@
+[["waitfor", "#menu:not(.hidden)", 240000], ["wait", 1.5], ["shot", "live.png"], ["eval", "document.title"]]

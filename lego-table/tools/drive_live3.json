@@ -1,0 +1,1 @@
+[["wait", 3], ["shot", "load.png"], ["waitfor", "#menu:not(.hidden)", 240000], ["eval", "Math.round(performance.now()/1000) + \" s to menu\""]]

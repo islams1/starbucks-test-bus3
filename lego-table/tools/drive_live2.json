@@ -1,0 +1,1 @@
+[["waitfor", "#menu:not(.hidden)", 240000], ["wait", 1], ["click", "#playbtn"], ["wait", 1], ["click", "#startbtn"], ["wait", 25], ["shot", "in.png"], ["eval", "JSON.stringify({stage: window.__S && __S.stage, view: window.__VIEW && __VIEW.mode})"]]

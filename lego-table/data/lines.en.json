@@ -1,0 +1,376 @@
+{
+ "_note": "Concept A dialogue (en). t = spoken (numbers as words), sub = subtitle, en = English subtitle; to / glance / gesture from the scenario table.",
+ "speakers": {
+  "player": {
+   "name": "You",
+   "role": "Turnaround lead",
+   "en": [
+    "You",
+    "Turnaround lead"
+   ],
+   "voice": "en-US-BrianNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "ina": {
+   "name": "Ina",
+   "role": "Design head",
+   "en": [
+    "Ina",
+    "Design head"
+   ],
+   "voice": "en-US-EmmaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "mikael": {
+   "name": "Mikael",
+   "role": "Operations head",
+   "en": [
+    "Mikael",
+    "Operations head"
+   ],
+   "voice": "en-GB-RyanNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "rania": {
+   "name": "Rania",
+   "role": "Channel lead",
+   "en": [
+    "Rania",
+    "Channel lead"
+   ],
+   "voice": "en-GB-LibbyNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  },
+  "victor": {
+   "name": "Victor",
+   "role": "Board chair",
+   "en": [
+    "Victor",
+    "Board chair"
+   ],
+   "voice": "en-US-ChristopherNeural",
+   "rate": "-6%",
+   "pitch": "-4Hz"
+  },
+  "narrator": {
+   "name": "Narrator",
+   "role": "",
+   "en": [
+    "Narrator",
+    ""
+   ],
+   "voice": "en-US-AndrewNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz"
+  }
+ },
+ "lines": {
+  "nar_open": {
+   "s": "narrator",
+   "e": "news",
+   "t": "Rukn Toy Company is having a hard year. There are more proposals on the table than the team can deliver. You lead the turnaround, and you have eight units of execution capacity for this cycle.",
+   "en": "Rukn Toy Company is having a hard year. There are more proposals on the table than the team can deliver. You lead the turnaround, and you have eight units of execution capacity for this cycle."
+  },
+  "victor_hello": {
+   "s": "victor",
+   "e": "firm",
+   "t": "Take your time at the table. When you are done, I want a clear order, a named risk and a review condition.",
+   "en": "Take your time at the table. When you are done, I want a clear order, a named risk and a review condition.",
+   "to": "all"
+  },
+  "rania_open": {
+   "s": "rania",
+   "e": "calm",
+   "t": "Our retailer is asking for regular delivery of the line that customers already buy.",
+   "en": "Our retailer is asking for regular delivery of the line that customers already buy.",
+   "to": "player"
+  },
+  "rania_note": {
+   "s": "rania",
+   "e": "calm",
+   "t": "This is the retailer's report on stock and demand. Read it before you decide.",
+   "en": "This is the retailer's report on stock and demand. Read it before you decide.",
+   "to": "player",
+   "glance": "note",
+   "gesture": "report"
+  },
+  "ina_open": {
+   "s": "ina",
+   "e": "hopeful",
+   "t": "A new theme could bring in families who pass our current shelf.",
+   "en": "A new theme could bring in families who pass our current shelf.",
+   "to": "player",
+   "glance": "theme",
+   "gesture": "box"
+  },
+  "mikael_open": {
+   "s": "mikael",
+   "e": "firm",
+   "t": "Each proposal takes people away from something else. You have eight units of capacity this cycle.",
+   "en": "Each proposal takes people away from something else. You have eight units of capacity this cycle.",
+   "to": "player",
+   "glance": "rack",
+   "gesture": "point"
+  },
+  "ina_to_mikael": {
+   "s": "ina",
+   "e": "persuasive",
+   "t": "But if we don't try something new now, then when?",
+   "en": "But if we don't try something new now, then when?",
+   "to": "mikael"
+  },
+  "mikael_to_ina": {
+   "s": "mikael",
+   "e": "firm",
+   "t": "When we can staff it without pulling people off delivery.",
+   "en": "When we can staff it without pulling people off delivery.",
+   "to": "ina"
+  },
+  "rania_to_both": {
+   "s": "rania",
+   "e": "tense",
+   "t": "And the retailer won't wait. An empty shelf goes to someone else.",
+   "en": "And the retailer won't wait. An empty shelf goes to someone else.",
+   "to": "all"
+  },
+  "mikael_task": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "Open all four proposals first, and read the retailer's report. Then we allocate the units.",
+   "en": "Open all four proposals first, and read the retailer's report. Then we allocate the units.",
+   "to": "player",
+   "glance": "rack"
+  },
+  "q_core": {
+   "s": "rania",
+   "e": "confident",
+   "t": "This line already sells, and its parts are familiar to our customers. Four units keep its team fully staffed.",
+   "en": "This line already sells, and its parts are familiar to our customers. Four units keep its team fully staffed.",
+   "to": "player",
+   "glance": "core"
+  },
+  "q_delivery": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "The retailer finds the shelf empty one week and full the next. With two units we name an availability owner and steady supply.",
+   "en": "The retailer finds the shelf empty one week and full the next. With two units we name an availability owner and steady supply.",
+   "to": "player",
+   "glance": "delivery",
+   "gesture": "label"
+  },
+  "q_theme": {
+   "s": "ina",
+   "e": "hopeful",
+   "t": "The idea is promising, but no customer has tried it yet. Three units give us a small pilot and a decision after it.",
+   "en": "The idea is promising, but no customer has tried it yet. Three units give us a small pilot and a decision after it.",
+   "to": "player",
+   "glance": "theme"
+  },
+  "q_venue": {
+   "s": "ina",
+   "e": "excited",
+   "t": "A place where families come to build with us. It reaches people who never walk into a retail store.",
+   "en": "A place where families come to build with us. It reaches people who never walk into a retail store.",
+   "to": "player",
+   "glance": "venue"
+  },
+  "q_venue2": {
+   "s": "mikael",
+   "e": "skeptical",
+   "t": "But it needs a long lead time and a whole new operating model. Five units, and a commitment after that.",
+   "en": "But it needs a long lead time and a whole new operating model. Five units, and a commitment after that.",
+   "to": "ina",
+   "glance": "venue"
+  },
+  "rania_tag_wrong": {
+   "s": "rania",
+   "e": "skeptical",
+   "t": "It isn't untested demand. The report is about our existing range, and customers ask for it by name.",
+   "en": "It isn't untested demand. The report is about our existing range, and customers ask for it by name.",
+   "to": "player",
+   "glance": "note"
+  },
+  "rania_tag_ok": {
+   "s": "rania",
+   "e": "pleased",
+   "t": "Right. The demand is there. The problem is that the goods are not always on the shelf.",
+   "en": "Right. The demand is there. The problem is that the goods are not always on the shelf.",
+   "to": "player",
+   "glance": "note"
+  },
+  "mikael_alloc": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "Nothing is funded yet. Take units from the rack and press them onto the base of what you will fund. You can return them any time.",
+   "en": "Nothing is funded yet. Take units from the rack and press them onto the base of what you will fund. You can return them any time.",
+   "to": "player",
+   "glance": "rack"
+  },
+  "mikael_refuse": {
+   "s": "mikael",
+   "e": "firm",
+   "t": "It doesn't fit. For this to go in, something else has to wait.",
+   "en": "It doesn't fit. For this to go in, something else has to wait.",
+   "to": "player",
+   "glance": "rack"
+  },
+  "f_core": {
+   "s": "rania",
+   "e": "pleased",
+   "t": "Good. Our current line has its team.",
+   "en": "Good. Our current line has its team.",
+   "to": "player"
+  },
+  "f_delivery": {
+   "s": "mikael",
+   "e": "confident",
+   "t": "I'll name an availability owner tomorrow.",
+   "en": "I'll name an availability owner tomorrow.",
+   "to": "player"
+  },
+  "f_theme": {
+   "s": "ina",
+   "e": "pleased",
+   "t": "A small pilot is enough to learn.",
+   "en": "A small pilot is enough to learn.",
+   "to": "player"
+  },
+  "f_venue": {
+   "s": "mikael",
+   "e": "worried",
+   "t": "Five units into long work. We'll need another decision later.",
+   "en": "Five units into long work. We'll need another decision later.",
+   "to": "player"
+  },
+  "mikael_order": {
+   "s": "mikael",
+   "e": "curious",
+   "t": "You funded two. Which starts first? Put the two cards in the priority tray.",
+   "en": "You funded two. Which starts first? Put the two cards in the priority tray.",
+   "to": "player"
+  },
+  "ina_need": {
+   "s": "ina",
+   "e": "calm",
+   "t": "And what waits? Name one need you didn't fund, so it doesn't get lost.",
+   "en": "And what waits? Name one need you didn't fund, so it doesn't get lost.",
+   "to": "player"
+  },
+  "mikael_receipt": {
+   "s": "mikael",
+   "e": "calm",
+   "t": "This is what gets done, and this is what waits. Every line has a consequence.",
+   "en": "This is what gets done, and this is what waits. Every line has a consequence.",
+   "to": "player"
+  },
+  "victor_q": {
+   "s": "victor",
+   "e": "firm",
+   "t": "What happens first? What condition would make you change the plan?",
+   "en": "What happens first? What condition would make you change the plan?",
+   "to": "player"
+  },
+  "victor_single": {
+   "s": "victor",
+   "e": "calm",
+   "t": "One proposal, so it comes first. Then tell me what waits, and the review condition.",
+   "en": "One proposal, so it comes first. Then tell me what waits, and the review condition.",
+   "to": "player"
+  },
+  "victor_m_core": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "The plan protects the existing range and gives us a point to revisit.",
+   "en": "The plan protects the existing range and gives us a point to revisit.",
+   "to": "player"
+  },
+  "victor_m_delivery": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "We can see whether delivery improved before adding work.",
+   "en": "We can see whether delivery improved before adding work.",
+   "to": "player"
+  },
+  "victor_m_theme": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "The trial has a gate before we carry the full cost.",
+   "en": "The trial has a gate before we carry the full cost.",
+   "to": "player"
+  },
+  "victor_m_venue": {
+   "s": "victor",
+   "e": "pleased",
+   "t": "You have named the condition for taking on the larger commitment.",
+   "en": "You have named the condition for taking on the larger commitment.",
+   "to": "player"
+  },
+  "victor_other": {
+   "s": "victor",
+   "e": "skeptical",
+   "t": "That condition doesn't test what you put first.",
+   "en": "That condition doesn't test what you put first.",
+   "to": "player"
+  },
+  "victor_spend": {
+   "s": "victor",
+   "e": "skeptical",
+   "t": "Spending the remaining units right away is not a review condition. What will you watch?",
+   "en": "Spending the remaining units right away is not a review condition. What will you watch?",
+   "to": "player"
+  },
+  "victor_first_changed": {
+   "s": "victor",
+   "e": "calm",
+   "t": "The first proposal changed, so pick a new review condition.",
+   "en": "The first proposal changed, so pick a new review condition.",
+   "to": "player"
+  },
+  "player_pitch": {
+   "s": "player",
+   "e": "confident",
+   "t": "This is my plan: what starts first, what waits by name, and a condition to review it.",
+   "en": "This is my plan: what starts first, what waits by name, and a condition to review it.",
+   "to": "victor"
+  },
+  "victor_commit": {
+   "s": "victor",
+   "e": "warm",
+   "t": "Thank you. I'll keep this copy as it is. Now let's open the archive on the wall.",
+   "en": "Thank you. I'll keep this copy as it is. Now let's open the archive on the wall.",
+   "to": "player",
+   "glance": "wall"
+  },
+  "nar_archive1": {
+   "s": "narrator",
+   "e": "news",
+   "t": "This is a real archive. In its two thousand and four annual report, the LEGO Group described an action plan with three themes.",
+   "sub": "This is a real archive. In its 2004 annual report, the LEGO Group described an action plan with three themes.",
+   "en": "This is a real archive. In its 2004 annual report, the LEGO Group described an action plan with three themes."
+  },
+  "nar_archive2": {
+   "s": "narrator",
+   "e": "news",
+   "t": "LEGO refocused on core products, worked on customer and operating performance, and reduced its exposure to some activities and assets. Its financial report describes a return to profit in two thousand and five.",
+   "sub": "LEGO refocused on core products, worked on customer and operating performance, and reduced its exposure to some activities and assets. Its financial report describes a return to profit in 2005.",
+   "en": "LEGO refocused on core products, worked on customer and operating performance, and reduced its exposure to some activities and assets. Its financial report describes a return to profit in 2005."
+  },
+  "nar_archive3": {
+   "s": "narrator",
+   "e": "news",
+   "t": "The report shows several linked changes and an overall result, not one card. That is why each proposed change is tested with a defined review condition.",
+   "en": "The report shows several linked changes and an overall result, not one card. That is why each proposed change is tested with a defined review condition."
+  },
+  "victor_end": {
+   "s": "victor",
+   "e": "warm",
+   "t": "Your plan stays as you committed it. Compare it, and try another allocation if you like.",
+   "en": "Your plan stays as you committed it. Compare it, and try another allocation if you like.",
+   "to": "player"
+  }
+ }
+}

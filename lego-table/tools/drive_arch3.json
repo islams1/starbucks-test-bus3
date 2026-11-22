@@ -1,0 +1,2 @@
+[["waitfor", "#archive:not(.hidden)", 180000], ["wait", 2], ["click", "#arnext"], ["waitjs", "document.querySelector('#archive .ar-n') && /2/.test(document.querySelector('#archive .ar-n').textContent)", 60], ["wait", 1], ["click", "#arnext"],
+ ["waitjs", "document.querySelector('#archive .ar-n') && /3/.test(document.querySelector('#archive .ar-n').textContent.split(' ')[1] || document.querySelector('#archive .ar-n').textContent)", 60], ["wait", 3.5], ["shot", "c3.png"]]

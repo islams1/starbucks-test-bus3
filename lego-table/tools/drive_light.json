@@ -1,0 +1,4 @@
+[["waitfor", "#hud:not(.hidden)", 180000], ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 60], ["wait", 2], ["shot", "l0.png"],
+ ["eval", "(__renderer.toneMappingExposure = 0.78, __scene.environmentIntensity = 0.2, 'ok')"], ["wait", 1], ["shot", "l1.png"],
+ ["eval", "(() => { __scene.traverse(o => { if (o.isHemisphereLight) o.intensity = 0.1; }); return 'ok'; })()"], ["wait", 1], ["shot", "l2.png"],
+ ["eval", "(() => { const c = __composer.passes.map(p => p.constructor.name + ':' + p.enabled); return c.join(','); })()"]]

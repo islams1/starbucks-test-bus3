@@ -1,0 +1,10 @@
+[["waitfor", "#hud:not(.hidden)", 180000], ["waitjs", "document.getElementById('subs').classList.contains('hidden')", 90], ["wait", 1.5], ["shot", "k0.png"],
+ ["eval", "JSON.stringify([__VIEW.base.x.toFixed(2), __VIEW.base.z.toFixed(2)])"],
+ ["down", "KeyS"], ["wait", 1.2], ["up", "KeyS"], ["down", "KeyD"], ["wait", 2.0], ["up", "KeyD"], ["wait", 0.3], ["shot", "k1.png"],
+ ["eval", "JSON.stringify([__VIEW.base.x.toFixed(2), __VIEW.base.z.toFixed(2)])"],
+ ["down", "KeyW"], ["wait", 3.5], ["up", "KeyW"], ["wait", 0.3], ["shot", "k2.png"],
+ ["eval", "JSON.stringify([__VIEW.base.x.toFixed(2), __VIEW.base.z.toFixed(2)])"],
+ ["down", "ArrowLeft"], ["wait", 0.6], ["up", "ArrowLeft"], ["down", "KeyW"], ["wait", 2.5], ["up", "KeyW"], ["wait", 0.3], ["shot", "k3.png"],
+ ["eval", "JSON.stringify([__VIEW.base.x.toFixed(2), __VIEW.base.z.toFixed(2), document.querySelector('#dock .dk[data-id=backtable]').style.display])"],
+ ["key", "KeyL"], ["wait", 0.8], ["click", "#list button[data-a=open]"], ["wait", 3], ["shot", "k4.png"],
+ ["eval", "JSON.stringify([__VIEW.base.x.toFixed(2), __VIEW.base.z.toFixed(2), document.getElementById('pcard').className])"]]
